@@ -1,52 +1,49 @@
+
+---
+
 # Forge
 
+> **Point Cloud Viewer**: An application designed to visualize data in multiple formats.
 
+## Components
 
-> Point cloud viewver
-
-Components:
-
-- `src`.
-- `sandbox`.
-- `libs/*`.
-
+- `src/*`
+- `sandbox/*`
+- `libs/*`
 
 ## Getting Started
 
-#Build 
-```
-sudo pacman -S 
-```
+### 1. Downloading the Repository
 
-
-
-<ins>**1. Downloading the repository:**</ins>
-
-Start by cloning the repository with 
+Clone the repository using:
 
 ```bash
 git clone --recursive https://github.com/Alexei1R/Forge
 ```
 
+If you previously cloned the repository without the `--recursive` flag, update the submodules with:
 
-If the repository was cloned non-recursively previously, use 
 ```bash
 git submodule update --init
 ```
-to clone the necessary submodules.
 
+### 2. Build Instructions
 
-#Build 
-```
-sudo pacman -S 
-```
+#### Prerequisites
 
-Create the `build` directory, configure the build system and run make:
+Ensure the following packages are installed:
 
 ```bash
-mkdir build & cd build & cmake .. & make -j$(nproc)
+sudo pacman -S base-devel cmake gdb clang ninja
 ```
 
-To run the project cd `build` and run execurable
+#### Building on Linux
 
+Run the build script:
+
+```bash
+./build.sh
+```
+
+---
 
