@@ -1,5 +1,10 @@
 #include <iostream>
+
+#include <Forge/Application.h>
+
 int main(int argc, char *argv[]) {
-    std::cout << "Test";
+    Forge::Application app;
+    app.Run();
+
     return 0;
 }

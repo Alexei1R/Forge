@@ -13,10 +13,15 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)  # Choose Release, Debug, etc.
 endif()
 
+
+
 add_compile_options(
     "-Wno-array-bounds"
     "-Wno-error=stringop-overflow"
 )
+
+
+set(BUILD_BACKEND_OPENGL ON)
 
 add_subdirectory(libs)
 add_subdirectory(src)

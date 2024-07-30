@@ -20,6 +20,12 @@ target_link_libraries(Forge
         glm
         spdlog
 )
+
+if(BUILD_BACKEND_OPENGL)
+    target_link_libraries(Forge glad)
+endif()
+
 target_include_directories(Forge PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/)
 
+add_subdirectory(backends)
 
