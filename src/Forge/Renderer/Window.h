@@ -7,7 +7,11 @@
 
 #include <string>
 #include <cstdint>
-#include <memory>
+#include <GLFW/glfw3.h>
+#include "Forge/Utils.h"
+#include "Forge/Events/Event.h"
+#include "Forge/Events/KeyCodes.h"
+#include "Forge/Events/ImplEvent.h"
 
 namespace Forge {
 
@@ -21,8 +25,31 @@ struct WindowAttributes {
 };
 
 class Window {
+   private:
+    using EventCallbackFn = std::function<void(Event&)>;
+
    public:
-    static std::shared_ptr<Window> Create(const WindowAttributes& attributes = WindowAttributes());
+    Window(const WindowAttributes& attributes = WindowAttributes());
+    ~Window();
+    void* GetNativeWindow() const { return m_Window; };
+
+    void Update();
+    void SetEventCallback(const EventCallbackFn& callback) { m_WindowData.m_EventCallback = callback; }
+
+   private:
+    struct WindowData {
+        std::string Name;
+        uint32_t Width;
+        uint32_t Height;
+        EventCallbackFn m_EventCallback;
+    };
+
+    void SetCallBackEvents();
+
+   private:
+    GLFWwindow* m_Window;
+    WindowAttributes m_WindowAtributes;
+    WindowData m_WindowData;
 };
 
 }  // namespace Forge

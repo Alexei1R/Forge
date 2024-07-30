@@ -12,6 +12,8 @@ namespace Forge {
 class GraphicsContext {
    public:
     virtual ~GraphicsContext() = default;
+    /*virtual void SwapBuffers();*/
+
     static std::unique_ptr<GraphicsContext> Create();
 };
 

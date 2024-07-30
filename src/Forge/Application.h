@@ -17,6 +17,9 @@ class Application {
     void Run();
 
    private:
+    void HandleEvent(const Event &event);
+
+   private:
     std::shared_ptr<Window> m_Window;
 };
 }  // namespace Forge
