@@ -28,7 +28,7 @@ Planet::Planet(PlanetSettings settings)
 
 
     m_Shader->Bind();
-    glm::vec3 lightDirection = glm::vec3(1.0f, -2.5f, -2.5f);
+    glm::vec3 lightDirection = glm::vec3(1.0f);
     glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
     m_Shader->SetUniform("u_Light.direction", lightDirection);
     m_Shader->SetUniform("u_Light.color", lightColor);

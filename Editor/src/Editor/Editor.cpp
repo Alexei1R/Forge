@@ -48,7 +48,7 @@ void Editor::OnAttach()
     }
 
 
-    for (int i = 0; i < 10000; i++)
+    for (int i = 0; i < 1000; i++)
     {
         x_data[i] = i * 0.01;  // Scale x values appropriately for sine wave
         y_data[i] = sin(x_data[i]);  // Sine wave for y values
@@ -60,6 +60,7 @@ void Editor::OnUpdate(DeltaTime dt)
 {
     // Hovered Viewport
     m_Camera->AllowRotation(m_ViewportHovered);
+    m_Camera->AllowScroll(m_ViewportHovered);
 
     m_FrameRate = 1 / dt;
     // Resize
@@ -226,8 +227,8 @@ void Editor::OnImGuiRender()
                   nullptr,
                   &selectedEntry,
                   &firstFrame,
-                  ImSequencer::SEQUENCER_EDIT_STARTEND | ImSequencer::SEQUENCER_ADD |
-                      ImSequencer::SEQUENCER_DEL);
+                  ImSequencer::SEQUENCER_EDIT_ALL | ImSequencer::SEQUENCER_CHANGE_FRAME |
+                      ImSequencer::SEQUENCER_ADD);
 
         // Print time begin and end when slider is moved
         if (ImGui::IsItemActive())

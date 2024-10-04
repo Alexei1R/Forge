@@ -5,6 +5,7 @@
 #ifndef TIMELINE_H
 #define TIMELINE_H
 
+#include "Forge/Core/Log/Log.h"
 #include "imgui.h"
 #include "ImSequencer.h"
 #include <cstdio>
@@ -69,16 +70,12 @@ struct Timeline : public ImSequencer::SequenceInterface
 
     virtual void Add(int type)
     {
-        // Limit to one item (single track)
-        if (myItems.size() == 0)
-        {
-            myItems.push_back(TimelineItem {type, 0, 10, false});
-        }
+        LOG_INFO("+")
     }
 
     virtual void Del(int index)
     {
-        myItems.erase(myItems.begin() + index);
+        LOG_INFO("-")
     }
 
     virtual void Duplicate(int index)

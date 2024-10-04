@@ -2,19 +2,18 @@
 // Created by toor on 2024-09-12.
 //
 
+
 #ifndef ORBITALCAMERA_H
 #define ORBITALCAMERA_H
-
 
 #include "Camera.h"
 #include <glm/glm.hpp>
 #include "Forge/Events/Event.h"
 #include "Forge/Core/Components/Component.h"
-#include "glm/fwd.hpp"
 
 namespace Forge {
 
-class OrbitalCamera : public Component, Camera
+class OrbitalCamera : public Component, public Camera
 {
 public:
     // Constructors and Destructor
@@ -32,22 +31,21 @@ public:
     void Resize(int width, int height) override;
     void AllowMovement(bool state) override;
     void AllowRotation(bool state) override;
+    void AllowScroll(bool state) override;
 
     float GetNearClip() override
     {
         return m_NearClip;
-    };
+    }
     float GetFarClip() override
     {
         return m_FarClip;
-    };
-
+    }
 
     // Camera Control Methods
     void CameraRotate(float yaw, float pitch);
     void SetCameraRadius(float dist);
-    void SetCameraTarget(glm::vec3 target);
-
+    void SetCameraTarget(const glm::vec3& target);
 
     // Component Interface Methods
     void OnEvent(const Event& event) override;
@@ -84,20 +82,20 @@ private:
     // State
     bool m_FirstMouseTouch = true;
 
-    // Rotate Camera
-    float m_MovementYaw = 90;
-    float m_MovementPitch = 10;
-    float m_MovementSens = 30;
+    // Rotation Settings
+    float m_MovementYaw = 90.0f;
+    float m_MovementPitch = 10.0f;
+    float m_MovementSens = 30.0f;
 
-    // Scroll
-    float m_ScrollSens = 0.5;
+    // Scroll Settings
+    float m_ScrollSens = 0.5f;
 
-
-    // Movement/Rotation
+    // Controls
     bool m_AllowMoving = false;
     bool m_AllowRotation = false;
+    bool m_AllowScroll = false;
 };
 
 }  // namespace Forge
 
-#endif
+#endif  // ORBITALCAMERA_H

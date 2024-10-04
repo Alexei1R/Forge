@@ -34,6 +34,7 @@ public:
     virtual void Resize(int width, int height) = 0;
     virtual void AllowMovement(bool state) = 0;
     virtual void AllowRotation(bool state) = 0;
+    virtual void AllowScroll(bool state) = 0;
 };
 }  // namespace Forge
 
