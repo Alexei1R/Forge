@@ -2,11 +2,13 @@
 // Created by toor on 2024-09-11.
 //
 
+
 #ifndef SHADER_H
 #define SHADER_H
 
 #include "glm/glm.hpp"
 #include <glad/glad.h>
+#include <initializer_list>
 #include <string>
 #include <utility>
 #include <vector>
@@ -24,13 +26,23 @@ enum class ShaderType
     COMPUTE
 };
 
+struct ShaderElement
+{
+    std::string path;
+    ShaderType type;
+
+    ShaderElement(ShaderType type, std::string path) : path(std::move(path)), type(type) {}
+};
+
 class Shader
 {
 public:
     Shader();
+    Shader(std::initializer_list<ShaderElement> elements);
+
     ~Shader();
 
-    bool AddShader(const std::string& path, ShaderType shaderType);
+    bool AddShader(const ShaderElement& element);
 
     bool Build();
     void Reload();
@@ -54,10 +66,10 @@ private:
     void BuildShader();
 
 private:
-    std::vector<std::pair<std::string, ShaderType>> m_Shaders;
+    std::vector<ShaderElement> m_Shaders;
 
-    unsigned int m_ProgramID;
-    unsigned int m_PreviousProgramID;
+    unsigned int m_ProgramID = 0;
+    unsigned int m_PreviousProgramID = 0;
     std::unordered_map<std::string, int> m_UniformLocationCache;
 };
 

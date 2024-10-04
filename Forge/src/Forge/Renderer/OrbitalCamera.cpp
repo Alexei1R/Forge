@@ -76,9 +76,15 @@ void OrbitalCamera::CameraRotate(float yaw, float pitch)
     m_Up = glm::normalize(glm::cross(m_Right, m_Front));
 }
 
-void OrbitalCamera::SerCameraRadius(float distance)
+void OrbitalCamera::SetCameraRadius(float distance)
 {
     m_Radius = distance;
+}
+
+
+void OrbitalCamera::SetCameraTarget(glm::vec3 target)
+{
+    m_Target = target;
 }
 
 // Component Interface Methods

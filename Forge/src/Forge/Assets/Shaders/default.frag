@@ -7,6 +7,7 @@ in vec2 TexCoords;
 out vec4 FragColor;
 
 uniform vec3 u_ViewPos;
+uniform sampler2D colorTexture;  // The texture sampler
 
 struct Light {
     vec3 direction;
@@ -14,7 +15,6 @@ struct Light {
 };
 
 uniform Light u_Light;
-
 
 void main()
 {
@@ -32,10 +32,13 @@ void main()
     vec3 viewDir = normalize(u_ViewPos - FragPos);
     vec3 reflectDir = reflect(-lightDir, norm);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 50);
-
     vec3 specular = spec * u_Light.color;
 
-    vec3 result = ambient + diffuse + specular;
-    FragColor = vec4(result, 1.0f);
+    // Sample the texture using the interpolated texture coordinates
+    vec4 textureColor = texture(colorTexture, TexCoords);
+
+    // Final color calculation
+    vec3 result = (ambient + diffuse + specular) * textureColor.rgb;
+    FragColor = vec4(result, textureColor.a);  // Maintain texture alpha
 }
 

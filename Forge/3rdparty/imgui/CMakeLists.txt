@@ -3,6 +3,7 @@ project(imgui)
 
 set(IMGUI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/imgui)
 set(IMGUIZMO_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ImGuizmo)
+set(IMPLOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/implot)
 
 add_library(imgui STATIC
     ${IMGUI_DIR}/imgui.cpp
@@ -33,6 +34,14 @@ add_library(imgui STATIC
     ${IMGUIZMO_DIR}/ImSequencer.cpp
     ${IMGUIZMO_DIR}/ImSequencer.h
     ${IMGUIZMO_DIR}/ImZoomSlider.h
+
+
+
+    #ImPlot
+    ${IMPLOT_DIR}/implot.h
+    ${IMPLOT_DIR}/implot.cpp
+    ${IMPLOT_DIR}/implot_internal.h
+    ${IMPLOT_DIR}/implot_items.cpp
 
 )
 

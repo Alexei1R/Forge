@@ -3,10 +3,20 @@
 //
 
 #include "Editor.h"
+#include "Forge/Core/Log/Log.h"
+#include "Forge/Renderer/Buffer.h"
+#include "Forge/Renderer/Shader.h"
+#include "glm/fwd.hpp"
+#include "imgui.h"
+#include <memory>
+
+#include "implot/implot.h"
 
 
 namespace Forge {
-Editor::Editor() : Component(ComponentType::None) {}
+
+
+Editor::Editor() : Component(ComponentType::None), currentSelectedPlanet(0) {}
 
 Editor::~Editor() {}
 
@@ -17,7 +27,32 @@ void Editor::OnAttach()
     m_Renderer->SetClearColor(glm::vec3(0.3, 0.35, 0.4));
 
     m_Camera = std::make_shared<OrbitalCamera>(glm::vec3(0.0f, 0.0f, 0.0f), 1920, 1080);
+
+    m_Camera->SetCameraTarget(glm::vec3(30.0f, 0.0f, 0.0f));
     Forge::GetForgeInstance().PushComponent(m_Camera);
+
+
+    solarSystemSettings.push_back(
+        PlanetSettings("Sun", "Assets/Textures/sun.png", glm::vec3(0.0f), 5.0f));
+    solarSystemSettings.push_back(
+        PlanetSettings("Earth", "Assets/Textures/earth.png", glm::vec3(30.0f, 0.0f, 0.0f), 1.0f));
+    solarSystemSettings.push_back(
+        PlanetSettings("Mars", "Assets/Textures/martie.png", glm::vec3(20.0f, 0.0f, 20.0f), 0.7f));
+
+
+    // Create the planets and add them to the solar system vector
+    for (const auto& planetSettings : solarSystemSettings)
+    {
+        auto planet = std::make_shared<Planet>(planetSettings);
+        solarSystem.push_back(planet);
+    }
+
+
+    for (int i = 0; i < 10000; i++)
+    {
+        x_data[i] = i * 0.01;  // Scale x values appropriately for sine wave
+        y_data[i] = sin(x_data[i]);  // Sine wave for y values
+    }
 }
 
 void Editor::OnDetach() {}
@@ -25,6 +60,7 @@ void Editor::OnUpdate(DeltaTime dt)
 {
     // Hovered Viewport
     m_Camera->AllowRotation(m_ViewportHovered);
+
     m_FrameRate = 1 / dt;
     // Resize
     if (FramebufferProps props = m_Framebuffer->GetSpecification();
@@ -41,8 +77,16 @@ void Editor::OnUpdate(DeltaTime dt)
         m_ReloadShaders = false;
     }
 
+
     m_Framebuffer->Bind();
     m_Renderer->Clear();
+
+
+    for (size_t i = 0; i < solarSystem.size(); ++i)
+    {
+        // Draw the planet with its settings
+        solarSystem[i]->Draw(m_Camera);
+    }
 
 
     m_Framebuffer->UnBind();
@@ -59,6 +103,29 @@ void Editor::OnEvent(const Event& event)
             if (keyEv.GetKey() == Key::S)
             {
                 m_ReloadShaders = true;
+            }
+
+            if (keyEv.GetKey() == Key::Q)
+            {
+                currentSelectedPlanet--;
+                if (currentSelectedPlanet <= 0)
+                {
+                    currentSelectedPlanet = 0;
+                }
+
+                m_Camera->SetCameraTarget(solarSystemSettings[currentSelectedPlanet].position);
+                LOG_CRITICAL("Index {}", currentSelectedPlanet)
+            }
+            if (keyEv.GetKey() == Key::E)
+            {
+                currentSelectedPlanet--;
+                if (currentSelectedPlanet >= solarSystem.size() - 1)
+                {
+                    currentSelectedPlanet = solarSystem.size() - 1;
+                }
+
+                m_Camera->SetCameraTarget(solarSystemSettings[currentSelectedPlanet].position);
+                LOG_CRITICAL("Index {}", currentSelectedPlanet)
             }
         }
     }
@@ -98,6 +165,8 @@ void Editor::OnImGuiRender()
     ImGui::Begin("Stats");
     ImGui::Text("FPS %f", m_FrameRate);
 
+    ImGui::Text("Slected \n %s", solarSystemSettings[currentSelectedPlanet].name.c_str());
+
 
     ImGui::End();
     //**********************************************************************************************
@@ -134,6 +203,53 @@ void Editor::OnImGuiRender()
 
     ImGui::End();
     ImGui::PopStyleVar();
+
+
+    if (ImGui::Begin("Timeline Example"))
+    {
+        // Draw the timeline
+        static int selectedEntry = -1;
+        static int firstFrame = 0;
+        static int currentFrame = 100;
+
+        ImGui::PushItemWidth(130);
+        ImGui::InputInt("Frame Min", &m_Timeline.mFrameMin);
+        ImGui::SameLine();
+        ImGui::InputInt("Frame ", &currentFrame);
+        ImGui::SameLine();
+        ImGui::InputInt("Frame Max", &m_Timeline.mFrameMax);
+        ImGui::PopItemWidth();
+
+        // Timeline rendering with only one track
+        Sequencer(&m_Timeline,
+                  &currentFrame,
+                  nullptr,
+                  &selectedEntry,
+                  &firstFrame,
+                  ImSequencer::SEQUENCER_EDIT_STARTEND | ImSequencer::SEQUENCER_ADD |
+                      ImSequencer::SEQUENCER_DEL);
+
+        // Print time begin and end when slider is moved
+        if (ImGui::IsItemActive())
+        {
+            for (const auto& item : m_Timeline.myItems)
+            {
+                LOG_WARN("Time S: {0}, E: {1}", item.mFrameStart, item.mFrameEnd);
+            }
+        }
+    }
+    ImGui::End();
+
+
+    ImGui::Begin("Plots");
+
+    if (ImPlot::BeginPlot("Sine Wave Plot"))
+    {
+        ImPlot::PlotLine("Sine Wave", x_data, y_data, 1000);
+        ImPlot::EndPlot();
+    }
+
+    ImGui::End();
 
 
     EndGUI();
@@ -185,5 +301,6 @@ void Editor::EndGUI()
     // End of all ImGui
     ImGui::End();
 }
+
 
 }  // namespace Forge

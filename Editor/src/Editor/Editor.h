@@ -6,6 +6,10 @@
 #define EDITOR_H
 
 #include "Forge.h"
+#include "Forge/Renderer/Mesh.h"
+#include "glm/fwd.hpp"
+#include "src/Editor/Planet.h"
+#include "src/Editor/Timeline.h"
 #include <memory>
 
 
@@ -43,6 +47,18 @@ private:
 
     float m_FrameRate;
     bool m_ReloadShaders = true;
+
+
+    std::vector<std::shared_ptr<Planet>> solarSystem;
+    std::vector<PlanetSettings> solarSystemSettings;
+
+    int currentSelectedPlanet;
+
+
+    Timeline m_Timeline;
+
+
+    float x_data[1000], y_data[1000];
 };
 
 }  // namespace Forge

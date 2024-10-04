@@ -2,6 +2,7 @@
 // Created by toor on 2024-09-11.
 //
 
+
 #include "Shader.h"
 #include "Forge/Core/Log/Log.h"
 
@@ -10,8 +11,9 @@
 #include <sstream>
 
 namespace Forge {
+Shader::Shader() {}
 
-Shader::Shader() : m_ProgramID(0), m_PreviousProgramID(0) {}
+Shader::Shader(std::initializer_list<ShaderElement> elements) : m_Shaders(elements) {}
 
 Shader::~Shader()
 {
@@ -21,17 +23,18 @@ Shader::~Shader()
     }
 }
 
-bool Shader::AddShader(const std::string& path, ShaderType shaderType)
+bool Shader::AddShader(const ShaderElement& element)
 {
-    if (path.empty())
+    if (element.path.empty())
     {
         LOG_CRITICAL("Shader path is empty.");
         return false;
     }
 
-    m_Shaders.push_back({path, shaderType});
+    m_Shaders.push_back(element);
     return true;
 }
+
 
 bool Shader::Build()
 {
@@ -42,6 +45,7 @@ bool Shader::Build()
 void Shader::Reload()
 {
     BuildShader();
+    this->Bind();
 }
 
 void Shader::Bind() const
@@ -65,15 +69,15 @@ void Shader::BuildShader()
 
     for (const auto& shader : m_Shaders)
     {
-        std::string source = ReadShader(shader.first);
+        std::string source = ReadShader(shader.path);
         if (source.empty())
         {
-            LOG_CRITICAL("Shader source is empty: " + shader.first);
+            LOG_CRITICAL("Shader source is empty: " + shader.path);
             continue;
         }
 
         GLenum glShaderType;
-        switch (shader.second)
+        switch (shader.type)
         {
             case ShaderType::VERTEX: glShaderType = GL_VERTEX_SHADER; break;
             case ShaderType::FRAGMENT: glShaderType = GL_FRAGMENT_SHADER; break;
@@ -93,7 +97,7 @@ void Shader::BuildShader()
         }
         else
         {
-            LOG_CRITICAL("Failed to compile shader: " + shader.first);
+            LOG_CRITICAL("Failed to compile shader: " + shader.path);
         }
     }
 
@@ -104,8 +108,6 @@ void Shader::BuildShader()
         m_ProgramID = m_PreviousProgramID;
         LOG_CRITICAL("Build failed, reverted to the previous successful build if it exists.");
     }
-
-    m_Shaders.clear();
 }
 
 std::string Shader::ReadShader(const std::string& filePath)
@@ -145,6 +147,12 @@ unsigned int Shader::CompileShader(const std::string& source, GLenum shaderType)
 
 unsigned int Shader::LinkShaders(const std::vector<unsigned int>& shaderIDs)
 {
+    if (shaderIDs.empty())
+    {
+        LOG_CRITICAL("No shaders to link. Please add shaders before building.");
+        return 0;
+    }
+
     unsigned int programID = glCreateProgram();
 
     for (unsigned int shaderID : shaderIDs)
@@ -196,7 +204,6 @@ int Shader::GetUniformLocation(const std::string& name)
     m_UniformLocationCache[name] = location;
     return location;
 }
-
 
 void Shader::SetUniform(const std::string& name, int value)
 {

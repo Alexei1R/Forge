@@ -10,6 +10,7 @@
 #include <glm/glm.hpp>
 #include "Forge/Events/Event.h"
 #include "Forge/Core/Components/Component.h"
+#include "glm/fwd.hpp"
 
 namespace Forge {
 
@@ -44,7 +45,9 @@ public:
 
     // Camera Control Methods
     void CameraRotate(float yaw, float pitch);
-    void SerCameraRadius(float dist);
+    void SetCameraRadius(float dist);
+    void SetCameraTarget(glm::vec3 target);
+
 
     // Component Interface Methods
     void OnEvent(const Event& event) override;
@@ -87,7 +90,7 @@ private:
     float m_MovementSens = 30;
 
     // Scroll
-    float m_ScrollSens = 0.07;
+    float m_ScrollSens = 0.5;
 
 
     // Movement/Rotation

@@ -30,6 +30,7 @@ public:
     virtual float GetNearClip() = 0;
     virtual float GetFarClip() = 0;
 
+
     virtual void Resize(int width, int height) = 0;
     virtual void AllowMovement(bool state) = 0;
     virtual void AllowRotation(bool state) = 0;
