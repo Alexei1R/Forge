@@ -73,6 +73,10 @@ void Editor::OnAttach()
             m_PlotData.push_back(PlotData({}, false, data));
         }
     });
+
+    ImGuiIO& io = ImGui::GetIO();
+    ImFont* times = io.Fonts->AddFontFromFileTTF("Assets/Fonts/times.ttf", 14.0f);
+    ImFont* rostov = io.Fonts->AddFontFromFileTTF("Assets/Fonts/rostov.ttf", 64.0f);
 }
 
 void Editor::OnDetach() {}
@@ -208,6 +212,8 @@ void Editor::OnImGuiRender()
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2 {0, 0});
     ImGui::Begin("Viewport");
+
+    // Calculate viewport boundaries and positions
     auto viewportMinRegion = ImGui::GetWindowContentRegionMin();
     auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();
     auto viewportOffset = ImGui::GetWindowPos();
@@ -221,20 +227,30 @@ void Editor::OnImGuiRender()
 
     ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
     m_ViewportSize = {viewportPanelSize.x, viewportPanelSize.y};
+
+    // Draw the framebuffer image
     ImGui::Image(reinterpret_cast<void*>(m_Framebuffer->GetTextureID()),
                  ImVec2 {m_ViewportSize.x, m_ViewportSize.y},
                  ImVec2 {0, 1},
                  ImVec2 {1, 0});
 
+    ImGui::SetCursorPos(ImVec2(40, 20));
 
+    ImGuiIO& io = ImGui::GetIO();
+    ImFont* font = io.Fonts->Fonts[io.Fonts->Fonts.Size - 1];
+    ImGui::PushFont(font);
+
+    ImGui::Text(" %s ", solarSystemSettings[currentSelectedPlanet].name.c_str());
+
+    ImGui::PopFont();
+
+    // Setup ImGuizmo for the viewport
     ImGuizmo::SetOrthographic(false);
     ImGuizmo::SetDrawlist();
-
     ImGuizmo::SetRect(m_ViewportBounds[0].x,
                       m_ViewportBounds[0].y,
                       m_ViewportBounds[1].x - m_ViewportBounds[0].x,
                       m_ViewportBounds[1].y - m_ViewportBounds[0].y);
-
 
     ImGui::End();
     ImGui::PopStyleVar();
