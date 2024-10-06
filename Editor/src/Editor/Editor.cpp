@@ -4,6 +4,8 @@
 
 #include "Editor.h"
 #include "Forge/Core/Log/Log.h"
+#include "Forge/Events/Event.h"
+#include "Forge/Events/ImplEvent.h"
 #include "Forge/Renderer/Buffer.h"
 #include "Forge/Renderer/Shader.h"
 #include "glm/fwd.hpp"
@@ -53,6 +55,11 @@ void Editor::OnAttach()
         x_data[i] = i * 0.01;  // Scale x values appropriately for sine wave
         y_data[i] = sin(x_data[i]);  // Sine wave for y values
     }
+
+
+    timeline.AddTimeline("Timeline 1", 0, 144);
+    timeline.AddTimeline("Timeline 2", 0, 144);
+    timeline.AddTimeline("Timeline 3", 0, 144);
 }
 
 void Editor::OnDetach() {}
@@ -130,6 +137,17 @@ void Editor::OnEvent(const Event& event)
             }
         }
     }
+
+    if (event.GetType() == EventType::Drop)
+    {
+        DropEvent dropEv = static_cast<const DropEvent&>(event);
+        m_DropPopup.SetData(dropEv.GetFiles());
+
+        for (auto path : dropEv.GetFiles())
+        {
+            LOG_CRITICAL("Drop {}", path)
+        }
+    }
 }
 
 void Editor::OnImGuiRender()
@@ -162,6 +180,7 @@ void Editor::OnImGuiRender()
         ImGui::EndMenuBar();
     }
 
+
     //**********************************************************************************************
     ImGui::Begin("Stats");
     ImGui::Text("FPS %f", m_FrameRate);
@@ -171,6 +190,7 @@ void Editor::OnImGuiRender()
 
     ImGui::End();
     //**********************************************************************************************
+
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2 {0, 0});
     ImGui::Begin("Viewport");
@@ -206,37 +226,41 @@ void Editor::OnImGuiRender()
     ImGui::PopStyleVar();
 
 
-    if (ImGui::Begin("Timeline Example"))
+    if (ImGui::Begin("Timeline "))
     {
         // Draw the timeline
         static int selectedEntry = -1;
         static int firstFrame = 0;
-        static int currentFrame = 100;
+        /*static int currentFrame = 100;*/
 
-        ImGui::PushItemWidth(130);
-        ImGui::InputInt("Frame Min", &m_Timeline.mFrameMin);
-        ImGui::SameLine();
-        ImGui::InputInt("Frame ", &currentFrame);
-        ImGui::SameLine();
-        ImGui::InputInt("Frame Max", &m_Timeline.mFrameMax);
-        ImGui::PopItemWidth();
-
+        /*ImGui::PushItemWidth(130);*/
+        /*ImGui::InputInt("Frame Min", &m_Timeline.mFrameMin);*/
+        /*ImGui::SameLine();*/
+        /*ImGui::InputInt("Frame ", &currentFrame);*/
+        /*ImGui::SameLine();*/
+        /*ImGui::InputInt("Frame Max", &m_Timeline.mFrameMax);*/
+        /*ImGui::PopItemWidth();*/
+        /**/
         // Timeline rendering with only one track
-        Sequencer(&m_Timeline,
-                  &currentFrame,
+        Sequencer(&timeline,
+                  nullptr,
                   nullptr,
                   &selectedEntry,
                   &firstFrame,
-                  ImSequencer::SEQUENCER_EDIT_ALL | ImSequencer::SEQUENCER_CHANGE_FRAME |
-                      ImSequencer::SEQUENCER_ADD);
+                  ImSequencer::SEQUENCER_EDIT_ALL);
 
-        // Print time begin and end when slider is moved
+        // Print time begin and end when slider is moved*/
+        /*    if (ImGui::IsItemActive())*/
+        /*    {*/
+        /*        for (const auto& item : timeline.GetTimeLines())*/
+        /*        {*/
+        /*            LOG_WARN("Time S: {0}, E: {1}", item.name, item.frameMax);*/
+        /*        }*/
+        /*    }*/
+
         if (ImGui::IsItemActive())
         {
-            for (const auto& item : m_Timeline.myItems)
-            {
-                LOG_WARN("Time S: {0}, E: {1}", item.mFrameStart, item.mFrameEnd);
-            }
+            /*timeline.get*/
         }
     }
     ImGui::End();
@@ -251,6 +275,9 @@ void Editor::OnImGuiRender()
     }
 
     ImGui::End();
+
+
+    m_DropPopup.DrawPopup();
 
 
     EndGUI();

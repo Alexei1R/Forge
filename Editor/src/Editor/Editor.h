@@ -6,10 +6,10 @@
 #define EDITOR_H
 
 #include "Forge.h"
-#include "Forge/Renderer/Mesh.h"
 #include "glm/fwd.hpp"
 #include "src/Editor/Planet.h"
-#include "src/Editor/Timeline.h"
+#include "src/Editor/Popup.h"
+#include "src/Editor/TimeLine.h"
 #include <memory>
 
 
@@ -54,11 +54,11 @@ private:
 
     int currentSelectedPlanet;
 
-
-    Timeline m_Timeline;
-
-
+    Timeline timeline;
+    /*Timeline m_Timeline;*/
     float x_data[1000], y_data[1000];
+
+    DropPopup m_DropPopup;
 };
 
 }  // namespace Forge

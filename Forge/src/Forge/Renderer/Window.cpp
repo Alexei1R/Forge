@@ -4,8 +4,11 @@
 
 
 #include "Window.h"
+#include "Forge/Events/Event.h"
 #include "Forge/Events/ImplEvent.h"
 #include <GLFW/glfw3.h>
+#include <string>
+#include <vector>
 
 #include "Forge/Core/Utils.h"
 #include "Forge/Core/Log/Log.h"
@@ -189,6 +192,21 @@ void Window::SetCallBackEvents()
         WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
         MouseEvent event(xPos, yPos, Action::MouseMove);
+        data.m_EventCallback(event);
+    });
+
+
+    glfwSetDropCallback(m_Window, [](GLFWwindow* window, int count, const char* paths[]) {
+        WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+
+        std::vector<std::string> droppedFiles;
+        droppedFiles.reserve(count);
+
+        for (int i = 0; i < count; ++i)
+        {
+            droppedFiles.emplace_back(paths[i]);
+        }
+        DropEvent event(droppedFiles, Action::Drop);
         data.m_EventCallback(event);
     });
 }

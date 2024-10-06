@@ -15,6 +15,7 @@ enum class EventType
     Window,
     Key,
     Mouse,
+    Drop
 };
 enum class Action
 {
@@ -36,7 +37,9 @@ enum class Action
     Iconify,
     Restore,
     Maximize,
-    FramebufferResize
+    FramebufferResize,
+    // Drop a file
+    Drop
 };
 
 class Event
