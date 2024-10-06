@@ -10,6 +10,7 @@
 #include <vector>
 #include <unordered_set>
 #include "imgui.h"
+#include <functional>
 
 struct DropElements
 {
@@ -21,10 +22,26 @@ struct DropElements
 
 class DropPopup
 {
+private:
+    using CallbackFN = std::function<void()>;
+
 public:
     void SetData(const std::vector<std::string>& filePaths);
     void DrawPopup();
-    void HidePopup();
+    void SaveData();
+
+    void OpenNewPopup();
+
+    void SetCloseCallback(CallbackFN func)
+    {
+        m_EventCallback = func;
+    }
+
+    std::vector<std::string> GetSelectedPaths()
+    {
+        return m_SelectedFilePaths;
+    }
+
 
 private:
     DropElements getDropElements(const std::string& filePath);
@@ -50,6 +67,11 @@ private:
 
     // Helper function to generate unique IDs
     ImGuiID GenerateUniqueID();
+
+
+    std::vector<std::string> m_SelectedFilePaths;
+
+    CallbackFN m_EventCallback;
 };
 
 #endif  // POPUP_H

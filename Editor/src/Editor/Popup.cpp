@@ -26,6 +26,12 @@ void DropPopup::SetData(const std::vector<std::string>& filePaths)
     }
 }
 
+void DropPopup::OpenNewPopup()
+{
+    m_OpenFullscreenPopup = true;
+}
+
+
 void DropPopup::DrawPopup()
 {
     if (m_OpenFullscreenPopup)
@@ -75,6 +81,11 @@ void DropPopup::DrawPopup()
 
         if (ImGui::IsKeyPressed(ImGuiKey_Enter))
         {
+            SaveData();
+            if (m_EventCallback)
+            {
+                m_EventCallback();
+            }
             ImGui::CloseCurrentPopup();
         }
 
@@ -82,9 +93,21 @@ void DropPopup::DrawPopup()
     }
 }
 
-void DropPopup::HidePopup()
+void DropPopup::SaveData()
 {
-    ImGui::CloseCurrentPopup();
+    m_SelectedFilePaths.clear();
+    for (ImGuiID selected_item : m_SelectedItems)
+    {
+        for (const auto& element : m_DropElements)
+        {
+            if (element.ID == selected_item)
+            {
+                m_SelectedFilePaths.push_back(
+                    element.path + "/" + element.name + element.extension);
+                break;
+            }
+        }
+    }
 }
 
 DropElements DropPopup::getDropElements(const std::string& filePath)

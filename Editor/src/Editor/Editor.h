@@ -15,6 +15,24 @@
 
 namespace Forge {
 
+struct PlotEntry
+{
+    std::vector<double> timestamps;
+    std::vector<double> values;
+};
+
+struct PlotData
+{
+    std::vector<std::pair<int, int>> csvData;
+    bool loaded = false;
+    std::string name;
+
+    PlotData(const std::vector<std::pair<int, int>>& data,
+             bool isLoaded,
+             const std::string& plotName) : csvData(data), loaded(isLoaded), name(plotName)
+    {
+    }
+};
 
 class Editor : public Component
 {
@@ -48,7 +66,7 @@ private:
     float m_FrameRate;
     bool m_ReloadShaders = true;
 
-
+    std::shared_ptr<Planet> space;
     std::vector<std::shared_ptr<Planet>> solarSystem;
     std::vector<PlanetSettings> solarSystemSettings;
 
@@ -59,6 +77,11 @@ private:
     float x_data[1000], y_data[1000];
 
     DropPopup m_DropPopup;
+
+
+    std::vector<PlotData> m_PlotData;
+    int selectedEntry = -1;
+    std::mutex plotDataMutex;
 };
 
 }  // namespace Forge

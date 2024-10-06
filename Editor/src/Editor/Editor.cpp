@@ -6,10 +6,12 @@
 #include "Forge/Core/Log/Log.h"
 #include "Forge/Events/Event.h"
 #include "Forge/Events/ImplEvent.h"
+#include "Forge/Events/KeyCodes.h"
 #include "Forge/Renderer/Buffer.h"
 #include "Forge/Renderer/Shader.h"
 #include "glm/fwd.hpp"
 #include "imgui.h"
+#include <future>
 #include <memory>
 
 #include "implot/implot.h"
@@ -42,6 +44,13 @@ void Editor::OnAttach()
         PlanetSettings("Mars", "Assets/Textures/martie.png", glm::vec3(20.0f, 0.0f, 20.0f), 0.7f));
 
 
+    PlanetSettings spaceSettings(
+        "Space",
+        "Assets/Textures/way.png",
+        glm::vec3(30.0f, 0.0f, 0.0f),
+        100);
+    space = std::make_shared<Planet>(spaceSettings);
+
     // Create the planets and add them to the solar system vector
     for (const auto& planetSettings : solarSystemSettings)
     {
@@ -57,9 +66,13 @@ void Editor::OnAttach()
     }
 
 
-    timelineManager.AddTimeline("Timeline 1", 0, 144);
-    timelineManager.AddTimeline("Timeline 2", 0, 144);
-    timelineManager.AddTimeline("Timeline 3", 0, 144);
+    m_DropPopup.SetCloseCallback([this]() {
+        for (auto data : m_DropPopup.GetSelectedPaths())
+        {
+            timelineManager.AddTimeline(data, 0, 144);
+            m_PlotData.push_back(PlotData({}, false, data));
+        }
+    });
 }
 
 void Editor::OnDetach() {}
@@ -88,7 +101,7 @@ void Editor::OnUpdate(DeltaTime dt)
 
     m_Framebuffer->Bind();
     m_Renderer->Clear();
-
+    space->Draw(m_Camera);
 
     for (size_t i = 0; i < solarSystem.size(); ++i)
     {
@@ -142,6 +155,7 @@ void Editor::OnEvent(const Event& event)
     {
         DropEvent dropEv = static_cast<const DropEvent&>(event);
         m_DropPopup.SetData(dropEv.GetFiles());
+        m_DropPopup.OpenNewPopup();
 
         for (auto path : dropEv.GetFiles())
         {
@@ -239,28 +253,73 @@ void Editor::OnImGuiRender()
                   &firstFrame,
                   ImSequencer::SEQUENCER_EDIT_ALL);
 
-        // Print slider start and end values when the timeline is active
+        // Async load for selected timeline entry
         if (ImGui::IsItemActive() && selectedEntry >= 0 &&
             selectedEntry < timelineManager.GetTimelineCount())
         {
             const auto& timeline = timelineManager.GetTimelines()[selectedEntry];
-            LOG_INFO("Timeline: {} Start: {}, End: {}",
-                     timeline.name,
-                     timeline.startSlider,
-                     timeline.endSlider);
+
+            // Lambda function for loading data asynchronously
+            auto asyncLoadData = [this, &timeline]() {
+                for (int i = 0; i < m_PlotData.size(); i++)
+                {
+                    if (m_PlotData[i].name == timeline.name && !m_PlotData[i].loaded)
+                    {
+                        m_PlotData[i].loaded = true;
+                        std::ifstream file(timeline.name);
+
+                        if (!file.is_open())
+                        {
+                            std::cerr
+                                << "Error: Could not open file " << timeline.name << std::endl;
+                            return;
+                        }
+
+                        std::string line;
+                        std::lock_guard<std::mutex> lock(
+                            plotDataMutex);  // Lock before accessing shared data
+                        while (std::getline(file, line))
+                        {
+                            std::istringstream ss(line);
+                            std::string timestampStr, valueStr;
+
+                            // Assuming the CSV has two columns separated by a comma
+                            if (std::getline(ss, timestampStr, ',') &&
+                                std::getline(ss, valueStr, ','))
+                            {
+                                try
+                                {
+                                    int timestamp = static_cast<int>(
+                                        std::stod(timestampStr));  // Convert string to int
+                                    int value = std::stoi(valueStr);
+
+                                    LOG_INFO(" {0} {1}", timestamp, value);
+                                    // Add logic to handle parsed data, e.g., store in m_PlotData
+                                }
+                                catch (const std::exception& e)
+                                {
+                                    std::cerr << "Error parsing line: " << line << " - " << e.what()
+                                              << std::endl;
+                                }
+                            }
+                        }
+                        file.close();
+                    }
+                }
+            };
+
+            // Use std::async to load the data asynchronously
+            std::future<void> loadFuture = std::async(std::launch::async, asyncLoadData);
         }
     }
     ImGui::End();
 
-
     ImGui::Begin("Plots");
-
     if (ImPlot::BeginPlot("Sine Wave Plot"))
     {
         ImPlot::PlotLine("Sine Wave", x_data, y_data, 1000);
         ImPlot::EndPlot();
     }
-
     ImGui::End();
 
 
