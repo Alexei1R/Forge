@@ -27,6 +27,9 @@ struct PlotData
     bool loaded = false;
     std::string name;
 
+    // Add PlotEntry for storing timestamps and values
+    PlotEntry plotEntry;
+
     PlotData(const std::vector<std::pair<int, int>>& data,
              bool isLoaded,
              const std::string& plotName) : csvData(data), loaded(isLoaded), name(plotName)

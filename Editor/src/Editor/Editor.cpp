@@ -278,6 +278,9 @@ void Editor::OnImGuiRender()
                         std::string line;
                         std::lock_guard<std::mutex> lock(
                             plotDataMutex);  // Lock before accessing shared data
+                        std::vector<double> timestamps;
+                        std::vector<double> values;
+
                         while (std::getline(file, line))
                         {
                             std::istringstream ss(line);
@@ -289,12 +292,12 @@ void Editor::OnImGuiRender()
                             {
                                 try
                                 {
-                                    int timestamp = static_cast<int>(
-                                        std::stod(timestampStr));  // Convert string to int
-                                    int value = std::stoi(valueStr);
+                                    // Convert strings to double for plotting
+                                    double timestamp = std::stod(timestampStr);
+                                    double value = std::stod(valueStr);
 
-                                    LOG_INFO(" {0} {1}", timestamp, value);
-                                    // Add logic to handle parsed data, e.g., store in m_PlotData
+                                    timestamps.push_back(timestamp);
+                                    values.push_back(value);
                                 }
                                 catch (const std::exception& e)
                                 {
@@ -303,6 +306,11 @@ void Editor::OnImGuiRender()
                                 }
                             }
                         }
+
+                        // Store loaded data into m_PlotData
+                        m_PlotData[i].plotEntry.timestamps = std::move(timestamps);
+                        m_PlotData[i].plotEntry.values = std::move(values);
+
                         file.close();
                     }
                 }
@@ -314,10 +322,21 @@ void Editor::OnImGuiRender()
     }
     ImGui::End();
 
+    // Plot Visualization for the selected timeline
     ImGui::Begin("Plots");
-    if (ImPlot::BeginPlot("Sine Wave Plot"))
+    if (ImPlot::BeginPlot("Selected Timeline Plot"))
     {
-        ImPlot::PlotLine("Sine Wave", x_data, y_data, 1000);
+        for (const auto& plotData : m_PlotData)
+        {
+            if (plotData.loaded)
+            {
+                std::lock_guard<std::mutex> lock(plotDataMutex);  // Ensure data is safely accessed
+                ImPlot::PlotLine(plotData.name.c_str(),
+                                 plotData.plotEntry.timestamps.data(),
+                                 plotData.plotEntry.values.data(),
+                                 plotData.plotEntry.timestamps.size());
+            }
+        }
         ImPlot::EndPlot();
     }
     ImGui::End();
