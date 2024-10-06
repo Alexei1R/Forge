@@ -1,40 +1,33 @@
-//
-// Created by toor on 2024-10-06.
-//
-
 #ifndef TIMELINE_H
 #define TIMELINE_H
-
 
 #include "Forge/Core/Log/Log.h"
 #include "imgui.h"
 #include "ImSequencer.h"
-#include <cstdio>
 #include <vector>
 #include <string>
-#include <algorithm>
 
-struct TimelineItem
+struct Timeline
 {
-    int mType;
-    int mFrameStart;
-    int mFrameEnd = 20;
-    bool mExpanded;
-    std::string name;
-};
-
-struct TimelineData
-{
-    std::vector<TimelineItem> items;
     std::string name;
     int frameMin;
     int frameMax;
+    int startSlider;
+    int endSlider;
+
+    Timeline(const std::string& timelineName, int minFrame, int maxFrame) :
+        name(timelineName), frameMin(minFrame), frameMax(maxFrame), startSlider(minFrame),
+        endSlider(minFrame + 10)
+    {
+    }
 };
 
-class Timeline : public ImSequencer::SequenceInterface
+class TimelineManager : public ImSequencer::SequenceInterface
 {
 public:
-    // Interface with sequencer
+    TimelineManager();
+
+    // ImSequencer interface implementation
     virtual int GetFrameMin() const override;
     virtual int GetFrameMax() const override;
     virtual int GetItemCount() const override;
@@ -46,30 +39,20 @@ public:
     virtual void Del(int index) override;
     virtual void Duplicate(int index) override;
 
-    Timeline() {}
-
-    // Functions for multiple timelines
+    // Custom functions for managing timelines
     void AddTimeline(const std::string& name, int frameMin, int frameMax);
-    void RemoveTimeline(size_t index);
+    void RemoveTimeline(int index);
     size_t GetTimelineCount() const
     {
         return mTimelines.size();
     }
-
-    std::vector<TimelineData> GetTimeLines()
+    const std::vector<Timeline>& GetTimelines() const
     {
         return mTimelines;
     }
 
-    // New functions to work with all timelines
-    int GetTotalItemCount() const;
-    const TimelineData& GetTimelineData(size_t index) const
-    {
-        return mTimelines[index];
-    }
-
 private:
-    std::vector<TimelineData> mTimelines;
-    const char* name = "TimeLinePlanet";
+    std::vector<Timeline> mTimelines;
 };
+
 #endif  // TIMELINE_H

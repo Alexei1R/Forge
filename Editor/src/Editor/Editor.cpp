@@ -57,9 +57,9 @@ void Editor::OnAttach()
     }
 
 
-    timeline.AddTimeline("Timeline 1", 0, 144);
-    timeline.AddTimeline("Timeline 2", 0, 144);
-    timeline.AddTimeline("Timeline 3", 0, 144);
+    timelineManager.AddTimeline("Timeline 1", 0, 144);
+    timelineManager.AddTimeline("Timeline 2", 0, 144);
+    timelineManager.AddTimeline("Timeline 3", 0, 144);
 }
 
 void Editor::OnDetach() {}
@@ -226,41 +226,28 @@ void Editor::OnImGuiRender()
     ImGui::PopStyleVar();
 
 
-    if (ImGui::Begin("Timeline "))
+    if (ImGui::Begin("Timeline"))
     {
-        // Draw the timeline
         static int selectedEntry = -1;
         static int firstFrame = 0;
-        /*static int currentFrame = 100;*/
 
-        /*ImGui::PushItemWidth(130);*/
-        /*ImGui::InputInt("Frame Min", &m_Timeline.mFrameMin);*/
-        /*ImGui::SameLine();*/
-        /*ImGui::InputInt("Frame ", &currentFrame);*/
-        /*ImGui::SameLine();*/
-        /*ImGui::InputInt("Frame Max", &m_Timeline.mFrameMax);*/
-        /*ImGui::PopItemWidth();*/
-        /**/
-        // Timeline rendering with only one track
-        Sequencer(&timeline,
+        // Timeline rendering
+        Sequencer(&timelineManager,
                   nullptr,
                   nullptr,
                   &selectedEntry,
                   &firstFrame,
                   ImSequencer::SEQUENCER_EDIT_ALL);
 
-        // Print time begin and end when slider is moved*/
-        /*    if (ImGui::IsItemActive())*/
-        /*    {*/
-        /*        for (const auto& item : timeline.GetTimeLines())*/
-        /*        {*/
-        /*            LOG_WARN("Time S: {0}, E: {1}", item.name, item.frameMax);*/
-        /*        }*/
-        /*    }*/
-
-        if (ImGui::IsItemActive())
+        // Print slider start and end values when the timeline is active
+        if (ImGui::IsItemActive() && selectedEntry >= 0 &&
+            selectedEntry < timelineManager.GetTimelineCount())
         {
-            /*timeline.get*/
+            const auto& timeline = timelineManager.GetTimelines()[selectedEntry];
+            LOG_INFO("Timeline: {} Start: {}, End: {}",
+                     timeline.name,
+                     timeline.startSlider,
+                     timeline.endSlider);
         }
     }
     ImGui::End();

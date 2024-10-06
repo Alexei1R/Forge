@@ -1,56 +1,43 @@
-//
-// Created by toor on 2024-10-06.
-//
-
-
 #include "TimeLine.h"
 #include "Forge/Core/Log/Log.h"
 
-int Timeline::GetFrameMin() const
+TimelineManager::TimelineManager() {}
+
+int TimelineManager::GetFrameMin() const
 {
     if (mTimelines.empty())
         return 0;
     return std::min_element(mTimelines.begin(),
                             mTimelines.end(),
-                            [](const TimelineData& a, const TimelineData& b) {
+                            [](const Timeline& a, const Timeline& b) {
                                 return a.frameMin < b.frameMin;
                             })
         ->frameMin;
 }
 
-int Timeline::GetFrameMax() const
+int TimelineManager::GetFrameMax() const
 {
     if (mTimelines.empty())
         return 0;
     return std::max_element(mTimelines.begin(),
                             mTimelines.end(),
-                            [](const TimelineData& a, const TimelineData& b) {
+                            [](const Timeline& a, const Timeline& b) {
                                 return a.frameMax < b.frameMax;
                             })
         ->frameMax;
 }
 
-int Timeline::GetItemCount() const
+int TimelineManager::GetItemCount() const
 {
-    return GetTotalItemCount();
+    return static_cast<int>(mTimelines.size());
 }
 
-int Timeline::GetTotalItemCount() const
+int TimelineManager::GetItemTypeCount() const
 {
-    int count = 0;
-    for (const auto& timeline : mTimelines)
-    {
-        count += timeline.items.size();
-    }
-    return count;
+    return static_cast<int>(mTimelines.size());  // Each timeline can be considered its own type
 }
 
-int Timeline::GetItemTypeCount() const
-{
-    return mTimelines.size();
-}
-
-const char* Timeline::GetItemTypeName(int typeIndex) const
+const char* TimelineManager::GetItemTypeName(int typeIndex) const
 {
     if (typeIndex >= 0 && typeIndex < mTimelines.size())
     {
@@ -59,95 +46,94 @@ const char* Timeline::GetItemTypeName(int typeIndex) const
     return "Invalid Timeline";
 }
 
-const char* Timeline::GetItemLabel(int index) const
+const char* TimelineManager::GetItemLabel(int index) const
 {
-    static char tmps[512];
-    int currentIndex = 0;
-    for (const auto& timeline : mTimelines)
+    if (index >= 0 && index < mTimelines.size())
     {
-        if (index < currentIndex + timeline.items.size())
-        {
-            int localIndex = index - currentIndex;
-            snprintf(tmps,
-                     120,
-                     "%s",
-                     timeline.name.c_str(),
-                     localIndex,
-                     timeline.items[localIndex].name.c_str());
-            return tmps;
-        }
-        currentIndex += timeline.items.size();
+        return mTimelines[index].name.c_str();
     }
-    snprintf(tmps, 512, "Invalid Item");
-    return tmps;
+    return "Invalid Item";
 }
 
-void Timeline::Get(int index, int** start, int** end, int* type, unsigned int* color)
+void TimelineManager::Get(int index, int** start, int** end, int* type, unsigned int* color)
 {
-    int currentIndex = 0;
-    for (size_t i = 0; i < mTimelines.size(); ++i)
+    if (index >= 0 && index < mTimelines.size())
     {
-        const auto& timeline = mTimelines[i];
-        if (index < currentIndex + timeline.items.size())
-        {
-            int localIndex = index - currentIndex;
-            const TimelineItem& item = timeline.items[localIndex];
-            if (start)
-                *start = const_cast<int*>(&item.mFrameStart);
-            if (end)
-                *end = const_cast<int*>(&item.mFrameEnd);
-            if (type)
-                *type = i;
-            if (color)
-                *color = 0xFFAA8080 + (i * 0x00110000);
-            return;
-        }
-        currentIndex += timeline.items.size();
+        const auto& timeline = mTimelines[index];
+        if (start)
+            *start = const_cast<int*>(&timeline.startSlider);  // Cast away const-ness
+        if (end)
+            *end = const_cast<int*>(&timeline.endSlider);  // Cast away const-ness
+        if (type)
+            *type = index;
+        if (color)
+            *color = 0xFFAA8080 + (index * 0x00110000);  // Simple color scheme
+    }
+    else
+    {
+        LOG_ERROR("Invalid timeline index: {}", index);
     }
 }
 
-void Timeline::Add(int type)
+void TimelineManager::Add(int type)
 {
     if (type >= 0 && type < mTimelines.size())
     {
         auto& timeline = mTimelines[type];
         int totalFrames = timeline.frameMax - timeline.frameMin;
-        int defaultItemSize = totalFrames / 10;
-
-        defaultItemSize = std::max(1, defaultItemSize);
-
-        LOG_INFO("Adding item to timeline {}", type);
-
-        timeline.items.push_back(TimelineItem {
-            0,
-            timeline.frameMin,
-            timeline.frameMin + defaultItemSize,
-            false,
-            timeline.name});
+        int defaultItemSize = std::max(1, totalFrames / 10);
+        timeline.startSlider = timeline.frameMin;
+        timeline.endSlider = timeline.frameMin + defaultItemSize;
+        LOG_INFO("Added item to timeline {}", type);
+    }
+    else
+    {
+        LOG_ERROR("Invalid timeline type: {}", type);
     }
 }
 
-void Timeline::Del(int index) {}
-
-void Timeline::Duplicate(int index) {}
-
-void Timeline::AddTimeline(const std::string& name, int frameMin, int frameMax)
+void TimelineManager::Del(int index)
 {
-    TimelineData newTimeline;
-    newTimeline.name = name;
-    newTimeline.frameMin = frameMin;
-    newTimeline.frameMax = frameMax;
-    newTimeline.items.push_back(TimelineItem {0, frameMin, frameMin + 1, false, name});
+    if (index >= 0 && index < mTimelines.size())
+    {
+        mTimelines.erase(mTimelines.begin() + index);
+        LOG_INFO("Deleted timeline at index: {}", index);
+    }
+    else
+    {
+        LOG_ERROR("Invalid timeline index: {}", index);
+    }
+}
 
-    mTimelines.push_back(newTimeline);
+void TimelineManager::Duplicate(int index)
+{
+    if (index >= 0 && index < mTimelines.size())
+    {
+        const auto& timeline = mTimelines[index];
+        mTimelines.emplace_back(timeline.name, timeline.frameMin, timeline.frameMax);
+        LOG_INFO("Duplicated timeline at index: {}", index);
+    }
+    else
+    {
+        LOG_ERROR("Invalid timeline index: {}", index);
+    }
+}
+
+void TimelineManager::AddTimeline(const std::string& name, int frameMin, int frameMax)
+{
+    mTimelines.emplace_back(name, frameMin, frameMax);
     LOG_INFO("Added new timeline: {}", name);
 }
 
-void Timeline::RemoveTimeline(size_t index)
+void TimelineManager::RemoveTimeline(int index)
 {
-    if (index < mTimelines.size())
+    if (index >= 0 && index < mTimelines.size())
     {
         mTimelines.erase(mTimelines.begin() + index);
         LOG_INFO("Removed timeline at index: {}", index);
+    }
+    else
+    {
+        LOG_ERROR("Invalid timeline index: {}", index);
     }
 }

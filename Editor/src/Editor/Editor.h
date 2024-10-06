@@ -54,7 +54,7 @@ private:
 
     int currentSelectedPlanet;
 
-    Timeline timeline;
+    TimelineManager timelineManager;
     /*Timeline m_Timeline;*/
     float x_data[1000], y_data[1000];
 
