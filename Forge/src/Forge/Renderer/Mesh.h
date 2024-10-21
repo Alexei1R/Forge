@@ -9,12 +9,10 @@
 #include <memory>
 #include <glm/glm.hpp>
 #include "BufferImpl.h"
-#include "Forge/Renderer/Shader.h"
-#include "Texture.h"
+#include "Forge/Renderer/RenderableObject.h"
 
 
 namespace Forge {
-
 
 struct Vertex
 {
@@ -23,28 +21,23 @@ struct Vertex
     glm::vec2 TexCoords;
 };
 
-struct TextureData
-{
-    std::shared_ptr<Texture> texture;
-    std::string type;
-    std::string path;
-};
-
-class Mesh
+class Mesh : public RenderableObject
 {
 public:
     Mesh(const std::vector<Vertex>& vertices,
          const std::vector<unsigned int>& indices,
-         const std::vector<TextureData>& textures = {});
+         const std::vector<std::shared_ptr<Texture>>& textures = {});
 
-    void Draw(const std::shared_ptr<Shader>& shader);
+
+    std::shared_ptr<VertexArrayBuffer>& GetVertexArrayBuffer() override;
+    std::vector<std::shared_ptr<Texture>>& GetTextures() override;
 
 private:
     void SetupMesh();
 
     std::vector<Vertex> m_Vertices;
     std::vector<unsigned int> m_Indices;
-    std::vector<TextureData> m_Textures;
+    std::vector<std::shared_ptr<Texture>> m_Textures;
 
     std::shared_ptr<VertexArrayBuffer> m_VAO;
     std::shared_ptr<VertexBuffer> m_VBO;

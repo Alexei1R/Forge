@@ -63,6 +63,8 @@ void EditorCamera::CameraRotate(float yaw, float pitch)
         pitch = -89.0f;
 
     m_Yaw = yaw;
+    m_Yaw = fmod(m_Yaw, 360.0f);
+
     m_Pitch = pitch;
 
     m_Position =

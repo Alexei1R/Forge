@@ -25,7 +25,6 @@ public:
 
 
 private:
-    std::shared_ptr<Renderer> m_Renderer;
     std::shared_ptr<EditorCamera> m_Camera;
 
 

@@ -1,13 +1,20 @@
+// cube.vert
 #version 330 core
 
-layout(location = 0) in vec3 aPos;
+layout(location = 0) in vec3 aPos;      // Vertex position
+layout(location = 1) in vec3 aNormal;   // Vertex normal
 
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 proj;
 
+out vec3 FragPos;   // Position of the fragment in world space
+out vec3 Normal;    // Normal of the fragment
+
 void main()
 {
-    gl_Position = proj * view * model * vec4(aPos, 1.0);
-}
+    FragPos = vec3(model * vec4(aPos, 1.0));                        // Transform vertex position to world space
+    Normal = mat3(transpose(inverse(model))) * aNormal;             // Transform normal to world space
 
+    gl_Position = proj * view * vec4(FragPos, 1.0);                 // Transform to clip space
+}

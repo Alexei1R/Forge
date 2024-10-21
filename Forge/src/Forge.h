@@ -28,6 +28,7 @@
 #include "Forge/Renderer/Window.h"
 #include "Forge/Renderer/Framebuffer.h"
 #include "Forge/Renderer/Renderer.h"
+#include "Forge/Renderer/RenderCommand.h"
 #include "Forge/Renderer/Mesh.h"
 
 // Application
@@ -42,6 +43,7 @@
 
 // Camera
 #include "Forge/Renderer/EditorCamera.h"
+#include "Forge/Renderer/Camera.h"
 
 
 #endif  // FORGE_H

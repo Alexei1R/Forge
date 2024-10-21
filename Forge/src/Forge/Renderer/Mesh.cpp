@@ -8,10 +8,9 @@
 
 namespace Forge {
 
-
 Mesh::Mesh(const std::vector<Vertex>& vertices,
            const std::vector<unsigned int>& indices,
-           const std::vector<TextureData>& textures) :
+           const std::vector<std::shared_ptr<Texture>>& textures) :
     m_Vertices(vertices), m_Indices(indices), m_Textures(textures)
 {
     SetupMesh();
@@ -39,41 +38,13 @@ void Mesh::SetupMesh()
     m_VAO->Unbind();
 }
 
-void Mesh::Draw(const std::shared_ptr<Shader>& shader)
+std::shared_ptr<VertexArrayBuffer>& Mesh::GetVertexArrayBuffer()
 {
-    unsigned int diffuseNr = 1;
-    unsigned int specularNr = 1;
-    unsigned int normalNr = 1;
-    unsigned int heightNr = 1;
-
-    for (unsigned int i = 0; i < m_Textures.size(); i++)
-    {
-        m_Textures[i].texture->Bind(i);
-        std::string number;
-        std::string name = m_Textures[i].type;
-        if (name == "texture_diffuse")
-            number = std::to_string(diffuseNr++);
-        else if (name == "texture_specular")
-            number = std::to_string(specularNr++);
-        else if (name == "texture_normal")
-            number = std::to_string(normalNr++);
-        else if (name == "texture_height")
-            number = std::to_string(heightNr++);
-
-        // Remove 'material.' prefix
-        shader->SetUniform((name + number).c_str(), static_cast<int>(i));
-    }
-
-    // Draw mesh
-    m_VAO->Bind();
-    glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(m_Indices.size()), GL_UNSIGNED_INT, 0);
-    m_VAO->Unbind();
-
-    // Unbind textures
-    for (unsigned int i = 0; i < m_Textures.size(); i++)
-    {
-        m_Textures[i].texture->UnBind();
-    }
+    return m_VAO;
+}
+std::vector<std::shared_ptr<Texture>>& Mesh::GetTextures()
+{
+    return m_Textures;
 }
 
 

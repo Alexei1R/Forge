@@ -10,27 +10,31 @@
 #include "Forge/Core/Module/Module.h"
 #include "Forge/Core/Time.h"
 #include "Forge/Events/Event.h"
-
+#include "Camera.h"
 
 namespace Forge {
 
 
-enum class CameraProjection
-{
-    PerspectiveCamera,
-    OrthographicCamera
-};
-
-
-class EditorCamera : public Module
+class EditorCamera : public Module, public Camera
 {
 public:
     EditorCamera(glm::vec3 target = glm::vec3(0.0f), int width = 1920, int height = 1080);
     virtual ~EditorCamera() = default;
 
-    glm::mat4& GetViewProjectionMatrix();
-    glm::mat4& GetViewMatrix();
-    glm::mat4& GetProjectionMatrix();
+
+    // NOTE: Camera
+    glm::mat4& GetViewProjectionMatrix() override;
+    glm::mat4& GetViewMatrix() override;
+    glm::mat4& GetProjectionMatrix() override;
+
+
+    // NOTE: Module
+    void OnEvent(const Event& event) override;
+    void OnAttach() override;
+    void OnDetach() override;
+    void OnUpdate(DeltaTime dt) override;
+
+
     void SetCameraProjection(CameraProjection proj);
     void SetCameraFov(int degrees);
     glm::vec3 GetCameraPosition();
@@ -53,10 +57,6 @@ public:
     void SetCameraRadius(float dist);
     void SetCameraTarget(const glm::vec3& target);
 
-    void OnEvent(const Event& event);
-    void OnAttach();
-    void OnDetach();
-    void OnUpdate(DeltaTime dt);
 
 private:
     void RecalculateProjection(int width, int height);

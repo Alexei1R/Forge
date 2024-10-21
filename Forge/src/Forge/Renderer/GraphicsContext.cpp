@@ -28,7 +28,12 @@ Context::Context(std::shared_ptr<Window>& window) : m_Window(window)
     LOG_INFO("  OpenGL Version: [{}.{}]", major, minor)
 
     glEnable(GL_DEPTH_TEST);
+
+
     glEnable(GL_BLEND);
+
+    glDepthFunc(GL_LESS);
+
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 

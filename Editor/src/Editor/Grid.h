@@ -1,12 +1,13 @@
 //
-// Created by toor on 2024-10-15.
+// Created by toor on 2024-10-21.
 //
 
 #ifndef GRID_H
 #define GRID_H
 
-
 #include <memory>
+#include <vector>
+#include <glm/glm.hpp>
 #include "Forge/Renderer/Mesh.h"
 #include "Forge/Renderer/Shader.h"
 #include "Forge/Renderer/EditorCamera.h"
@@ -20,7 +21,9 @@ public:
     ~Grid();
 
     void OnAttach();
-    void Draw(const std::shared_ptr<EditorCamera>& camera);
+
+
+    std::shared_ptr<Mesh>& GetMesh(const std::shared_ptr<EditorCamera>& camera);
 
 private:
     void SetupGrid();
@@ -30,6 +33,5 @@ private:
 };
 
 }  // namespace Forge
-
 
 #endif

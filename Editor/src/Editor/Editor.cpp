@@ -3,6 +3,11 @@
 //
 
 #include "Editor.h"
+#include "Forge/Core/Log/Log.h"
+#include "Forge/Renderer/RenderCommand.h"
+#include "Forge/Renderer/Renderer.h"
+#include "glm/fwd.hpp"
+#include <iterator>
 #include <memory>
 
 
@@ -14,13 +19,11 @@ Editor::~Editor() {}
 
 void Editor::OnAttach()
 {
-    m_Renderer = std::make_shared<Renderer>();
-    m_Renderer->SetClearColor(glm::vec3(0.3f, 0.3f, 0.3f));
+    RenderCommand::SetClearColor(glm::vec3(0.3f, 0.3f, 0.3f));
 
     m_Camera = std::make_shared<EditorCamera>(glm::vec3(0.0f, 0.0f, 0.0f), 1920, 1080);
     m_Camera->SetCameraTarget(glm::vec3(0.0f, 0.0f, 0.0f));  // Look at origin
     Forge::GetForgeInstance().PushModule(m_Camera);
-
 
     m_Grid = std::make_shared<Grid>();
 }
@@ -29,9 +32,16 @@ void Editor::OnDetach() {}
 
 void Editor::OnUpdate(DeltaTime dt)
 {
-    m_Renderer->Clear();
+    RenderCommand::Clear();
 
-    m_Grid->Draw(m_Camera);
+
+    std::shared_ptr<Camera> camera = std::static_pointer_cast<Camera>(m_Camera);
+    Renderer::BeginScene(camera);
+
+    glm::mat4 transform = glm::mat4(1.0);
+    Renderer::DrawMesh(m_Grid->GetMesh(m_Camera), transform);
+
+    Renderer::EndScene();
 }
 
 void Editor::OnEvent(const Event& event)
@@ -60,7 +70,7 @@ void Editor::OnEvent(const Event& event)
         WindowEvent windowEvent = static_cast<const WindowEvent&>(event);
         if (windowEvent.GetAction() == Action::Resize)
         {
-            m_Renderer->SetViewport(0, 0, windowEvent.GetX(), windowEvent.GetY());
+            RenderCommand::SetViewport(0, 0, windowEvent.GetX(), windowEvent.GetY());
             m_Camera->Resize(windowEvent.GetX(), windowEvent.GetY());
         }
     }
