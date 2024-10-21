@@ -2,9 +2,11 @@
 // Created by toor on 2024-08-26.
 //
 
+#include <chrono>
 #include <filesystem>
 #include <memory>
 #include "ForgeApplication.h"
+#include "Forge/Core/Log/Log.h"
 #include "Forge/Events/ImplEvent.h"
 
 
@@ -22,7 +24,7 @@ Forge::Forge()
 
     m_Window = std::make_shared<Window>();
     m_Window->SetEventCallback(std::bind(&Forge::HandleEvent, this, std::placeholders::_1));
-    m_Window->EnableVSynk(true);
+    m_Window->EnableVSynk(false);
 
     m_GraphicsContext = std::make_unique<Context>(m_Window);
 }

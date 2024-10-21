@@ -15,3 +15,6 @@
 	path = Editor/3rdparty/imgui/imgui
 	url = https://github.com/ocornut/imgui.git
 	branch = docking
+[submodule "Forge/3rdparty/msdf-atlas-gen"]
+	path = Forge/3rdparty/msdf-atlas-gen
+	url = https://github.com/Chlumsky/msdf-atlas-gen.git

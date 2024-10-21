@@ -138,11 +138,11 @@ void EditorCamera::OnUpdate(DeltaTime dt)
                     mouse_delta.second = 0.0f;
                     m_FirstMouseTouchMovement = false;
                 }
-                m_Target += (float)mouse_delta.first * (m_Right * m_MovementSpeed * dt);
-                m_Position += (float)mouse_delta.first * (m_Right * m_MovementSpeed * dt);
+                m_Target += (float)mouse_delta.first * (m_Right * m_MovementSpeed);
+                m_Position += (float)mouse_delta.first * (m_Right * m_MovementSpeed);
 
-                m_Target += (float)mouse_delta.second * (m_Up * m_MovementSpeed * dt);
-                m_Position += (float)mouse_delta.second * (m_Up * m_MovementSpeed * dt);
+                m_Target += (float)mouse_delta.second * (m_Up * m_MovementSpeed);
+                m_Position += (float)mouse_delta.second * (m_Up * m_MovementSpeed);
             }
             else
             {
@@ -160,7 +160,7 @@ void EditorCamera::OnUpdate(DeltaTime dt)
                     mouse_delta.second = 0.0f;
                     m_FirstMouseTouch = false;
                 }
-                float sensitivity = m_RotationSens * dt;
+                float sensitivity = m_RotationSens;
                 m_RotationYaw += mouse_delta.first * sensitivity;
                 m_RotationPitch += mouse_delta.second * sensitivity;
 

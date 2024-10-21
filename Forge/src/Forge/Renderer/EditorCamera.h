@@ -84,7 +84,7 @@ private:
 
     float m_RotationYaw = 90.0f;
     float m_RotationPitch = 10.0f;
-    float m_RotationSens = 30.0f;
+    float m_RotationSens = 0.08f;
 
     float m_ScrollSens = 0.5f;
 
@@ -93,7 +93,7 @@ private:
     bool m_AllowScroll = true;
 
 
-    float m_MovementSpeed = 0.60;
+    float m_MovementSpeed = 0.006;
     bool m_FirstMouseTouchMovement = true;
 };
 

@@ -1,3 +1,4 @@
+add_subdirectory(msdf-atlas-gen)
 add_subdirectory(glfw)
 add_subdirectory(glad)
 add_subdirectory(glm)
