@@ -8,9 +8,8 @@
 #include <vector>
 #include <memory>
 #include <glm/glm.hpp>
-#include "BufferImpl.h"
+#include "Forge/Renderer/Buffer/BufferImpl.h"
 #include "Forge/Renderer/RenderableObject.h"
-
 
 namespace Forge {
 

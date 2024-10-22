@@ -27,6 +27,7 @@ public:
 private:
     std::shared_ptr<EditorCamera> m_Camera;
 
+    std::shared_ptr<Text> m_Text;
 
     bool m_ShowDebugGrid = true;
     std::shared_ptr<Grid> m_Grid;

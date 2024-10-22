@@ -22,14 +22,15 @@
 /*#include "Forge/FileWatch/FileWatch.h"*/
 
 // Renderer System
-#include "Forge/Renderer/BufferImpl.h"
-#include "Forge/Renderer/Buffer.h"
+#include "Forge/Renderer/Buffer/BufferImpl.h"
+#include "Forge/Renderer/Buffer/Buffer.h"
 #include "Forge/Renderer/Shader.h"
 #include "Forge/Renderer/Window.h"
 #include "Forge/Renderer/Framebuffer.h"
-#include "Forge/Renderer/Renderer.h"
+#include "Forge/Renderer/Renderer3D.h"
+#include "Forge/Renderer/Renderer2D.h"
 #include "Forge/Renderer/RenderCommand.h"
-#include "Forge/Renderer/Mesh.h"
+#include "Forge/Renderer/Model/Mesh.h"
 
 // Application
 #include "Forge/ForgeApplication.h"
@@ -42,8 +43,12 @@
 #include <glm/gtc/type_ptr.hpp>
 
 // Camera
-#include "Forge/Renderer/EditorCamera.h"
-#include "Forge/Renderer/Camera.h"
+#include "Forge/Renderer/Camera/Camera.h"
+#include "Forge/Renderer/Camera/EditorCamera.h"
+
+
+// Text
+#include "Forge/Renderer/Text/Text.h"
 
 
 #endif  // FORGE_H

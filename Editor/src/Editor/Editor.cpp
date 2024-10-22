@@ -3,9 +3,6 @@
 //
 
 #include "Editor.h"
-#include "Forge/Core/Log/Log.h"
-#include "Forge/Renderer/RenderCommand.h"
-#include "Forge/Renderer/Renderer.h"
 #include "glm/fwd.hpp"
 #include <iterator>
 #include <memory>
@@ -26,6 +23,8 @@ void Editor::OnAttach()
     Forge::GetForgeInstance().PushModule(m_Camera);
 
     m_Grid = std::make_shared<Grid>();
+
+    m_Text = std::make_shared<Text>("/home/toor/rostov/Rostov.ttf");
 }
 
 void Editor::OnDetach() {}
@@ -36,12 +35,12 @@ void Editor::OnUpdate(DeltaTime dt)
 
 
     std::shared_ptr<Camera> camera = std::static_pointer_cast<Camera>(m_Camera);
-    Renderer::BeginScene(camera);
+    Renderer3D::BeginScene(camera);
 
     glm::mat4 transform = glm::mat4(1.0);
-    Renderer::DrawMesh(m_Grid->GetMesh(m_Camera), transform);
+    Renderer3D::DrawMesh(m_Grid->GetMesh(m_Camera), transform);
 
-    Renderer::EndScene();
+    Renderer3D::EndScene();
 }
 
 void Editor::OnEvent(const Event& event)

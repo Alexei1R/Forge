@@ -5,14 +5,14 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
-#include "Forge/Renderer/Camera.h"
-#include "Forge/Renderer/Mesh.h"
+#include "Forge/Renderer/Camera/Camera.h"
+#include "Forge/Renderer/Model/Mesh.h"
 #include "Forge/Renderer/RenderCommand.h"
 #include <memory>
 namespace Forge {
 
 
-class Renderer
+class Renderer3D
 {
 public:
     static void BeginScene(const std::shared_ptr<Camera>& camera);

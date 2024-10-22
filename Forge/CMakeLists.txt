@@ -22,6 +22,7 @@ target_link_libraries(ForgeLIB
         glfw
         glad
         stb
+        msdf-atlas-gen
 )
 
 

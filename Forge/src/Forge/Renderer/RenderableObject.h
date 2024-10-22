@@ -6,7 +6,7 @@
 #define RENDERABLEOBJECT_H
 
 
-#include "Forge/Renderer/BufferImpl.h"
+#include "Forge/Renderer/Buffer/BufferImpl.h"
 #include "Forge/Renderer/Texture.h"
 #include <memory>
 #include <vector>

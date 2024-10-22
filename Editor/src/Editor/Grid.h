@@ -8,9 +8,9 @@
 #include <memory>
 #include <vector>
 #include <glm/glm.hpp>
-#include "Forge/Renderer/Mesh.h"
-#include "Forge/Renderer/Shader.h"
-#include "Forge/Renderer/EditorCamera.h"
+
+#include "Forge.h"
+
 
 namespace Forge {
 
