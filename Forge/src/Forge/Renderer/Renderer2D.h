@@ -7,6 +7,7 @@
 
 #include "Forge/Renderer/Camera/Camera.h"
 #include "Forge/Renderer/RenderCommand.h"
+#include "Forge/Renderer/Shader.h"
 #include <memory>
 namespace Forge {
 
@@ -18,10 +19,10 @@ public:
     static void EndScene();
 
 
+    // Primitives
+    static void DrawQuad();
+
 private:
-    static std::shared_ptr<Camera> m_Camera;
-
-
     RenderCommand m_RenderCommand;
 };
 

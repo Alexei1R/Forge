@@ -71,7 +71,7 @@ private:
 
     float m_Yaw = 90.0f;
     float m_Pitch = 10.0f;
-    float m_NearClip = 0.1f;
+    float m_NearClip = 0.001f;
     float m_FarClip = 1000.0f;
     float m_FOV = 45.0f;
     float m_Radius = 5.0f;
@@ -86,14 +86,14 @@ private:
     float m_RotationPitch = 10.0f;
     float m_RotationSens = 0.08f;
 
-    float m_ScrollSens = 0.5f;
+    float m_ScrollSens = 0.1f;
 
     bool m_AllowMoving = true;
     bool m_AllowRotation = true;
     bool m_AllowScroll = true;
 
 
-    float m_MovementSpeed = 0.006;
+    float m_MovementSpeed = 0.0008;
     bool m_FirstMouseTouchMovement = true;
 };
 

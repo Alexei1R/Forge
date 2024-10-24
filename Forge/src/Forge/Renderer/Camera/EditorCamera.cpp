@@ -105,9 +105,9 @@ void EditorCamera::OnEvent(const Event& event)
             if (mouse_event.GetAction() == Action::MouseScroll)
             {
                 m_Radius += mouse_event.GetY() * -m_ScrollSens;
-                if (m_Radius <= 0.1f)
+                if (m_Radius <= 0.01f)
                 {
-                    m_Radius = 0.1f;
+                    m_Radius = 0.01f;
                 }
                 m_Position =
                     m_Target +
@@ -138,11 +138,13 @@ void EditorCamera::OnUpdate(DeltaTime dt)
                     mouse_delta.second = 0.0f;
                     m_FirstMouseTouchMovement = false;
                 }
-                m_Target += (float)mouse_delta.first * (m_Right * m_MovementSpeed);
-                m_Position += (float)mouse_delta.first * (m_Right * m_MovementSpeed);
 
-                m_Target += (float)mouse_delta.second * (m_Up * m_MovementSpeed);
-                m_Position += (float)mouse_delta.second * (m_Up * m_MovementSpeed);
+
+                m_Target += (float)mouse_delta.first * (m_Right * m_MovementSpeed) * (m_Radius);
+                m_Position += (float)mouse_delta.first * (m_Right * m_MovementSpeed) * (m_Radius);
+
+                m_Target += (float)mouse_delta.second * (m_Up * m_MovementSpeed) * (m_Radius);
+                m_Position += (float)mouse_delta.second * (m_Up * m_MovementSpeed) * (m_Radius);
             }
             else
             {

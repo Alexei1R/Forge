@@ -8,9 +8,8 @@
 
 namespace Forge {
 
-Texture::Texture(const std::string& filePath, TextureType type) :
-    m_FilePath(filePath), m_Width(0), m_Height(0), m_Format(GL_RGB), m_TextureID(0),
-    m_TextureType(type)
+Texture::Texture(const std::string& filePath) :
+    m_FilePath(filePath), m_Width(0), m_Height(0), m_Format(GL_RGB), m_TextureID(0)
 {
     stbi_set_flip_vertically_on_load(true);
     int nrChannels;

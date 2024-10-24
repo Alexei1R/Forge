@@ -27,10 +27,17 @@ public:
 private:
     std::shared_ptr<EditorCamera> m_Camera;
 
-    std::shared_ptr<Text> m_Text;
 
     bool m_ShowDebugGrid = true;
     std::shared_ptr<Grid> m_Grid;
+
+
+    // Font and Quad Rendering
+    std::shared_ptr<Font> m_Font;
+    std::shared_ptr<Shader> m_QuadShader;
+    std::shared_ptr<VertexArrayBuffer> m_QuadVAO;
+    std::shared_ptr<VertexBuffer> m_QuadVBO;
+    std::shared_ptr<IndexBuffer> m_QuadEBO;
 };
 
 }  // namespace Forge
