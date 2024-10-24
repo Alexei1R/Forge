@@ -32,41 +32,6 @@ void Editor::OnAttach()
     Forge::GetForgeInstance().PushModule(m_Camera);
 
     m_Grid = std::make_shared<Grid>();
-
-
-    // NOTE: Quad Test
-    std::initializer_list<ShaderElement> shaderElements = {
-        {ShaderType::VERTEX, "Assets/Shaders/Renderer2DQuad.vert"},
-        {ShaderType::FRAGMENT, "Assets/Shaders/Renderer2DQuad.frag"}};
-    m_QuadShader = std::make_shared<Shader>(shaderElements);
-    m_QuadShader->Build();
-    std::vector<QuadVertex> m_Vertices = {
-        {{0.25f, 0.25f, 0.0f}, {1.0f, 1.0f}},  // Top Right
-        {{-0.25f, -0.25f, 0.0f}, {0.0f, 0.0f}},  // Bottom Left
-        {{-0.25f, 0.25f, 0.0f}, {0.0f, 1.0f}},  // Top Left
-        {{0.25f, -0.25f, 0.0f}, {1.0f, 0.0f}},  // Bottom Right
-    };
-    std::vector<unsigned int> m_Indices = {0, 1, 2, 1, 3, 0};
-    m_QuadVAO = std::make_shared<VertexArrayBuffer>();
-    m_QuadVBO =
-        std::make_shared<VertexBuffer>(m_Vertices.data(), m_Vertices.size() * sizeof(QuadVertex));
-    m_QuadEBO = std::make_shared<IndexBuffer>(m_Indices.data(), m_Indices.size());
-    m_QuadVAO->Bind();
-    m_QuadVBO->Bind();
-    BufferLayout layout = {{BufferDataType::Float3, "aPos"},
-                           {BufferDataType::Float2, "aTexCoords"}};
-    m_QuadVBO->SetLayout(layout);
-    m_QuadVAO->AddVertexBuffer(m_QuadVBO);
-    m_QuadEBO->Bind();
-    m_QuadVAO->SetIndexBuffer(m_QuadEBO);
-    m_QuadVAO->Unbind();
-    // NOTE: Quad Test End
-    m_Font = std::make_shared<Font>("/home/toor/fonts//Oswald.ttf");
-    if (!m_Font || !m_Font->GetAtlasTexture())
-    {
-        LOG_ERROR("Failed to load font or its atlas texture");
-        return;
-    }
 }
 
 void Editor::OnDetach() {}
@@ -84,29 +49,14 @@ void Editor::OnUpdate(DeltaTime dt)
 
     Renderer3D::EndScene();
 
-    m_QuadShader->Bind();
-    m_QuadShader->SetUniform("u_ViewProjection", m_Camera->GetViewProjectionMatrix());
 
-    // Set text color (e.g., white)
-    m_QuadShader->SetUniform("u_TextColor", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+    renderer.BeginScene(camera);
 
-    // Set pixel range (should match the range used during MSDF atlas generation)
-    float pxRange = 4.0f;  // Example value, adjust as needed
-    m_QuadShader->SetUniform("u_PxRange", pxRange);
+    // Draw quads
+    renderer.DrawQuad({0.0f, 0.0f}, {1.0f, 1.0f});  // Magenta quad at (0,0) size 1x1
+    renderer.DrawQuad({2.0f, 2.0f}, {1.0f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f});  // Green quad
 
-    // Bind the font's atlas texture
-    if (m_Font && m_Font->GetAtlasTexture())
-    {
-        m_Font->GetAtlasTexture()->Bind(0);
-        m_QuadShader->SetUniform("u_Texture", 0);
-    }
-    else
-    {
-        LOG_ERROR("Font or atlas texture is not valid");
-    }
-
-    m_QuadVAO->Bind();
-    RenderCommand::Draw(m_QuadVAO);
+    renderer.EndScene();
 }
 
 void Editor::OnEvent(const Event& event)

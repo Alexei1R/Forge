@@ -45,6 +45,8 @@ private:
 #define LOG_WARN(...) F_ASSERT(::Forge::Log::GetLogger(), " Logger is not Init")::Forge::Log::GetLogger()->warn(__VA_ARGS__);
 #define LOG_ERROR(...) F_ASSERT(::Forge::Log::GetLogger(), " Logger is not Init")::Forge::Log::GetLogger()->error(__VA_ARGS__);
 #define LOG_CRITICAL(...) F_ASSERT(::Forge::Log::GetLogger(), " Logger is not Init")::Forge::Log::GetLogger()->critical(__VA_ARGS__);
+
+#define LOG_INITIALIZED
 #endif
 // clang-format on
 

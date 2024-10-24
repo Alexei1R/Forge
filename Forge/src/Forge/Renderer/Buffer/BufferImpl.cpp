@@ -3,6 +3,10 @@
 //
 
 #include "BufferImpl.h"
+#include "Forge/Core/Log/Log.h"
+#include "Forge/Core/Utils.h"
+#include "Forge/Renderer/Buffer/Buffer.h"
+#include <cassert>
 
 
 namespace Forge {
@@ -49,11 +53,20 @@ GLenum BufferDataTypeToOpenGLBaseType(BufferDataType type)
 //  Vertex Buffer Implementation
 //========================================
 
-VertexBuffer::VertexBuffer(const void* data, uint32_t size)
+VertexBuffer::VertexBuffer(const void* data, uint32_t count, VertexBufferDrawMode drawMode)
 {
     glGenBuffers(1, &m_RendererID);
     glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
-    glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+
+    switch (drawMode)
+    {
+        case VertexBufferDrawMode::Static:
+            glBufferData(GL_ARRAY_BUFFER, count, data, GL_STATIC_DRAW);
+            break;
+        case VertexBufferDrawMode::Dynamic:
+            glBufferData(GL_ARRAY_BUFFER, count, data, GL_DYNAMIC_DRAW);
+            break;
+    }
 }
 
 VertexBuffer::~VertexBuffer()

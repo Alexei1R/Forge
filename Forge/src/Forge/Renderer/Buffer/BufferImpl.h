@@ -7,6 +7,7 @@
 
 
 #include "Buffer.h"
+#include <cstdint>
 #include <vector>
 #include <glad/glad.h>
 #include <glm/glm.hpp>
@@ -19,10 +20,18 @@ namespace Forge {
 //========================================
 
 
+enum class VertexBufferDrawMode : uint8_t
+{
+    Static,
+    Dynamic
+};
+
 class VertexBuffer : public Buffer
 {
 public:
-    VertexBuffer(const void* data, uint32_t count);
+    VertexBuffer(const void* data,
+                 uint32_t count,
+                 VertexBufferDrawMode drawMode = VertexBufferDrawMode::Static);
     ~VertexBuffer();
 
     void Bind() const override;

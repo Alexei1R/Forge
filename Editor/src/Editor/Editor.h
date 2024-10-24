@@ -32,12 +32,12 @@ private:
     std::shared_ptr<Grid> m_Grid;
 
 
-    // Font and Quad Rendering
-    std::shared_ptr<Font> m_Font;
-    std::shared_ptr<Shader> m_QuadShader;
     std::shared_ptr<VertexArrayBuffer> m_QuadVAO;
     std::shared_ptr<VertexBuffer> m_QuadVBO;
     std::shared_ptr<IndexBuffer> m_QuadEBO;
+
+
+    Renderer2D renderer;
 };
 
 }  // namespace Forge
