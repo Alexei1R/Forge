@@ -36,7 +36,6 @@ private:
     std::shared_ptr<VertexBuffer> m_QuadVBO;
     std::shared_ptr<IndexBuffer> m_QuadEBO;
 
-
     Renderer2D renderer;
 };
 

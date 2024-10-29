@@ -53,8 +53,8 @@ void Editor::OnUpdate(DeltaTime dt)
     renderer.BeginScene(camera);
 
     // Draw quads
-    renderer.DrawQuad({0.0f, 0.0f}, {1.0f, 1.0f});  // Magenta quad at (0,0) size 1x1
-    renderer.DrawQuad({2.0f, 2.0f}, {1.0f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f});  // Green quad
+    renderer.DrawQuad({0.0f, 1.0f}, {1.0f, 1.0f}, {0.0f, 1.0f, 1.0f, 1.0f});  // Green quad
+    renderer.DrawQuad({0.0f, 0.0f}, {1.0f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f});  // Green quad
 
     renderer.EndScene();
 }

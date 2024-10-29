@@ -50,6 +50,7 @@ private:
     QuadVertex* m_QuadVertexBufferPtr = nullptr;
 
     glm::mat4 m_ViewProjectionMatrix;
+    std::shared_ptr<Camera> m_Camera;  // Store the camera for BeginScene
 };
 
 }  // namespace Forge

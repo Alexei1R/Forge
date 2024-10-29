@@ -47,8 +47,4 @@
 #include "Forge/Renderer/Camera/EditorCamera.h"
 
 
-// Text
-#include "Forge/Renderer/Text/Text.h"
-
-
 #endif  // FORGE_H

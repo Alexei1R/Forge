@@ -86,7 +86,7 @@ private:
     float m_RotationPitch = 10.0f;
     float m_RotationSens = 0.08f;
 
-    float m_ScrollSens = 0.1f;
+    float m_ScrollSens = 1.0f;
 
     bool m_AllowMoving = true;
     bool m_AllowRotation = true;
