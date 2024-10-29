@@ -37,7 +37,18 @@ public:
             ShaderLayout {{ShaderType::VERTEX, "Assets/Shaders/Renderer2DQuad.vert"},
                           {ShaderType::FRAGMENT, "Assets/Shaders/Renderer2DQuad.frag"}});
         m_Shader->Build();
+
+
+        m_Layout = {{BufferDataType::Float3, "aPos"},
+                    {BufferDataType::Float3, "aNormal"},
+                    {BufferDataType::Float, "aTexCoords"}};
     }
+
+    const BufferLayout& GetBufferLayout() override
+    {
+        return m_Layout;
+    }
+
 
     const std::vector<QuadVertex>& GetVertices() const override
     {
@@ -54,20 +65,13 @@ public:
         return m_Shader;
     }
 
-    size_t GetVertexCount() const override
-    {
-        return vertices.size();
-    }
-
-    size_t GetIndexCount() const override
-    {
-        return indices.size();
-    }
 
 private:
-    std::vector<QuadVertex> vertices;
-    std::vector<unsigned int> indices;
+    std::vector<QuadVertex> vertices = {};
+    std::vector<unsigned int> indices = {};
     std::shared_ptr<Shader> m_Shader;
+
+    BufferLayout m_Layout;
 };
 
 }  // namespace Forge

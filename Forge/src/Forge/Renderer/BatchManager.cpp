@@ -3,26 +3,27 @@
 //
 
 #include "BatchManager.h"
-#include "Forge/Core/Log/Log.h"
-#include <stdexcept>
 
 namespace Forge {
 
-BatchManager::BatchManager(unsigned int capacity) :
-    m_Capacity(capacity), m_VertexBufferSize(0), m_VertexTypeSize(0)
-{
-}
+BatchManager::BatchManager(unsigned int capacity) : m_Capacity(capacity) {}
 
-void BatchManager::BeginBatch() {}
+void BatchManager::BeginBatch()
+{
+    m_VertexBuffer.clear();
+    m_Indices.clear();
+    m_VertexBufferSize = 0;
+}
 
 void BatchManager::EndBatch() {}
 
 void BatchManager::Flush()
 {
-    LOG_INFO(" VetexType : {}", m_VertexTypeSize)
-    LOG_INFO(" Size : {}", m_VertexBufferSize)
-    LOG_INFO(" Size Byte : {}", m_VertexBuffer.size())
-    LOG_INFO(" Count : {}", m_VertexBufferSize / m_VertexTypeSize)
+    /*LOG_INFO(" VertexBuffer Size Byte : {}", m_VertexBuffer.size());*/
+    /*LOG_INFO(" IndexBuffer Size in elements : {}", m_Indices.size());*/
+    /**/
+    /*LOG_INFO(" Currect Count {0}  ; m_Capacity {1}", (m_VertexBufferSize / 24), m_Capacity);*/
 }
+
 
 }  // namespace Forge

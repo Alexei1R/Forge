@@ -33,6 +33,8 @@ private:
 
 
     BatchManager m_QuadBatch;
+
+    Quad m_Quad;
 };
 
 }  // namespace Forge

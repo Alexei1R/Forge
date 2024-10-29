@@ -5,11 +5,12 @@
 #ifndef BATCHMANAGER_H
 #define BATCHMANAGER_H
 
-#include <algorithm>
 #include <vector>
+#include <memory>
 #include <cstddef>
 #include "Forge/Core/Log/Log.h"
-
+#include "Forge/Renderer/Buffer/BufferImpl.h"
+#include "Forge/Renderer/Shader.h"
 
 namespace Forge {
 
@@ -17,7 +18,6 @@ class BatchManager
 {
 public:
     BatchManager(unsigned int capacity);
-
     void BeginBatch();
     void EndBatch();
     void Flush();
@@ -26,37 +26,36 @@ public:
     void Submit(const std::vector<VertexType>& vertices, const std::vector<unsigned int>& indices)
     {
         size_t vertexSize = sizeof(VertexType);
-        m_VertexTypeSize = vertexSize;
         m_VertexBufferSize += vertexSize;
 
-        if ((m_VertexBufferSize / m_VertexTypeSize) >= m_Capacity)
+        if ((m_VertexBufferSize / vertexSize) >= m_Capacity)
         {
-            LOG_WARN("Please set bigger batch size")
+            LOG_WARN("Please set bigger batch size , Current capacity : {}", m_Capacity)
             m_Capacity *= 2;
-            m_IsResizedToCapacity = false;
+            m_ResizeVertexBuffer = true;
         }
-        if (!m_IsResizedToCapacity)
+        if (m_ResizeVertexBuffer)
         {
-            m_IsResizedToCapacity = true;
-            LOG_INFO("Resize VertexBuffer")
-            m_VertexBuffer.reserve(m_Capacity * vertices.size());
-            m_Indices.reserve(m_Capacity * indices.size());
+            m_ResizeVertexBuffer = false;
+            m_VertexBuffer.reserve(m_Capacity * vertexSize);
+            m_Indices.reserve(m_Capacity * sizeof(unsigned int));
         }
 
         const std::byte* data = reinterpret_cast<const std::byte*>(vertices.data());
         m_VertexBuffer.insert(m_VertexBuffer.end(), data, data + vertices.size() * vertexSize);
+
+        m_Indices.insert(m_Indices.end(), indices.begin(), indices.end());
     }
 
-private:
-    std::vector<std::byte> m_VertexBuffer;
-    unsigned int m_VertexBufferSize;
 
-    unsigned int m_VertexTypeSize;
-    std::vector<unsigned int> m_Indices;
+private:
+    std::vector<std::byte> m_VertexBuffer = {};
+    std::vector<unsigned int> m_Indices = {};
+    unsigned int m_VertexBufferSize = 0;
+    bool m_ResizeVertexBuffer = true;
     unsigned int m_Capacity;
-    bool m_IsResizedToCapacity = false;
 };
 
 }  // namespace Forge
 
-#endif
+#endif  // BATCHMANAGER_H
