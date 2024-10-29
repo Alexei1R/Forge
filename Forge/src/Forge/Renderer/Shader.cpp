@@ -10,10 +10,44 @@
 #include <fstream>
 #include <sstream>
 
+
 namespace Forge {
+
+ShaderLayout::ShaderLayout() {}
+
+ShaderLayout::ShaderLayout(std::initializer_list<ShaderElement> elements) : m_Elements(elements) {}
+
+void ShaderLayout::AddElement(const ShaderElement& element)
+{
+    m_Elements.push_back(element);
+}
+
+std::vector<ShaderElement>::iterator ShaderLayout::begin()
+{
+    return m_Elements.begin();
+}
+
+std::vector<ShaderElement>::iterator ShaderLayout::end()
+{
+    return m_Elements.end();
+}
+
+std::vector<ShaderElement>::const_iterator ShaderLayout::begin() const
+{
+    return m_Elements.begin();
+}
+
+std::vector<ShaderElement>::const_iterator ShaderLayout::end() const
+{
+    return m_Elements.end();
+}
+
 Shader::Shader() {}
 
-Shader::Shader(std::initializer_list<ShaderElement> elements) : m_Shaders(elements) {}
+Shader::Shader(const ShaderLayout& layout) : m_ShaderLayout(layout)
+{
+    BuildShader();
+}
 
 Shader::~Shader()
 {
@@ -23,24 +57,11 @@ Shader::~Shader()
     }
 }
 
-bool Shader::AddShader(const ShaderElement& element)
-{
-    if (element.path.empty())
-    {
-        LOG_CRITICAL("Shader path is empty.");
-        return false;
-    }
-
-    m_Shaders.push_back(element);
-    return true;
-}
-
-
 bool Shader::Build()
 {
     BuildShader();
-    return m_ProgramID != 0;
     this->Bind();
+    return m_ProgramID != 0;
 }
 
 void Shader::Reload()
@@ -68,7 +89,7 @@ void Shader::BuildShader()
 
     std::vector<unsigned int> compiledShaders;
 
-    for (const auto& shader : m_Shaders)
+    for (const auto& shader : m_ShaderLayout)
     {
         std::string source = ReadShader(shader.path);
         if (source.empty())

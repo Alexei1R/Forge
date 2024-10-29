@@ -9,7 +9,7 @@
 #include <memory>
 #include <glm/glm.hpp>
 #include "Forge/Renderer/Buffer/BufferImpl.h"
-#include "Forge/Renderer/RenderableObject.h"
+#include "Forge/Renderer/Texture.h"
 
 namespace Forge {
 
@@ -20,7 +20,7 @@ struct Vertex
     glm::vec2 TexCoords;
 };
 
-class Mesh : public RenderableObject
+class Mesh
 {
 public:
     Mesh(const std::vector<Vertex>& vertices,
@@ -28,8 +28,8 @@ public:
          const std::vector<std::shared_ptr<Texture>>& textures = {});
 
 
-    std::shared_ptr<VertexArrayBuffer>& GetVertexArrayBuffer() override;
-    std::vector<std::shared_ptr<Texture>>& GetTextures() override;
+    std::shared_ptr<VertexArrayBuffer>& GetVertexArrayBuffer();
+    std::vector<std::shared_ptr<Texture>>& GetTextures();
 
 private:
     void SetupMesh();

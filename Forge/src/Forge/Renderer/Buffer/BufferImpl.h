@@ -36,7 +36,7 @@ public:
 
     void Bind() const override;
     void Unbind() const override;
-
+    void SubmitData(const void* data, uint32_t count, uint32_t offset = 0);
 
     const BufferLayout& GetLayout()
     {
@@ -50,6 +50,8 @@ public:
 private:
     unsigned int m_RendererID;
     BufferLayout m_Layout;
+
+    VertexBufferDrawMode m_DrawMode;
 };
 
 

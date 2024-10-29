@@ -34,15 +34,30 @@ struct ShaderElement
     ShaderElement(ShaderType type, std::string path) : path(std::move(path)), type(type) {}
 };
 
+class ShaderLayout
+{
+public:
+    ShaderLayout();
+    ShaderLayout(std::initializer_list<ShaderElement> elements);
+
+    void AddElement(const ShaderElement& element);
+
+    std::vector<ShaderElement>::iterator begin();
+    std::vector<ShaderElement>::iterator end();
+    std::vector<ShaderElement>::const_iterator begin() const;
+    std::vector<ShaderElement>::const_iterator end() const;
+
+private:
+    std::vector<ShaderElement> m_Elements;
+};
+
 class Shader
 {
 public:
     Shader();
-    Shader(std::initializer_list<ShaderElement> elements);
+    Shader(const ShaderLayout& layout);
 
     ~Shader();
-
-    bool AddShader(const ShaderElement& element);
 
     bool Build();
     void Reload();
@@ -66,7 +81,7 @@ private:
     void BuildShader();
 
 private:
-    std::vector<ShaderElement> m_Shaders;
+    ShaderLayout m_ShaderLayout;
 
     unsigned int m_ProgramID = 0;
     unsigned int m_PreviousProgramID = 0;

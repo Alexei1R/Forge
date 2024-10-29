@@ -3,6 +3,7 @@
 //
 
 #include "Grid.h"
+#include "Forge/Renderer/Shader.h"
 
 namespace Forge {
 
@@ -15,11 +16,10 @@ Grid::~Grid() {}
 
 void Grid::OnAttach()
 {
-    std::initializer_list<ShaderElement> shaderElements = {
-        {ShaderType::VERTEX, "Assets/Shaders/grid.vert"},
-        {ShaderType::FRAGMENT, "Assets/Shaders/grid.frag"}};
+    ShaderLayout shaderLayout = {{ShaderType::VERTEX, "Assets/Shaders/grid.vert"},
+                                 {ShaderType::FRAGMENT, "Assets/Shaders/grid.frag"}};
 
-    m_GridShader = std::make_shared<Shader>(shaderElements);
+    m_GridShader = std::make_shared<Shader>(shaderLayout);
     m_GridShader->Build();
 
     SetupGrid();

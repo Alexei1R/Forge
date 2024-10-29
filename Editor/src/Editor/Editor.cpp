@@ -12,13 +12,6 @@
 namespace Forge {
 
 
-struct QuadVertex
-{
-    glm::vec3 Position;
-    glm::vec2 TexCoord;
-};
-
-
 Editor::Editor() {}
 
 Editor::~Editor() {}

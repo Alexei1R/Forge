@@ -53,7 +53,8 @@ GLenum BufferDataTypeToOpenGLBaseType(BufferDataType type)
 //  Vertex Buffer Implementation
 //========================================
 
-VertexBuffer::VertexBuffer(const void* data, uint32_t count, VertexBufferDrawMode drawMode)
+VertexBuffer::VertexBuffer(const void* data, uint32_t count, VertexBufferDrawMode drawMode) :
+    m_DrawMode(drawMode)
 {
     glGenBuffers(1, &m_RendererID);
     glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
@@ -68,6 +69,23 @@ VertexBuffer::VertexBuffer(const void* data, uint32_t count, VertexBufferDrawMod
             break;
     }
 }
+
+void VertexBuffer::SubmitData(const void* data, uint32_t count, uint32_t offset)
+{
+    Bind();
+
+    if (m_DrawMode == VertexBufferDrawMode::Dynamic)
+    {
+        glBufferSubData(GL_ARRAY_BUFFER, offset, count, data);
+    }
+    else
+    {
+        F_ASSERT(false,
+                 "Can't submit data to a static VertexBuffer. Set VertexBufferDrawMode to "
+                 "Dynamic.");
+    }
+}
+
 
 VertexBuffer::~VertexBuffer()
 {
