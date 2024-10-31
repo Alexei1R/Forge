@@ -8,6 +8,7 @@
 #include "Forge/Renderer/BatchManager.h"
 #include "Forge/Renderer/Camera/Camera.h"
 #include "Forge/Renderer/RenderableTargets/Quad.h"
+#include <algorithm>
 #include <glm/glm.hpp>
 #include <memory>
 
@@ -23,7 +24,7 @@ public:
     void EndScene();
 
     // Primitives
-    void DrawQuad(const glm::vec2& position,
+    void DrawQuad(const glm::vec3& position,
                   const glm::vec2& size,
                   const glm::vec4& color = glm::vec4(1.0f));
 
@@ -32,7 +33,8 @@ private:
     std::shared_ptr<Camera> m_Camera;
 
 
-    BatchManager m_QuadBatch;
+    std::unique_ptr<BatchManager> m_QuadBatch;
+    std::shared_ptr<Shader> m_Shader = nullptr;
 
     Quad m_Quad;
 };

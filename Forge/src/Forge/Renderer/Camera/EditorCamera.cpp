@@ -105,9 +105,9 @@ void EditorCamera::OnEvent(const Event& event)
             if (mouse_event.GetAction() == Action::MouseScroll)
             {
                 m_Radius += mouse_event.GetY() * -m_ScrollSens;
-                if (m_Radius <= 0.01f)
+                if (m_Radius <= 0.1f)
                 {
-                    m_Radius = 0.01f;
+                    m_Radius = 0.1f;
                 }
                 m_Position =
                     m_Target +

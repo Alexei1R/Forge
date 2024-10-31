@@ -4,6 +4,7 @@
 
 
 #include "RenderCommand.h"
+#include <cstdint>
 
 namespace Forge {
 
@@ -45,4 +46,13 @@ void RenderCommand::Draw(std::shared_ptr<VertexArrayBuffer>& buffer, DrawPrimiti
             break;
     }
 }
+
+int RenderCommand::GetMaxTextureSlots()
+{
+    int maxTextureSlots;
+    glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTextureSlots);
+    return maxTextureSlots;
+}
+
+
 }  // namespace Forge

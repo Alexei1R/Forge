@@ -36,6 +36,8 @@ public:
     static void Draw(std::shared_ptr<VertexArrayBuffer>& buffer,
                      DrawPrimitives primitives = DrawPrimitives::TRIANGLES);
 
+    static int GetMaxTextureSlots();
+
 private:
     static glm::vec3 m_ClearColor;
 };

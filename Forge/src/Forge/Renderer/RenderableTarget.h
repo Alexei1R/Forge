@@ -8,7 +8,6 @@
 
 #include "Forge/Renderer/Buffer/Buffer.h"
 #include "Forge/Renderer/Shader.h"
-#include <cstddef>
 #include <memory>
 #include <vector>
 
@@ -18,10 +17,11 @@ template <typename VertexType>
 class RenderableTarget
 {
 public:
-    virtual const std::vector<VertexType>& GetVertices() const = 0;
-    virtual const std::vector<unsigned int>& GetIndices(int offset) const = 0;
-    virtual const std::shared_ptr<Shader>& GetShader() = 0;
-    virtual const BufferLayout& GetBufferLayout() = 0;
+    virtual std::vector<VertexType> GetVertices(const glm::vec3& position,
+                                                const glm::vec2& size,
+                                                const glm::vec4& color) const = 0;
+    virtual std::vector<unsigned int> GetIndices() const = 0;
+    virtual const BufferLayout& GetLayout() const = 0;
     virtual ~RenderableTarget() = default;
 };
 
