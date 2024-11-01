@@ -45,8 +45,11 @@ void Editor::OnUpdate(DeltaTime dt)
 
     renderer.BeginScene(camera);
 
-    renderer.DrawQuad({0.5f, 0.5f, 0.0f}, {0.1f, 0.1f}, {0.0f, 1.0f, 0.0f, 1.0f});
+    renderer.DrawQuad({0.0f, 0.0f, 0.5f}, {1.0f, 1.0f}, {0.0f, 1.0f, 1.0f, 1.0f});
+    renderer.DrawQuad({0.5f, 0.5f, 0.0f}, {0.1f, 0.1f}, {0.0f, 1.0f, 0.5f, 1.0f});
+    renderer.DrawQuad({0.0f, 0.0f, 0.0f}, {0.1f, 0.1f}, {1.0f, 0.0f, 0.0f, 1.0f});
 
+    renderer.DrawQuad({0.0f, 0.0f, -1.0f}, {1.0f, 1.0f}, {1.0f, 1.0f, 0.0f, 0.3f});
     renderer.EndScene();
 }
 

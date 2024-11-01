@@ -18,16 +18,19 @@ namespace Forge {
 struct BatchProps
 {
     uint32_t Capacity;
+
+    uint32_t VerticesCount = 32;
     uint32_t IndicesCount = 32;
     const BufferLayout& bufferLayout;
 
     bool HasTextures = false;
     BatchProps(unsigned int capacity,
+               uint32_t verticesCount,
                uint32_t indicesCount,
                const BufferLayout& bufferLayout,
                bool hasTextures = false) :
-        Capacity(capacity), IndicesCount(indicesCount), bufferLayout(bufferLayout),
-        HasTextures(hasTextures)
+        Capacity(capacity), VerticesCount(verticesCount), IndicesCount(indicesCount),
+        bufferLayout(bufferLayout), HasTextures(hasTextures)
     {
     }
 };
@@ -39,21 +42,39 @@ class BatchManager
 public:
     BatchManager(const BatchProps& properties) : m_BatchProperties(properties)
     {
-        m_VertexBuffer.reserve(m_BatchProperties.Capacity);
-        m_IndexBufffer.reserve(m_BatchProperties.Capacity * m_BatchProperties.IndicesCount);
-        m_TextureSlots = RenderCommand::GetMaxTextureSlots();
-
         // NOTE: Initialize buffers
         if ((m_BatchProperties.bufferLayout.GetElements().size() <= 0))
         {
             F_ASSERT(false, "BatchManager BufferLayout is not set");
         }
+
+        uint32_t MaxVertexCount = m_BatchProperties.Capacity * m_BatchProperties.VerticesCount;
+        uint32_t MaxIndexCount = m_BatchProperties.Capacity * m_BatchProperties.IndicesCount;
+
+        // Reserve space for vertices and indices
+        m_Vertices.reserve(MaxVertexCount);
+        m_Indices.reserve(MaxIndexCount);
+
+        m_VAO = std::make_shared<VertexArrayBuffer>();
+        m_VBO = std::make_shared<VertexBuffer>(nullptr,
+                                               MaxVertexCount * sizeof(VertexType),
+                                               BufferDrawMode::Dynamic);
+        m_EBO = std::make_shared<IndexBuffer>(nullptr,
+                                              MaxIndexCount * sizeof(uint32_t),
+                                              BufferDrawMode::Dynamic);
+
+        m_VAO->Bind();
+        m_VBO->Bind();
+
+        m_VBO->SetLayout(m_BatchProperties.bufferLayout);
+        m_VAO->AddVertexBuffer(m_VBO);
+
+        m_EBO->Bind();
+        m_VAO->SetIndexBuffer(m_EBO);
+
+        m_VAO->Unbind();
     }
-    void BeginBatch()
-    {
-        m_VertexBuffer.clear();
-        m_IndexBufffer.clear();
-    }
+    void BeginBatch() {}
     void EndBatch()
     {
         Flush();
@@ -61,72 +82,64 @@ public:
 
     void Submit(const std::vector<VertexType>& vertices, const std::vector<uint32_t>& indices)
     {
-        if (vertices.size() + m_VertexBuffer.size() > m_BatchProperties.Capacity ||
-            indices.size() + m_IndexBufffer.size() >
+        if (vertices.size() + m_Vertices.size() > m_BatchProperties.Capacity ||
+            indices.size() + m_Indices.size() >
                 m_BatchProperties.Capacity * m_BatchProperties.IndicesCount)
         {
             Flush();
         }
 
-        m_VertexBuffer.insert(m_VertexBuffer.end(), vertices.begin(), vertices.end());
-        m_VertexCount++;
-
-        for (auto index : indices)
+        if (vertices.size() > m_BatchProperties.Capacity * m_BatchProperties.VerticesCount ||
+            indices.size() > m_BatchProperties.Capacity * m_BatchProperties.IndicesCount)
         {
-            m_IndexBufffer.push_back(
-                index + static_cast<uint32_t>(m_VertexBuffer.size() - vertices.size()));
+            F_ASSERT(false, "Submitted data exceeds batch capacity");
+            return;
+        }
+
+        m_Vertices.insert(m_Vertices.end(), vertices.begin(), vertices.end());
+
+        // Adjust indices to offset by current vertex count
+        uint32_t currentVertexOffset = static_cast<uint32_t>(m_Vertices.size() - vertices.size());
+        for (uint32_t index : indices)
+        {
+            m_Indices.push_back(index + currentVertexOffset);
         }
     }
 
     void Flush()
     {
-        if (m_IndexBufffer.empty())
-        {
+        if (m_Vertices.empty())
             return;  // Nothing to draw
-        }
 
         m_VAO->Bind();
 
-        m_VBO->SetLayout(m_BatchProperties.bufferLayout);
-        m_VAO->AddVertexBuffer(m_VBO);
-
-        m_EBO->Bind();
-        m_VAO->SetIndexBuffer(m_EBO);
         // Upload vertex data
         m_VBO->Bind();
-        m_VBO->SubmitData(m_VertexBuffer.data(), m_VertexBuffer.size() * sizeof(VertexType));
+        m_VBO->SubmitData(m_Vertices.data(), m_Vertices.size() * sizeof(VertexType));
 
         m_EBO->Bind();
-        m_EBO->SubmitData(m_IndexBufffer.data(), m_IndexBufffer.size() * sizeof(uint32_t));
+        m_EBO->SubmitData(m_Indices.data(), m_Indices.size() * sizeof(uint32_t));
 
-
-        // Bind textures if any
-        if (m_BatchProperties.HasTextures)
-        {
-            LOG_CRITICAL("Can`t batch textures")
-        }
-
-        LOG_CRITICAL("Draw VAO")
-        // Draw call
-        RenderCommand::Draw(m_VAO);
+        RenderCommand::DrawIndexed(m_VAO, m_Indices.size());
 
         m_VAO->Unbind();
+
+        // Clear vertex and index data for next frame
+        m_Vertices.clear();
+        m_Indices.clear();
     }
 
 
 private:
-    std::vector<VertexType> m_VertexBuffer = {};
-    std::vector<uint32_t> m_IndexBufffer = {};
-
-
-    uint32_t m_VertexCount = 0;
-    uint8_t m_TextureSlots = 0;
     const BatchProps m_BatchProperties;
 
 
     std::shared_ptr<VertexArrayBuffer> m_VAO;
     std::shared_ptr<VertexBuffer> m_VBO;
     std::shared_ptr<IndexBuffer> m_EBO;
+
+    std::vector<VertexType> m_Vertices;
+    std::vector<uint32_t> m_Indices;
 };
 
 }  // namespace Forge

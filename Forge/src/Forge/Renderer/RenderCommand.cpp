@@ -31,20 +31,41 @@ void RenderCommand::SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t
 }
 
 
-void RenderCommand::Draw(std::shared_ptr<VertexArrayBuffer>& buffer, DrawPrimitives primitives)
+void RenderCommand::Draw(const std::shared_ptr<VertexArrayBuffer>& buffer,
+                         DrawPrimitives primitives)
 {
+    buffer->Bind();
+
+    GLenum mode;
     switch (primitives)
     {
-        case DrawPrimitives::TRIANGLES:
-
-            glDrawElements(GL_TRIANGLES, buffer->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0);
-            break;
-
-
-        case DrawPrimitives::LINES:
-            glDrawElements(GL_LINES, buffer->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0);
+        case DrawPrimitives::TRIANGLES: mode = GL_TRIANGLES; break;
+        case DrawPrimitives::LINES: mode = GL_LINES; break;
+        default:
+            mode = GL_TRIANGLES;  // Default to triangles if unspecified
             break;
     }
+
+    glDrawElements(mode, buffer->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+}
+
+void RenderCommand::DrawIndexed(const std::shared_ptr<VertexArrayBuffer>& buffer,
+                                uint32_t indexCount,
+                                DrawPrimitives primitives)
+{
+    buffer->Bind();
+
+    GLenum mode;
+    switch (primitives)
+    {
+        case DrawPrimitives::TRIANGLES: mode = GL_TRIANGLES; break;
+        case DrawPrimitives::LINES: mode = GL_LINES; break;
+        default:
+            mode = GL_TRIANGLES;  // Default to triangles if unspecified
+            break;
+    }
+
+    glDrawElements(mode, indexCount, GL_UNSIGNED_INT, nullptr);
 }
 
 uint8_t RenderCommand::GetMaxTextureSlots()

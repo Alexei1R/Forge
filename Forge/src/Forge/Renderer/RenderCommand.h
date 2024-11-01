@@ -34,8 +34,13 @@ public:
     static void SetClearColor(glm::vec3 clearColor);
     static void Clear();
 
-    static void Draw(std::shared_ptr<VertexArrayBuffer>& buffer,
+    static void Draw(const std::shared_ptr<VertexArrayBuffer>& buffer,
                      DrawPrimitives primitives = DrawPrimitives::TRIANGLES);
+
+    static void DrawIndexed(const std::shared_ptr<VertexArrayBuffer>& buffer,
+                            uint32_t indexCount,
+                            DrawPrimitives primitives = DrawPrimitives::TRIANGLES);
+
 
     static uint8_t GetMaxTextureSlots();
 
