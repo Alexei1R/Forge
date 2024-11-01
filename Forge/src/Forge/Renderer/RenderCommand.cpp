@@ -47,11 +47,11 @@ void RenderCommand::Draw(std::shared_ptr<VertexArrayBuffer>& buffer, DrawPrimiti
     }
 }
 
-int RenderCommand::GetMaxTextureSlots()
+uint8_t RenderCommand::GetMaxTextureSlots()
 {
-    int maxTextureSlots;
+    GLint maxTextureSlots;
     glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTextureSlots);
-    return maxTextureSlots;
+    return static_cast<uint8_t>(maxTextureSlots);
 }
 
 

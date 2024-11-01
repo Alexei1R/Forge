@@ -5,14 +5,20 @@
 #ifndef RENDERER2D_H
 #define RENDERER2D_H
 
-#include "Forge/Renderer/BatchManager.h"
+#include "Forge/Renderer/Buffer/BufferImpl.h"
 #include "Forge/Renderer/Camera/Camera.h"
-#include "Forge/Renderer/RenderableTargets/Quad.h"
-#include <algorithm>
+#include "Forge/Renderer/Shader.h"
 #include <glm/glm.hpp>
 #include <memory>
 
 namespace Forge {
+
+struct QuadVertex
+{
+    glm::vec3 Position;
+    glm::vec4 Color;
+};
+
 
 class Renderer2D
 {
@@ -33,10 +39,13 @@ private:
     std::shared_ptr<Camera> m_Camera;
 
 
-    std::unique_ptr<BatchManager> m_QuadBatch;
+    std::shared_ptr<VertexArrayBuffer> m_VAO;
+    std::shared_ptr<VertexBuffer> m_VBO;
+    std::shared_ptr<IndexBuffer> m_EBO;
     std::shared_ptr<Shader> m_Shader = nullptr;
 
-    Quad m_Quad;
+    std::vector<QuadVertex> m_Vertices;
+    std::vector<uint32_t> m_Indices;
 };
 
 }  // namespace Forge

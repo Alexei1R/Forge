@@ -17,10 +17,9 @@ template <typename VertexType>
 class RenderableTarget
 {
 public:
-    virtual std::vector<VertexType> GetVertices(const glm::vec3& position,
-                                                const glm::vec2& size,
-                                                const glm::vec4& color) const = 0;
-    virtual std::vector<unsigned int> GetIndices() const = 0;
+    virtual const std::vector<VertexType>&
+        GetVertices(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color) = 0;
+    virtual const std::vector<uint32_t>& GetIndices() const = 0;
     virtual const BufferLayout& GetLayout() const = 0;
     virtual ~RenderableTarget() = default;
 };

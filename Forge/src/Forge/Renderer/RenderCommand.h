@@ -9,6 +9,7 @@
 #include "Forge/Renderer/Buffer/BufferImpl.h"
 #include "glad/glad.h"
 #include "glm/glm.hpp"
+#include <cstdint>
 #include <memory>
 
 namespace Forge {
@@ -36,7 +37,7 @@ public:
     static void Draw(std::shared_ptr<VertexArrayBuffer>& buffer,
                      DrawPrimitives primitives = DrawPrimitives::TRIANGLES);
 
-    static int GetMaxTextureSlots();
+    static uint8_t GetMaxTextureSlots();
 
 private:
     static glm::vec3 m_ClearColor;

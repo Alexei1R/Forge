@@ -20,7 +20,7 @@ namespace Forge {
 //========================================
 
 
-enum class VertexBufferDrawMode : uint8_t
+enum class BufferDrawMode : uint8_t
 {
     Static,
     Dynamic
@@ -31,7 +31,7 @@ class VertexBuffer : public Buffer
 public:
     VertexBuffer(const void* data,
                  uint32_t count,
-                 VertexBufferDrawMode drawMode = VertexBufferDrawMode::Static);
+                 BufferDrawMode drawMode = BufferDrawMode::Static);
     ~VertexBuffer();
 
     void Bind() const override;
@@ -51,7 +51,7 @@ private:
     unsigned int m_RendererID;
     BufferLayout m_Layout;
 
-    VertexBufferDrawMode m_DrawMode;
+    BufferDrawMode m_DrawMode;
 };
 
 
@@ -63,7 +63,7 @@ private:
 class IndexBuffer : public Buffer
 {
 public:
-    IndexBuffer(uint32_t* data, uint32_t count);
+    IndexBuffer(uint32_t* data, uint32_t count, BufferDrawMode drawMode = BufferDrawMode::Static);
     ~IndexBuffer();
 
     IndexBuffer(const IndexBuffer&) = delete;
@@ -71,6 +71,7 @@ public:
 
     void Bind() const override;
     void Unbind() const override;
+    void SubmitData(const void* data, uint32_t count, uint32_t offset = 0);
 
     inline unsigned int GetCount() const
     {
@@ -80,6 +81,8 @@ public:
 private:
     unsigned int m_RendererID;
     unsigned int m_Count;
+
+    BufferDrawMode m_DrawMode;
 };
 
 

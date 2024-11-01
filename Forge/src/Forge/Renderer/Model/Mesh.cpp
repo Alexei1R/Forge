@@ -5,6 +5,7 @@
 
 #include "Mesh.h"
 #include "Forge/Renderer/Buffer/BufferImpl.h"
+#include <cstdint>
 
 
 namespace Forge {
@@ -21,7 +22,7 @@ void Mesh::SetupMesh()
 {
     m_VAO = std::make_shared<VertexArrayBuffer>();
     m_VBO = std::make_shared<VertexBuffer>(m_Vertices.data(), m_Vertices.size() * sizeof(Vertex));
-    m_EBO = std::make_shared<IndexBuffer>(m_Indices.data(), m_Indices.size());
+    m_EBO = std::make_shared<IndexBuffer>(m_Indices.data(), m_Indices.size() * sizeof(uint32_t));
 
     m_VAO->Bind();
     m_VBO->Bind();

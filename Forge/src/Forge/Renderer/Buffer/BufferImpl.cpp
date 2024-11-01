@@ -7,6 +7,7 @@
 #include "Forge/Core/Utils.h"
 #include "Forge/Renderer/Buffer/Buffer.h"
 #include <cassert>
+#include <cstdint>
 
 
 namespace Forge {
@@ -53,7 +54,7 @@ GLenum BufferDataTypeToOpenGLBaseType(BufferDataType type)
 //  Vertex Buffer Implementation
 //========================================
 
-VertexBuffer::VertexBuffer(const void* data, uint32_t count, VertexBufferDrawMode drawMode) :
+VertexBuffer::VertexBuffer(const void* data, uint32_t count, BufferDrawMode drawMode) :
     m_DrawMode(drawMode)
 {
     glGenBuffers(1, &m_RendererID);
@@ -61,10 +62,10 @@ VertexBuffer::VertexBuffer(const void* data, uint32_t count, VertexBufferDrawMod
 
     switch (drawMode)
     {
-        case VertexBufferDrawMode::Static:
+        case BufferDrawMode::Static:
             glBufferData(GL_ARRAY_BUFFER, count, data, GL_STATIC_DRAW);
             break;
-        case VertexBufferDrawMode::Dynamic:
+        case BufferDrawMode::Dynamic:
             glBufferData(GL_ARRAY_BUFFER, count, data, GL_DYNAMIC_DRAW);
             break;
     }
@@ -74,14 +75,14 @@ void VertexBuffer::SubmitData(const void* data, uint32_t count, uint32_t offset)
 {
     Bind();
 
-    if (m_DrawMode == VertexBufferDrawMode::Dynamic)
+    if (m_DrawMode == BufferDrawMode::Dynamic)
     {
         glBufferSubData(GL_ARRAY_BUFFER, offset, count, data);
     }
     else
     {
         F_ASSERT(false,
-                 "Can't submit data to a static VertexBuffer. Set VertexBufferDrawMode to "
+                 "Can't submit data to a static VertexBuffer. Set BufferDrawMode to "
                  "Dynamic.");
     }
 }
@@ -108,12 +109,40 @@ void VertexBuffer::Unbind() const
 //  Index Buffer Implementation
 //========================================
 
-IndexBuffer::IndexBuffer(uint32_t* data, uint32_t count) : m_Count(count)
+IndexBuffer::IndexBuffer(uint32_t* data, uint32_t count, BufferDrawMode drawMode) :
+    m_Count(count / sizeof(uint32_t)), m_DrawMode(drawMode)
 {
     glGenBuffers(1, &m_RendererID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(uint32_t), data, GL_STATIC_DRAW);
+
+
+    switch (drawMode)
+    {
+        case BufferDrawMode::Static:
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, count, data, GL_STATIC_DRAW);
+            break;
+        case BufferDrawMode::Dynamic:
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, count, data, GL_STATIC_DRAW);
+            break;
+    }
 }
+
+void IndexBuffer::SubmitData(const void* data, uint32_t count, uint32_t offset)
+{
+    Bind();
+
+    if (m_DrawMode == BufferDrawMode::Dynamic)
+    {
+        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, count, data);
+    }
+    else
+    {
+        F_ASSERT(false,
+                 "Can't submit data to a static IndexBuffer. Set BufferDrawMode to "
+                 "Dynamic.");
+    }
+}
+
 
 IndexBuffer::~IndexBuffer()
 {
@@ -187,6 +216,7 @@ void VertexArrayBuffer::SetIndexBuffer(std::shared_ptr<IndexBuffer>& indexBuffer
 {
     glBindVertexArray(m_RendererID);
     indexBuffer->Bind();
+
 
     m_IndexBuffer = indexBuffer;
 }
