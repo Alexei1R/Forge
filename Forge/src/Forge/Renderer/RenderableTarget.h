@@ -22,6 +22,8 @@ public:
     virtual const std::vector<uint32_t>& GetIndices() const = 0;
     virtual const BufferLayout& GetLayout() const = 0;
     virtual ~RenderableTarget() = default;
+    virtual const uint32_t GetVerticesSize() const = 0;
+    virtual const uint32_t GetIndicesSize() const = 0;
 };
 
 }  // namespace Forge

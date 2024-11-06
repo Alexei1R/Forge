@@ -3,7 +3,9 @@
 //
 
 #include "Editor.h"
+#include "Forge/Core/Log/Log.h"
 #include "Forge/Renderer/Renderer2D.h"
+#include "Forge/Renderer/ShaderManager.h"
 #include "glm/fwd.hpp"
 #include <iterator>
 #include <memory>
@@ -25,6 +27,23 @@ void Editor::OnAttach()
     Forge::GetForgeInstance().PushModule(m_Camera);
 
     m_Grid = std::make_shared<Grid>();
+
+
+    auto& shaderManager = ShaderManager::GetInstance();
+    Handle shaderHandle = shaderManager.LoadShader(
+        ShaderLayout {{ShaderType::VERTEX, "Assets/Shaders/Renderer2DQuad.vert"},
+                      {ShaderType::FRAGMENT, "Assets/Shaders/Renderer2DQuad.frag"}});
+
+    if (shaderHandle.GetValue() == 0)
+    {
+        LOG_CRITICAL("Failed to load shader.");
+        return;  // Handle the failure case appropriately
+    }
+
+    materialManager = std::make_shared<MaterialManager>();
+    auto basicMaterial = materialManager->CreateMaterial("Basic", shaderHandle);
+
+    basicMaterial->SetParameter("Color", glm::vec4(0.5f, 0.8f, 0.2f, 1.0f));
 }
 
 void Editor::OnDetach() {}
@@ -33,6 +52,8 @@ void Editor::OnDetach() {}
 void Editor::OnUpdate(DeltaTime dt)
 {
     RenderCommand::Clear();
+
+    LOG_INFO("FPS =  {}", 1 / dt)
 
     std::shared_ptr<Camera> camera = std::static_pointer_cast<Camera>(m_Camera);
     Renderer3D::BeginScene(camera);
@@ -45,11 +66,25 @@ void Editor::OnUpdate(DeltaTime dt)
 
     renderer.BeginScene(camera);
 
-    renderer.DrawQuad({0.0f, 0.0f, 0.5f}, {1.0f, 1.0f}, {0.0f, 1.0f, 1.0f, 1.0f});
-    renderer.DrawQuad({0.5f, 0.5f, 0.0f}, {0.1f, 0.1f}, {0.0f, 1.0f, 0.5f, 1.0f});
-    renderer.DrawQuad({0.0f, 0.0f, 0.0f}, {0.1f, 0.1f}, {1.0f, 0.0f, 0.0f, 1.0f});
+    float squareSize = 1.0f;
+    glm::vec3 startPosition = {-5.0f, -5.0f, 0.0f};
+    auto material = materialManager->GetMaterial("Basic");
 
-    renderer.DrawQuad({0.0f, 0.0f, -1.0f}, {1.0f, 1.0f}, {1.0f, 1.0f, 0.0f, 0.3f});
+
+    for (int x = 0; x < 10; ++x)
+    {
+        for (int y = 0; y < 10; ++y)
+        {
+            bool isWhite = (x + y) % 2 == 0;
+            material->SetParameter("Color",
+                                   isWhite ? glm::vec4(1.0f) : glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+
+            glm::vec3 position = startPosition + glm::vec3(x * squareSize, y * squareSize, 0.0f);
+            renderer.DrawQuad(position, {squareSize, squareSize}, material);
+        }
+    }
+
+
     renderer.EndScene();
 }
 

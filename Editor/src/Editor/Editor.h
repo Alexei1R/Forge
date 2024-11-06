@@ -6,6 +6,7 @@
 #define EDITOR_H
 
 #include "Forge.h"
+#include "Forge/Renderer/Material.h"
 #include "src/Editor/Grid.h"
 #include <memory>
 
@@ -32,10 +33,7 @@ private:
     std::shared_ptr<Grid> m_Grid;
 
 
-    std::shared_ptr<VertexArrayBuffer> m_QuadVAO;
-    std::shared_ptr<VertexBuffer> m_QuadVBO;
-    std::shared_ptr<IndexBuffer> m_QuadEBO;
-
+    std::shared_ptr<MaterialManager> materialManager;
     Renderer2D renderer;
 };
 

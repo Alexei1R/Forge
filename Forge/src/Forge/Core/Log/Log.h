@@ -12,6 +12,7 @@
 #include <iostream>
 #include <memory>
 #include "Forge/Core/Utils.h"
+#include "LogFormaters.h"
 
 namespace Forge {
 

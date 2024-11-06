@@ -54,6 +54,16 @@ public:
         return m_Layout;
     }
 
+    const uint32_t GetVerticesSize() const
+    {
+        return 4;
+    }
+    const uint32_t GetIndicesSize() const
+    {
+        return 5;
+    }
+
+
 private:
     BufferLayout m_Layout;
     std::vector<uint32_t> m_Indices;

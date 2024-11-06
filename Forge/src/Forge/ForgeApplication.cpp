@@ -9,6 +9,7 @@
 #include "Forge/Core/Log/Log.h"
 #include "Forge/Events/ImplEvent.h"
 
+#include "Forge/Renderer/ShaderManager.h"
 
 namespace Forge {
 
@@ -47,6 +48,8 @@ void Forge::Run()
         m_GraphicsContext->SwapBuffers();
         m_Window->Update();
     }
+
+    ShaderManager::GetInstance().Shutdown();
 }
 
 

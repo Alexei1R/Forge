@@ -7,8 +7,8 @@
 
 #include "Forge/Renderer/BatchManager.h"
 #include "Forge/Renderer/Camera/Camera.h"
+#include "Forge/Renderer/Material.h"
 #include "Forge/Renderer/RenderableTargets/Quad.h"
-#include <algorithm>
 #include <glm/glm.hpp>
 #include <memory>
 
@@ -26,18 +26,20 @@ public:
     // Primitives
     void DrawQuad(const glm::vec3& position,
                   const glm::vec2& size,
-                  const glm::vec4& color = glm::vec4(1.0f));
+                  const std::shared_ptr<Material>& material);
 
 private:
     glm::mat4 m_ViewProjectionMatrix;
     std::shared_ptr<Camera> m_Camera;
 
-
     std::unique_ptr<BatchManager<QuadVertex>> m_QuadBatch;
-    std::shared_ptr<Shader> m_Shader = nullptr;
-    Quad m_Quad;
-};
+    std::vector<QuadVertex> m_StaticQuadVertices;
+    std::vector<uint32_t> m_StaticQuadIndices;
 
+
+    std::vector<QuadVertex> m_QuadVertices;
+    const std::vector<uint32_t> quadIndices;
+};
 }  // namespace Forge
 
 #endif  // RENDERER2D_H

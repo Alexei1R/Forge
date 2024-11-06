@@ -54,6 +54,7 @@ Shader::~Shader()
     if (m_ProgramID != 0)
     {
         glDeleteProgram(m_ProgramID);
+        m_ProgramID = 0;
     }
 }
 

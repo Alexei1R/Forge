@@ -10,20 +10,21 @@
 #include "Forge/Core/Log/Log.h"
 #include "Forge/Renderer/Buffer/Buffer.h"
 #include "Forge/Renderer/Buffer/BufferImpl.h"
+#include "Forge/Renderer/Camera/Camera.h"
+#include "Forge/Renderer/Material.h"
 #include "Forge/Renderer/RenderCommand.h"
+#include "Forge/Renderer/ShaderManager.h"
 
 namespace Forge {
-
 
 struct BatchProps
 {
     uint32_t Capacity;
-
     uint32_t VerticesCount = 32;
     uint32_t IndicesCount = 32;
     const BufferLayout& bufferLayout;
-
     bool HasTextures = false;
+
     BatchProps(unsigned int capacity,
                uint32_t verticesCount,
                uint32_t indicesCount,
@@ -35,23 +36,16 @@ struct BatchProps
     }
 };
 
-
 template <typename VertexType>
 class BatchManager
 {
 public:
     BatchManager(const BatchProps& properties) : m_BatchProperties(properties)
     {
-        // NOTE: Initialize buffers
-        if ((m_BatchProperties.bufferLayout.GetElements().size() <= 0))
-        {
-            F_ASSERT(false, "BatchManager BufferLayout is not set");
-        }
-
+        // Initialize buffers with appropriate capacity
         uint32_t MaxVertexCount = m_BatchProperties.Capacity * m_BatchProperties.VerticesCount;
         uint32_t MaxIndexCount = m_BatchProperties.Capacity * m_BatchProperties.IndicesCount;
 
-        // Reserve space for vertices and indices
         m_Vertices.reserve(MaxVertexCount);
         m_Indices.reserve(MaxIndexCount);
 
@@ -65,41 +59,48 @@ public:
 
         m_VAO->Bind();
         m_VBO->Bind();
-
         m_VBO->SetLayout(m_BatchProperties.bufferLayout);
         m_VAO->AddVertexBuffer(m_VBO);
-
         m_EBO->Bind();
         m_VAO->SetIndexBuffer(m_EBO);
-
         m_VAO->Unbind();
     }
-    void BeginBatch() {}
+
+    void BeginBatch(const glm::mat4& viewProjectionMatrix)
+    {
+        m_ViewProjectionMatrix = viewProjectionMatrix;
+        m_DrawCallCount = 0;
+    }
+
     void EndBatch()
     {
         Flush();
+        LOG_INFO("Nr DrawCalls is {}", m_DrawCallCount);
     }
 
-    void Submit(const std::vector<VertexType>& vertices, const std::vector<uint32_t>& indices)
+    void Submit(const std::vector<VertexType>& vertices,
+                const std::vector<uint32_t>& indices,
+                const std::shared_ptr<Material>& material)
     {
-        if (vertices.size() + m_Vertices.size() > m_BatchProperties.Capacity ||
+        if (m_CurrentMaterial != material)
+        {
+            Flush();
+            m_CurrentMaterial = material;
+        }
+
+        // Ensure batch has space
+        if (vertices.size() + m_Vertices.size() >
+                m_BatchProperties.Capacity * m_BatchProperties.VerticesCount ||
             indices.size() + m_Indices.size() >
                 m_BatchProperties.Capacity * m_BatchProperties.IndicesCount)
         {
             Flush();
         }
 
-        if (vertices.size() > m_BatchProperties.Capacity * m_BatchProperties.VerticesCount ||
-            indices.size() > m_BatchProperties.Capacity * m_BatchProperties.IndicesCount)
-        {
-            F_ASSERT(false, "Submitted data exceeds batch capacity");
-            return;
-        }
-
         m_Vertices.insert(m_Vertices.end(), vertices.begin(), vertices.end());
-
-        // Adjust indices to offset by current vertex count
         uint32_t currentVertexOffset = static_cast<uint32_t>(m_Vertices.size() - vertices.size());
+
+        // Offset indices and add
         for (uint32_t index : indices)
         {
             m_Indices.push_back(index + currentVertexOffset);
@@ -109,37 +110,42 @@ public:
     void Flush()
     {
         if (m_Vertices.empty())
-            return;  // Nothing to draw
+            return;
+
+        auto& shaderManager = ShaderManager::GetInstance();
+        auto shader = shaderManager.GetShader(m_CurrentMaterial->ShaderHandle);
+
+        shader->Bind();
+        shader->SetUniform("u_ViewProjection", m_ViewProjectionMatrix);
 
         m_VAO->Bind();
-
-        // Upload vertex data
         m_VBO->Bind();
         m_VBO->SubmitData(m_Vertices.data(), m_Vertices.size() * sizeof(VertexType));
-
         m_EBO->Bind();
         m_EBO->SubmitData(m_Indices.data(), m_Indices.size() * sizeof(uint32_t));
 
         RenderCommand::DrawIndexed(m_VAO, m_Indices.size());
+        m_DrawCallCount++;
 
         m_VAO->Unbind();
 
-        // Clear vertex and index data for next frame
+        // Clear vectors without deallocation
         m_Vertices.clear();
         m_Indices.clear();
     }
 
-
 private:
     const BatchProps m_BatchProperties;
-
-
     std::shared_ptr<VertexArrayBuffer> m_VAO;
     std::shared_ptr<VertexBuffer> m_VBO;
     std::shared_ptr<IndexBuffer> m_EBO;
 
     std::vector<VertexType> m_Vertices;
     std::vector<uint32_t> m_Indices;
+
+    glm::mat4 m_ViewProjectionMatrix = glm::mat4(1.0f);
+    uint32_t m_DrawCallCount = 0;
+    std::shared_ptr<Material> m_CurrentMaterial = nullptr;
 };
 
 }  // namespace Forge
