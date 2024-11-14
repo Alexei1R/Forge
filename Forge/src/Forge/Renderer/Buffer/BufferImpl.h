@@ -48,7 +48,7 @@ public:
     }
 
 private:
-    unsigned int m_RendererID;
+    uint32_t m_RendererID;
     BufferLayout m_Layout;
 
     BufferDrawMode m_DrawMode;
@@ -73,14 +73,14 @@ public:
     void Unbind() const override;
     void SubmitData(const void* data, uint32_t count, uint32_t offset = 0);
 
-    inline unsigned int GetCount() const
+    inline uint32_t GetCount() const
     {
         return m_Count;
     }
 
 private:
-    unsigned int m_RendererID;
-    unsigned int m_Count;
+    uint32_t m_RendererID;
+    uint32_t m_Count;
 
     BufferDrawMode m_DrawMode;
 };
@@ -111,7 +111,7 @@ public:
 private:
     std::vector<std::shared_ptr<VertexBuffer>> m_VertexBuffers;
     std::shared_ptr<IndexBuffer> m_IndexBuffer;
-    unsigned int m_RendererID;
+    uint32_t m_RendererID;
 };
 
 }  // namespace Forge

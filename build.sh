@@ -1,7 +1,7 @@
 #!/bin/bash
 
 build_and_run() {
-    if [ ! -a "build" ]; then
+    if [ ! -d "build" ]; then
         mkdir build
     fi
     cd build || exit
@@ -10,7 +10,26 @@ build_and_run() {
         if make -j"$(nproc)"; then
             cd Editor || exit
             if [ -f "./ForgeEditor" ]; then
-                ./ForgeEditor
+                case "$1" in
+                    -pcpu)
+                        notify-send -a "Forge" "Starting CPU profiling..."
+                        perf record --call-graph dwarf ./ForgeEditor
+                        notify-send -a "Forge" "CPU profiling completed."
+                        if [ -f "perf.data" ]; then
+                            notify-send -a "Forge" "Launching Hotspot with perf.data..."
+                            hotspot perf.data
+                        else
+                            notify-send -a "Forge" "Perf data not found. Run with -pcpu first."
+                        fi
+                        ;;
+                    -pgpu)
+                        notify-send -a "Forge" "Starting GPU profiling..."
+                        echo "There is no gpu profiling"
+                        ;;
+                    *)
+                        ./ForgeEditor
+                        ;;
+                esac
             else
                 notify-send -a "Forge" "Build successful, but executable not found."
             fi
@@ -24,8 +43,17 @@ build_and_run() {
     fi
 }
 
+
 notify-send -a "Forge" "Begin build."
-build_and_run
 
-
-
+case "$1" in
+    -pcpu)
+        build_and_run -pcpu
+        ;;
+    -pgpu)
+        build_and_run -pgpu
+        ;;
+    *)
+        build_and_run
+        ;;
+esac

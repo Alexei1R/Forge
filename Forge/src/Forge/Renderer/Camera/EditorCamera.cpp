@@ -19,6 +19,7 @@ EditorCamera::EditorCamera(glm::vec3 target, int width, int height) : m_Target(t
     CameraRotate(m_Yaw, m_Pitch);
 }
 
+
 glm::mat4& EditorCamera::GetViewProjectionMatrix()
 {
     m_ViewMatrix = glm::lookAt(m_Position, m_Target, m_Up);
@@ -52,6 +53,8 @@ glm::vec3 EditorCamera::GetCameraTarget()
 
 void EditorCamera::Resize(int width, int height)
 {
+    m_Width = width;
+    m_Height = height;
     RecalculateProjection(width, height);
 }
 

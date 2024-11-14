@@ -12,7 +12,7 @@
 
 namespace Forge {
 
-unsigned int GetComponentCount(BufferDataType type)
+uint32_t GetComponentCount(BufferDataType type)
 {
     switch (type)
     {

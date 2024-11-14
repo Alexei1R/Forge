@@ -3,7 +3,6 @@
 //
 
 
-// ShaderManager.cpp
 #include "ShaderManager.h"
 #include "Forge/Core/Log/Log.h"
 

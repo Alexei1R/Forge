@@ -7,11 +7,11 @@
 
 #include "Forge.h"
 #include "Forge/Renderer/Material.h"
-#include "src/Editor/Grid.h"
 #include <memory>
 
 
 namespace Forge {
+
 
 class Editor : public Module
 {
@@ -29,12 +29,17 @@ private:
     std::shared_ptr<EditorCamera> m_Camera;
 
 
-    bool m_ShowDebugGrid = true;
-    std::shared_ptr<Grid> m_Grid;
-
-
     std::shared_ptr<MaterialManager> materialManager;
     Renderer2D renderer;
+
+
+    float timeAccumulator = 0.0f;
+    int frameCount = 0;
+    float fpsAverage = 0.0f;
+
+
+    float m_Width = 0;
+    float m_Height = 0;
 };
 
 }  // namespace Forge

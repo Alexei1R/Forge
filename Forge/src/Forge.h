@@ -27,7 +27,6 @@
 #include "Forge/Renderer/Shader.h"
 #include "Forge/Renderer/Window.h"
 #include "Forge/Renderer/Framebuffer.h"
-#include "Forge/Renderer/Renderer3D.h"
 #include "Forge/Renderer/Renderer2D.h"
 #include "Forge/Renderer/RenderCommand.h"
 #include "Forge/Renderer/Model/Mesh.h"

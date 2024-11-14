@@ -10,10 +10,10 @@
 #include "Forge/Core/Log/Log.h"
 #include "Forge/Renderer/Buffer/Buffer.h"
 #include "Forge/Renderer/Buffer/BufferImpl.h"
-#include "Forge/Renderer/Camera/Camera.h"
 #include "Forge/Renderer/Material.h"
 #include "Forge/Renderer/RenderCommand.h"
 #include "Forge/Renderer/ShaderManager.h"
+#include "Forge/Renderer/TextureManager.h"
 
 namespace Forge {
 
@@ -23,15 +23,13 @@ struct BatchProps
     uint32_t VerticesCount = 32;
     uint32_t IndicesCount = 32;
     const BufferLayout& bufferLayout;
-    bool HasTextures = false;
 
     BatchProps(unsigned int capacity,
                uint32_t verticesCount,
                uint32_t indicesCount,
-               const BufferLayout& bufferLayout,
-               bool hasTextures = false) :
+               const BufferLayout& bufferLayout) :
         Capacity(capacity), VerticesCount(verticesCount), IndicesCount(indicesCount),
-        bufferLayout(bufferLayout), HasTextures(hasTextures)
+        bufferLayout(bufferLayout)
     {
     }
 };
@@ -66,17 +64,17 @@ public:
         m_VAO->Unbind();
     }
 
-    void BeginBatch(const glm::mat4& viewProjectionMatrix)
+    void BeginBatch()
     {
-        m_ViewProjectionMatrix = viewProjectionMatrix;
         m_DrawCallCount = 0;
     }
 
     void EndBatch()
     {
         Flush();
-        LOG_INFO("Nr DrawCalls is {}", m_DrawCallCount);
+        /*LOG_INFO("Nr DrawCalls is {}", m_DrawCallCount);*/
     }
+
 
     void Submit(const std::vector<VertexType>& vertices,
                 const std::vector<uint32_t>& indices,
@@ -105,6 +103,14 @@ public:
         {
             m_Indices.push_back(index + currentVertexOffset);
         }
+
+
+        if (material->TextureHandles.size() > 0)
+        {
+            m_HasTextures = true;
+        }
+
+        // if texture count is biiger er than maz texture slot flush
     }
 
     void Flush()
@@ -112,13 +118,30 @@ public:
         if (m_Vertices.empty())
             return;
 
+        m_VAO->Bind();
         auto& shaderManager = ShaderManager::GetInstance();
         auto shader = shaderManager.GetShader(m_CurrentMaterial->ShaderHandle);
-
         shader->Bind();
-        shader->SetUniform("u_ViewProjection", m_ViewProjectionMatrix);
+        for (const auto& [name, value] : m_CurrentMaterial->aditionlParameters)
+        {
+            std::visit(
+                [&](auto&& arg) {
+                    shader->SetUniform(name, arg);
+                },
+                value);
+        }
 
-        m_VAO->Bind();
+        auto& textureManager = TextureManager::GetInstance();
+        for (size_t i = 0; i < m_CurrentMaterial->TextureHandles.size(); ++i)
+        {
+            auto textureHandle = m_CurrentMaterial->TextureHandles[i];
+            if (textureHandle.GetValue() > 0)
+            {
+                auto texture = textureManager.GetTexture(textureHandle);
+                texture->Bind(i);
+            }
+        }
+
         m_VBO->Bind();
         m_VBO->SubmitData(m_Vertices.data(), m_Vertices.size() * sizeof(VertexType));
         m_EBO->Bind();
@@ -143,9 +166,10 @@ private:
     std::vector<VertexType> m_Vertices;
     std::vector<uint32_t> m_Indices;
 
-    glm::mat4 m_ViewProjectionMatrix = glm::mat4(1.0f);
     uint32_t m_DrawCallCount = 0;
     std::shared_ptr<Material> m_CurrentMaterial = nullptr;
+
+    bool m_HasTextures = false;
 };
 
 }  // namespace Forge

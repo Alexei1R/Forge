@@ -11,6 +11,7 @@
 class Handle
 {
 public:
+    Handle() : m_Value(0) {}
     explicit Handle(uint32_t value) : m_Value(value) {}
 
     bool operator==(const Handle& other) const

@@ -10,6 +10,7 @@
 #include "Forge/Events/ImplEvent.h"
 
 #include "Forge/Renderer/ShaderManager.h"
+#include "Forge/Renderer/TextureManager.h"
 
 namespace Forge {
 
@@ -50,6 +51,7 @@ void Forge::Run()
     }
 
     ShaderManager::GetInstance().Shutdown();
+    TextureManager::GetInstance().Shutdown();
 }
 
 

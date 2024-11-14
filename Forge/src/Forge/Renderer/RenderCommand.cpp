@@ -60,9 +60,7 @@ void RenderCommand::DrawIndexed(const std::shared_ptr<VertexArrayBuffer>& buffer
     {
         case DrawPrimitives::TRIANGLES: mode = GL_TRIANGLES; break;
         case DrawPrimitives::LINES: mode = GL_LINES; break;
-        default:
-            mode = GL_TRIANGLES;  // Default to triangles if unspecified
-            break;
+        default: mode = GL_TRIANGLES; break;
     }
 
     glDrawElements(mode, indexCount, GL_UNSIGNED_INT, nullptr);

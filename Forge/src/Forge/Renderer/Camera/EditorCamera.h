@@ -79,6 +79,7 @@ private:
     glm::mat4 m_ProjMatrix = glm::mat4(1.0f);
     glm::mat4 m_ViewMatrix = glm::mat4(1.0f);
     glm::mat4 m_ViewProjectionMatrix = glm::mat4(1.0f);
+    glm::mat4 m_ScreenSpaceMatrix = glm::mat4(1.0f);
 
     bool m_FirstMouseTouch = true;
 
@@ -95,6 +96,10 @@ private:
 
     float m_MovementSpeed = 0.0008;
     bool m_FirstMouseTouchMovement = true;
+
+
+    int m_Width;
+    int m_Height;
 };
 
 }  // namespace Forge

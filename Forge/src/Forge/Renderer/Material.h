@@ -5,52 +5,94 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
-
 #include "Forge/Renderer/Handle.h"
-#include "Forge/Renderer/Shader.h"
-#include "Forge/Renderer/Texture.h"
+#include "Forge/Renderer/RenderCommand.h"
 #include "Forge/Core/Log/Log.h"
 #include "glm/fwd.hpp"
+#include <cstdint>
 #include <memory>
 #include <optional>
 #include <string>
 #include <variant>
 #include <unordered_map>
 #include <mutex>
+#include <vector>
 
 namespace Forge {
 
-// Material parameter types
-using MaterialParamValue =
-    std::variant<float, glm::vec2, glm::vec3, glm::vec4, int, bool, std::shared_ptr<Texture>>;
+using MaterialParamValue = std::variant<float, glm::vec2, glm::vec3, glm::vec4, int, bool>;
 
 struct Material
 {
     std::string Name = "UnnamedMaterial";
+
     const Handle ShaderHandle;
-    std::unordered_map<std::string, MaterialParamValue> aditionalParams;
+    std::vector<Handle> TextureHandles;
+    std::unordered_map<std::string, MaterialParamValue> aditionlParameters;
+
+
+    glm::vec4 Color = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
+    glm::vec3 EmissiveColor = glm::vec3(0.0f);
+
+    float Metallic = 0.0f;
+    float Roughness = 0.5f;
+    float Specular = 0.5f;
+    float Opacity = 1.0f;
+    float RefractionIndex = 1.0f;
+    float Anisotropy = 0.0f;
+    float SubsurfaceScattering = 0.0f;
 
     Material(const Handle& shaderHandle) : ShaderHandle(shaderHandle)
     {
-        // Initialize default parameters
-        aditionalParams["Color"] = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
-        aditionalParams["Roughness"] = 0.5f;
-        aditionalParams["Metalness"] = 0.0f;
+        TextureHandles.resize(RenderCommand::GetMaxTextureSlots());
     }
+
+
+    void SetTexture(uint32_t slot, const Handle& textureHandle)
+    {
+        if (textureHandle == Handle(0))
+        {
+            LOG_CRITICAL("Invalid textureHandle ")
+            return;
+        }
+
+        if (slot < TextureHandles.size())
+        {
+            TextureHandles[slot] = textureHandle;
+        }
+        else
+        {
+            LOG_ERROR("Texture slot {} exceeds maximum of texture slots", slot);
+        }
+    }
+
+    uint32_t GetTexureSlot(Handle handle)
+    {
+        for (uint32_t i = 0; i < TextureHandles.size(); ++i)
+        {
+            if (TextureHandles[i] == handle)
+            {
+                return i;
+            }
+        }
+        LOG_WARN("Handle not found in TextureHandles.");
+        return UINT32_MAX;  // Cod de eroare dacă nu este găsit
+    }
+
 
     ~Material() {}
 
     template <typename T>
     void SetParameter(const std::string& name, T value)
     {
-        aditionalParams[name] = value;
+        aditionlParameters[name] = value;
     }
 
     template <typename T>
     std::optional<T> GetParameter(const std::string& name) const
     {
-        auto it = aditionalParams.find(name);
-        if (it != aditionalParams.end())
+        auto it = aditionlParameters.find(name);
+        if (it != aditionlParameters.end())
         {
             const MaterialParamValue& value = it->second;
             if (std::holds_alternative<T>(value))
