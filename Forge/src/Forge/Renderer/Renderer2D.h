@@ -39,6 +39,13 @@ struct TextVertex
     float TexIndex;
 };
 
+
+struct TextCache
+{
+    std::vector<TextVertex> vertices;
+    std::vector<uint32_t> indices;
+};
+
 class Renderer2D
 {
 public:
@@ -71,6 +78,8 @@ private:
     std::unique_ptr<BatchManager<TextVertex>> m_TextBatch;
 
     std::unique_ptr<UniformBuffer> m_CombinedUniformBuffer;
+
+    std::unordered_map<std::string, TextCache> m_TextCache;
 };
 }  // namespace Forge
 

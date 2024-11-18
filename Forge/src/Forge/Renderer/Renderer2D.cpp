@@ -25,8 +25,6 @@ namespace Forge {
 Renderer2D::Renderer2D()
 {
     // NOTE: Uniform Buffer for Camera, Do not remove
-
-
     auto mat4size = sizeof(glm::mat4);
     LOG_INFO("{}", mat4size)
     m_CombinedUniformBuffer =
@@ -41,12 +39,12 @@ Renderer2D::Renderer2D()
         {{BufferDataType::Float3, "a_Position"},
          {BufferDataType::Float4, "a_Color"},
          {BufferDataType::Float2, "a_TextCoord"},
-         {BufferDataType::Float, "a_Slot"}});
+         {BufferDataType::Float, "a_TexIndex"}});
     m_QuadBatch = std::make_unique<BatchManager<QuadVertex>>(props);
 
 
     BatchProps textBatchProps(
-        255,
+        55000,
         4,
         6,
         {{BufferDataType::Float3, "a_Position"},
@@ -66,16 +64,9 @@ void Renderer2D::BeginScene(const std::shared_ptr<Camera>& camera, uint32_t widt
     matrices.ViewProjection = camera->GetViewProjectionMatrix();
 
 
-    float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
-    float orthoHeight = 10.0f;
-    float orthoWidth = orthoHeight * aspectRatio;
-    matrices.OrthoProjection = glm::ortho(
-        -orthoWidth / 2.0f,
-        orthoWidth / 2.0f,
-        -orthoHeight / 2.0f,
-        orthoHeight / 2.0f,
-        0.001f,
-        1000.0f);
+    float orthoHeight = static_cast<float>(height) / 2.0f;  // Divide by 2 to map to pixel values
+    float orthoWidth = static_cast<float>(width) / 2.0f;  // Divide by 2 to map to pixel values
+    matrices.OrthoProjection = glm::ortho(-orthoWidth, orthoWidth, -orthoHeight, orthoHeight);
 
     m_CombinedUniformBuffer->Submit(&matrices, sizeof(CombinedMatrices));
     m_QuadBatch->BeginBatch();
@@ -142,24 +133,35 @@ void Renderer2D::DrawString(const std::string& text,
                             const std::shared_ptr<Font>& font,
                             const std::shared_ptr<Material>& material)
 {
-    // Get MSDF data from the font
+    auto it = m_TextCache.find(text);
+    if (it != m_TextCache.end())
+    {
+        m_TextBatch->Submit(it->second.vertices, it->second.indices, material);
+        return;
+    }
     const MSDFData* msdfData = font->GetMSDFData();
     const auto& fontGeometry = msdfData->FontGeometry;
     const auto& metrics = fontGeometry.getMetrics();
 
-    // Get the font atlas texture using the texture handle
     Handle atlasTextureHandle = font->GetAtlasTextureHandle();
     float textureIndex = material->GetTexureSlot(atlasTextureHandle);
-    // Initialize position and scaling
+
     double x = 0.0;
     double y = 0.0;
     double fsScale = scale / (metrics.ascenderY - metrics.descenderY);
     double lineHeight = fsScale * metrics.lineHeight;
 
-    // Retrieve the kerning map
     const std::map<std::pair<int, int>, double>& kerningMap = fontGeometry.getKerning();
 
-    // Loop through characters in the text
+
+    std::vector<TextVertex> vertices;
+    vertices.reserve(4 * text.size());
+    std::vector<uint32_t> indices;
+    indices.reserve(6 * text.size());
+
+    // Track global index offset
+    uint32_t globalIndexOffset = 0;
+
     for (size_t i = 0; i < text.size(); ++i)
     {
         char character = text[i];
@@ -175,10 +177,8 @@ void Renderer2D::DrawString(const std::string& text,
             continue;
         }
 
-        if (character == ' ')
+        if (character == ' ' || character == '\t')
         {
-            // Handle space character advance
-            // Get the glyph for space character
             const msdf_atlas::GlyphGeometry* glyph = nullptr;
             for (const auto& g : msdfData->Glyphs)
             {
@@ -191,25 +191,8 @@ void Renderer2D::DrawString(const std::string& text,
             if (!glyph)
                 continue;
             double advance = glyph->getAdvance();
-            x += fsScale * advance;
-            continue;
-        }
-
-        if (character == '\t')
-        {
-            // Handle tab character (assuming 4 spaces)
-            const msdf_atlas::GlyphGeometry* glyph = nullptr;
-            for (const auto& g : msdfData->Glyphs)
-            {
-                if (g.getCodepoint() == ' ')
-                {
-                    glyph = &g;
-                    break;
-                }
-            }
-            if (!glyph)
-                continue;
-            double advance = glyph->getAdvance() * 4;
+            if (character == '\t')
+                advance *= 4;  // Handle tab as 4 spaces
             x += fsScale * advance;
             continue;
         }
@@ -227,7 +210,7 @@ void Renderer2D::DrawString(const std::string& text,
 
         if (!glyph)
         {
-            // Use the glyph for '?' as a fallback
+            // Fallback to '?' glyph if not found
             for (const auto& g : msdfData->Glyphs)
             {
                 if (g.getCodepoint() == '?')
@@ -237,7 +220,7 @@ void Renderer2D::DrawString(const std::string& text,
                 }
             }
             if (!glyph)
-                continue;  // Skip if no fallback glyph is found
+                continue;
         }
 
         // Get glyph quad bounds in atlas coordinates
@@ -264,14 +247,8 @@ void Renderer2D::DrawString(const std::string& text,
         quadMin += glm::vec2(static_cast<float>(x), static_cast<float>(y));
         quadMax += glm::vec2(static_cast<float>(x), static_cast<float>(y));
 
-        // Construct the transform matrix
-        glm::mat4 transform = glm::translate(glm::mat4(1.0f), position);
-        /*glm::scale(glm::mat4(1.0f), glm::vec3(scale));*/
-
         // Create four vertices for the glyph quad
-        std::vector<TextVertex> vertices;
-        vertices.reserve(4);
-
+        glm::mat4 transform = glm::translate(glm::mat4(1.0f), position);
         vertices.push_back({glm::vec3(transform * glm::vec4(quadMin.x, quadMin.y, 0.0f, 1.0f)),
                             material->Color,
                             texCoordMin,
@@ -292,11 +269,13 @@ void Renderer2D::DrawString(const std::string& text,
                             glm::vec2(texCoordMax.x, texCoordMin.y),
                             textureIndex});
 
-        // Predefined index order (two triangles forming the quad)
-        std::vector<uint32_t> indices = {0, 1, 2, 2, 3, 0};
+        // Indices
+        std::vector<uint32_t> currentIndices = {0, 1, 2, 2, 3, 0};
 
-        // Submit the vertices and indices to the text batch
-        m_TextBatch->Submit(vertices, indices, material);
+        for (auto index : currentIndices)
+        {
+            indices.push_back(index + globalIndexOffset);
+        }
 
         // Advance the x position
         double advance = glyph->getAdvance();
@@ -314,8 +293,13 @@ void Renderer2D::DrawString(const std::string& text,
             }
         }
         x += fsScale * advance;
-    }
-}
 
+        // Increment global index offset
+        globalIndexOffset += 4;  // 4 vertices per character
+    }
+    m_TextCache[text] = {vertices, indices};
+    // Submit the vertices and indices to the text batch
+    m_TextBatch->Submit(vertices, indices, material);
+}
 
 }  // namespace Forge

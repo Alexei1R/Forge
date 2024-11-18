@@ -8,7 +8,6 @@
 #include "Forge/Renderer/Handle.h"
 #include "Forge/Renderer/Renderer2D.h"
 #include "Forge/Renderer/ShaderManager.h"
-#include "Forge/Renderer/TextureManager.h"
 #include "glm/fwd.hpp"
 #include <format>
 #include <iterator>
@@ -43,16 +42,14 @@ void Editor::OnAttach()
     }
 
 
-    auto textMaterial = materialManager->CreateMaterial("Text", shaderHandle);
+    auto textMaterial = materialManager->CreateMaterial("DefaultText", shaderHandle);
     textMaterial->Color = glm::vec4(1.0f);
     textMaterial->SetTexture(0, Font::GetDefault()->GetAtlasTextureHandle());
     textMaterial->SetParameter("u_UseScreenSpace", true);
 
 
-    auto textMaterial2 = materialManager->CreateMaterial("Text2", shaderHandle);
-    textMaterial2->Color = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
-    textMaterial2->SetTexture(0, Font::GetDefault()->GetAtlasTextureHandle());
-    textMaterial2->SetParameter("u_UseScreenSpace", false);
+    materialManager->Serialize();
+    materialManager->Deserialize();
 }
 
 void Editor::OnDetach() {}
@@ -74,57 +71,23 @@ void Editor::OnUpdate(DeltaTime dt)
 
     std::shared_ptr<Camera> camera = std::static_pointer_cast<Camera>(m_Camera);
 
+
     renderer.BeginScene(camera, m_Width, m_Height);
 
-    auto material = materialManager->GetMaterial("Text");
+    auto material = materialManager->GetMaterial("DefaultText");
 
+    renderer.DrawQuad({0.0, 0.0, -1.0}, {100.0, 100.0}, material);
     std::string fps = std::format("{:.2f} ", fpsAverage);
-    renderer.DrawString(fps, {-3.5f, 4.0f, -10.0f}, 0.3, Font::GetDefault(), material);
+    renderer.DrawString(fps,
+                        {-(m_Width / 2) + 20, (m_Height / 2) - 40, -0.1f},
+                        24,
+                        Font::GetDefault(),
+                        material);
 
-    auto material2 = materialManager->GetMaterial("Text2");
-    renderer.DrawString(
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n "
-        "asdfasdfahsldfihasslidfhaslidfihasldfbaslidflas \n ",
-        {0.0f, 0.0f, 0.0f},
-        0.3,
-        Font::GetDefault(),
-        material2);
     renderer.EndScene();
+
+
+    /*Renderer::Submit();*/
 }
 
 void Editor::OnEvent(const Event& event)
