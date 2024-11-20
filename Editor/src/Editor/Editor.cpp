@@ -2,17 +2,14 @@
 // Created by toor on 2024-09-15.
 //
 
+#include <glm/fwd.hpp>
+#include <memory>
+#include <string>
+
 #include "Editor.h"
 #include "Forge/Core/Log/Log.h"
-#include "Forge/Renderer/Font.h"
-#include "Forge/Renderer/Handle.h"
-#include "Forge/Renderer/Renderer2D.h"
-#include "Forge/Renderer/ShaderManager.h"
-#include "glm/fwd.hpp"
-#include <format>
-#include <iterator>
-#include <memory>
-
+#include "Forge/Renderer/Camera/Camera.h"
+#include "Forge/Renderer/Camera/CameraController.h"
 
 namespace Forge {
 
@@ -25,31 +22,54 @@ void Editor::OnAttach()
 {
     RenderCommand::SetClearColor(glm::vec3(0.1));
 
-    m_Camera = std::make_shared<EditorCamera>(glm::vec3(0.0f, 0.0f, 0.0f), 1920, 1080);
-    m_Camera->SetCameraTarget(glm::vec3(0.0f, 0.0f, 0.0f));  // Look at origin
-    Forge::GetForgeInstance().PushModule(m_Camera);
+    m_Camera =
+        std::make_shared<Camera>(CameraProjection::PerspectiveCamera, glm::vec3(0.0, 0.0, 5));
+
+    CameraController::Update(m_Camera);
+
+
+    m_CameraScreenSpace =
+        std::make_shared<Camera>(CameraProjection::OrthographicCamera, glm::vec3(0.0, 0.0, 1.0));
+
+    CameraController::Update(m_CameraScreenSpace);
+    Renderer::Initialize();
+
+
     materialManager = std::make_shared<MaterialManager>();
 
     auto& shaderManager = ShaderManager::GetInstance();
     Handle shaderHandle = shaderManager.LoadShader(
         ShaderLayout {{ShaderType::VERTEX, "Assets/Shaders/Renderer2DText.vert"},
                       {ShaderType::FRAGMENT, "Assets/Shaders/Renderer2DText.frag"}});
-
     if (shaderHandle.GetValue() == 0)
     {
         LOG_CRITICAL("Failed to load shader.");
-        return;  // Handle the failure case appropriately
     }
-
-
     auto textMaterial = materialManager->CreateMaterial("DefaultText", shaderHandle);
     textMaterial->Color = glm::vec4(1.0f);
     textMaterial->SetTexture(0, Font::GetDefault()->GetAtlasTextureHandle());
-    textMaterial->SetParameter("u_UseScreenSpace", true);
+    textMaterial->Color = glm::vec4(1.0);
+    m_Text = std::make_shared<Text>("", glm::vec3(0), 0, Font::GetDefault(), textMaterial);
 
 
-    materialManager->Serialize();
-    materialManager->Deserialize();
+    // NOTE: Draw Quad
+    m_Quad = std::make_shared<Quad>(glm::vec3(0.0f, 0.0f, 0.0f),
+                                    glm::vec2(1.0f, 1.0f),
+                                    glm::vec4(1.0f, 0.0f, 1.0f, 1.0f));
+
+
+    Handle quadShader = shaderManager.LoadShader(
+        ShaderLayout {{ShaderType::VERTEX, "Assets/Shaders/Renderer2DQuad.vert"},
+                      {ShaderType::FRAGMENT, "Assets/Shaders/Renderer2DQuad.frag"}});
+    if (quadShader.GetValue() == 0)
+    {
+        LOG_CRITICAL("Failed to load shader.");
+    }
+    auto quadMaterial = materialManager->CreateMaterial("QuadMaterial", quadShader);
+    quadMaterial->Color = glm::vec4(1.0f);
+
+    /*materialManager->Serialize();*/
+    /*materialManager->Deserialize();*/
 }
 
 void Editor::OnDetach() {}
@@ -69,25 +89,20 @@ void Editor::OnUpdate(DeltaTime dt)
 
     RenderCommand::Clear();
 
-    std::shared_ptr<Camera> camera = std::static_pointer_cast<Camera>(m_Camera);
+
+    CameraController::Update(m_Camera);
+    Renderer::Begin(m_Camera);
+    Renderer::SubmitMesh(*m_Quad, materialManager->GetMaterial("QuadMaterial"));
+    Renderer::End();
 
 
-    renderer.BeginScene(camera, m_Width, m_Height);
-
-    auto material = materialManager->GetMaterial("DefaultText");
-
-    renderer.DrawQuad({0.0, 0.0, -1.0}, {100.0, 100.0}, material);
+    // NOTE: Screen Space Camera
+    Renderer::Begin(m_CameraScreenSpace);
     std::string fps = std::format("{:.2f} ", fpsAverage);
-    renderer.DrawString(fps,
-                        {-(m_Width / 2) + 20, (m_Height / 2) - 40, -0.1f},
-                        24,
-                        Font::GetDefault(),
-                        material);
-
-    renderer.EndScene();
-
-
-    /*Renderer::Submit();*/
+    auto mousePos = Mouse::GetMousePosition();
+    m_Text->Update(fps, {-(m_Width / 2) + 20, (m_Height / 2) - 40, -0.1f}, 24);
+    Renderer::SubmitText(*m_Text, materialManager->GetMaterial("DefaultText"));
+    Renderer::End();
 }
 
 void Editor::OnEvent(const Event& event)
@@ -119,7 +134,8 @@ void Editor::OnEvent(const Event& event)
             m_Width = windowEvent.GetX();
             m_Height = windowEvent.GetY();
             RenderCommand::SetViewport(0, 0, m_Width, m_Height);
-            m_Camera->Resize(m_Width, m_Height);
+            m_Camera->RecalculateProjection(m_Width, m_Height);
+            m_CameraScreenSpace->RecalculateProjection(m_Width, m_Height);
         }
     }
 }

@@ -21,6 +21,8 @@ float median(float r, float g, float b) {
     return max(min(r, g), min(max(r, g), b));
 }
 
+
+
 void main() {
     int index = int(v_TexIndex);
     vec4 texSample = texture(u_Textures[index], v_TexCoord);
@@ -39,4 +41,5 @@ void main() {
 
     // Apply vertex color if needed
     FragColor = v_Color * color;
+
 }

@@ -6,22 +6,26 @@
 #include "Renderer.h"
 #include "Forge/Core/Log/Log.h"
 #include "Forge/Core/Utils.h"
+#include "Forge/Core/Hash.h"
+#include "glm/fwd.hpp"
 
 namespace Forge {
 
 bool Renderer::m_IsInScope = false;
 bool Renderer::m_IsInitialized = false;
-
+std::unique_ptr<UniformBuffer> Renderer::m_UniformBuffer = nullptr;
+std::unordered_map<uint32_t, RendererBatch> Forge::Renderer::m_RenderBatches;
 
 bool Renderer::Initialize()
 {
-    if (!m_IsInitialized)
+    if (m_IsInitialized)
     {
-        LOG_CRITICAL("The Renderer Context is already Initialized")
+        LOG_CRITICAL("The Renderer context is already initialized")
         return false;
     }
 
     // NOTE: Here Begin Initialization
+    m_UniformBuffer = std::make_unique<UniformBuffer>(sizeof(glm::mat4), 0);
 
 
     // NOTE: End
@@ -32,11 +36,12 @@ bool Renderer::Shutdown()
 {
     if (!m_IsInitialized)
     {
-        LOG_CRITICAL("The Renderer Context is not Initialized , Make shure to Initialize Before")
-        return false;
+        F_ASSERT(false, "The Renderer context is not initialized")
     }
     // NOTE: Here Begin Shutdown
 
+    m_RenderBatches.clear();
+    m_UniformBuffer.reset();
 
     // NOTE: End
     m_IsInitialized = false;
@@ -46,26 +51,31 @@ bool Renderer::Shutdown()
 
 void Renderer::CheckScope()
 {
+    if (!m_IsInitialized)
+    {
+        F_ASSERT(false, "The Renderer context is not initialized")
+    }
     if (!m_IsInScope)
     {
         F_ASSERT(false, "The Submit function is not in scope of Begin/End")
-        return;
     }
 }
 
 
-void Renderer::Begin()
+void Renderer::Begin(const std::shared_ptr<Camera>& camera)
 {
-    if (!m_IsInitialized || m_IsInScope)
+    if (!m_IsInitialized)
     {
-        LOG_CRITICAL("Make shure to you call the Renderer::End() before you call Begin")
+        F_ASSERT(false, "The Renderer context is not initialized")
+    }
+    if (m_IsInScope)
+    {
+        LOG_CRITICAL("Ensure that Renderer::End() is called before Renderer::Begin()")
         return;
     }
     m_IsInScope = true;
-
-
     // NOTE: Here Begin Shutdown
-
+    m_UniformBuffer->Submit(&camera->GetViewProjectionMatrix(), sizeof(glm::mat4));
 
     // NOTE: End
 }
@@ -73,22 +83,64 @@ void Renderer::Begin()
 
 void Renderer::End()
 {
+    if (!m_IsInitialized)
+    {
+        F_ASSERT(false, "The Renderer context is not initialized")
+    }
     if (!m_IsInScope)
     {
-        LOG_CRITICAL("Make shure to you call the Renderer::Begin() before you call End")
+        LOG_CRITICAL("Ensure that Renderer::Begin() is called before Renderer::End()")
         return;
     }
     m_IsInScope = false;
 
     // NOTE: Here Begin Shutdown
 
-
+    for (auto& [materialHash, batch] : m_RenderBatches)
+    {
+        batch.Flush();
+    }
     // NOTE: End
 }
-void Renderer::Submit()
+
+
+void Renderer::SubmitMesh(const RenderableTarget& target, const std::shared_ptr<Material>& material)
 {
-    CheckScope();
+    uint8_t materialData[sizeof(material)];
+    std::memcpy(materialData, &material, sizeof(material));
+    uint32_t materialHash = HashFast::GenerateU32BaseHash(materialData, sizeof(materialData));
+
+    // Check if batch exists, if not create it
+    if (m_RenderBatches.find(materialHash) == m_RenderBatches.end())
+    {
+        auto& batch = m_RenderBatches[materialHash];
+        batch.Init(1000, 1000, target.GetLayout());
+        batch.Submit(target, material);
+    }
+    else
+    {
+        auto& batch = m_RenderBatches[materialHash];
+        batch.Submit(target, material);
+    }
 }
 
+void Renderer::SubmitText(const RenderableTarget& target, const std::shared_ptr<Material>& material)
+{
+    uint8_t materialData[sizeof(material)];
+    std::memcpy(materialData, &material, sizeof(material));
+    uint32_t materialHash = HashFast::GenerateU32BaseHash(materialData, sizeof(materialData));
 
+    // Check if batch exists, if not create it
+    if (m_RenderBatches.find(materialHash) == m_RenderBatches.end())
+    {
+        auto& batch = m_RenderBatches[materialHash];
+        batch.Init(1000, 1000, target.GetLayout());
+        batch.Submit(target, material);
+    }
+    else
+    {
+        auto& batch = m_RenderBatches[materialHash];
+        batch.Submit(target, material);
+    }
+}
 }  // namespace Forge

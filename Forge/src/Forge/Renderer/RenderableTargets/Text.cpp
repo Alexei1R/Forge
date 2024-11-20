@@ -1,150 +1,36 @@
 //
-// Created by toor on 2024-10-29.
+// Created by toor on 2024-11-20.
 //
 
-#include "Renderer2D.h"
-#include "Forge/Core/Log/Log.h"
-#include "Forge/Renderer/BatchManager.h"
-#include "Forge/Renderer/RenderCommand.h"
-#include "Forge/Renderer/RenderableTargets/Quad.h"
-#include "Forge/Renderer/UniformBuffer.h"
-#include "glm/fwd.hpp"
-#include "glm/gtc/type_ptr.hpp"
-#include <algorithm>
-#include <cstdint>
-#include <memory>
-#include <random>
-#include "glm/ext/matrix_clip_space.hpp"
-#include "glm/ext/matrix_transform.hpp"
 
-#include "Forge/Renderer/TextureManager.h"
+#include "Text.h"
+#include <cstdint>
 
 
 namespace Forge {
 
-Renderer2D::Renderer2D()
+
+Text::Text(const std::string& text,
+           const glm::vec3& position,
+           const float scale,
+           const std::shared_ptr<Font>& font,
+           const std::shared_ptr<Material>& material) :
+    m_Text(text), m_Position(position), m_Font(font), m_Scale(scale), m_Material(material)
 {
-    // NOTE: Uniform Buffer for Camera, Do not remove
-    auto mat4size = sizeof(glm::mat4);
-    LOG_INFO("{}", mat4size)
-    m_CombinedUniformBuffer =
-        std::make_unique<UniformBuffer>(sizeof(CombinedMatrices), 0);  // Binding 0
-
-
-    // Slightly higher capacity to avoid frequent flushing
-    BatchProps props(
-        100,
-        4,
-        6,
-        {{BufferDataType::Float3, "a_Position"},
-         {BufferDataType::Float4, "a_Color"},
-         {BufferDataType::Float2, "a_TextCoord"},
-         {BufferDataType::Float, "a_TexIndex"}});
-    m_QuadBatch = std::make_unique<BatchManager<QuadVertex>>(props);
-
-
-    BatchProps textBatchProps(
-        55000,
-        4,
-        6,
-        {{BufferDataType::Float3, "a_Position"},
-         {BufferDataType::Float4, "a_Color"},
-         {BufferDataType::Float2, "a_TexCoord"},
-         {BufferDataType::Float, "a_TexIndex"}});
-    m_TextBatch = std::make_unique<BatchManager<TextVertex>>(textBatchProps);
-
-    LOG_INFO("MaxTextureSlots {}", RenderCommand::GetMaxTextureSlots())
+    m_Layout = {{BufferDataType::Float3, "a_Position"},
+                {BufferDataType::Float4, "a_Color"},
+                {BufferDataType::Float2, "a_TexCoord"},
+                {BufferDataType::Float, "a_TexIndex"}};
 }
 
-Renderer2D::~Renderer2D() {}
-
-void Renderer2D::BeginScene(const std::shared_ptr<Camera>& camera, uint32_t width, uint32_t height)
+void Text::Update(const std::string& text, const glm::vec3& position, const float scale)
 {
-    CombinedMatrices matrices;
-    matrices.ViewProjection = camera->GetViewProjectionMatrix();
-
-
-    float orthoHeight = static_cast<float>(height) / 2.0f;  // Divide by 2 to map to pixel values
-    float orthoWidth = static_cast<float>(width) / 2.0f;  // Divide by 2 to map to pixel values
-    matrices.OrthoProjection = glm::ortho(-orthoWidth, orthoWidth, -orthoHeight, orthoHeight);
-
-    m_CombinedUniformBuffer->Submit(&matrices, sizeof(CombinedMatrices));
-    m_QuadBatch->BeginBatch();
-    m_TextBatch->BeginBatch();
-}
-
-void Renderer2D::EndScene()
-{
-    m_QuadBatch->EndBatch();
-    m_TextBatch->EndBatch();
-}
-
-void Renderer2D::DrawQuad(const glm::vec3& position,
-                          const glm::vec2& size,
-                          const std::shared_ptr<Material>& material)
-
-
-{
-    // Precompute transformation matrix
-    glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) *
-                          glm::scale(glm::mat4(1.0f), {size.x, size.y, 1.0f});
-
-    // Static local-space vertices for a unit quad
-    static const std::array<glm::vec4, 4> localVertices = {
-        glm::vec4(-0.5f, -0.5f, 0.0f, 1.0f),  // Bottom-left
-        glm::vec4(0.5f, -0.5f, 0.0f, 1.0f),  // Bottom-right
-        glm::vec4(0.5f, 0.5f, 0.0f, 1.0f),  // Top-right
-        glm::vec4(-0.5f, 0.5f, 0.0f, 1.0f)  // Top-left
-    };
-
-    // Corresponding texture coordinates for each vertex
-    static const std::array<glm::vec2, 4> textureCoords = {
-        glm::vec2(0.0f, 0.0f),  // Bottom-left
-        glm::vec2(1.0f, 0.0f),  // Bottom-right
-        glm::vec2(1.0f, 1.0f),  // Top-right
-        glm::vec2(0.0f, 1.0f)  // Top-left
-    };
-
-
-    // Transform vertices and apply color, texture coordinates, and texture index
-    std::vector<QuadVertex> transformedVertices;
-    transformedVertices.reserve(4);
-    for (size_t i = 0; i < localVertices.size(); ++i)
-    {
-        glm::vec3 worldPosition = glm::vec3(transform * localVertices[i]);
-        transformedVertices.push_back({
-            worldPosition,  // Position
-            material->Color,  // Color
-            textureCoords[i],  // TexCoord
-            static_cast<float>(0)  // TexIndex
-        });
-    }
-
-    // Predefined index order (two triangles forming the quad)
-    static const std::vector<uint32_t> quadIndices = {0, 1, 2, 2, 3, 0};
-
-    m_QuadBatch->Submit(transformedVertices, quadIndices, material);
-}
-
-
-void Renderer2D::DrawString(const std::string& text,
-                            const glm::vec3& position,
-                            const float scale,
-                            const std::shared_ptr<Font>& font,
-                            const std::shared_ptr<Material>& material)
-{
-    auto it = m_TextCache.find(text);
-    if (it != m_TextCache.end())
-    {
-        m_TextBatch->Submit(it->second.vertices, it->second.indices, material);
-        return;
-    }
-    const MSDFData* msdfData = font->GetMSDFData();
+    const MSDFData* msdfData = m_Font->GetMSDFData();
     const auto& fontGeometry = msdfData->FontGeometry;
     const auto& metrics = fontGeometry.getMetrics();
 
-    Handle atlasTextureHandle = font->GetAtlasTextureHandle();
-    float textureIndex = material->GetTexureSlot(atlasTextureHandle);
+    Handle atlasTextureHandle = m_Font->GetAtlasTextureHandle();
+    float textureIndex = m_Material->GetTexureSlot(atlasTextureHandle);
 
     double x = 0.0;
     double y = 0.0;
@@ -250,22 +136,22 @@ void Renderer2D::DrawString(const std::string& text,
         // Create four vertices for the glyph quad
         glm::mat4 transform = glm::translate(glm::mat4(1.0f), position);
         vertices.push_back({glm::vec3(transform * glm::vec4(quadMin.x, quadMin.y, 0.0f, 1.0f)),
-                            material->Color,
+                            m_Material->Color,
                             texCoordMin,
                             textureIndex});
 
         vertices.push_back({glm::vec3(transform * glm::vec4(quadMin.x, quadMax.y, 0.0f, 1.0f)),
-                            material->Color,
+                            m_Material->Color,
                             glm::vec2(texCoordMin.x, texCoordMax.y),
                             textureIndex});
 
         vertices.push_back({glm::vec3(transform * glm::vec4(quadMax.x, quadMax.y, 0.0f, 1.0f)),
-                            material->Color,
+                            m_Material->Color,
                             texCoordMax,
                             textureIndex});
 
         vertices.push_back({glm::vec3(transform * glm::vec4(quadMax.x, quadMin.y, 0.0f, 1.0f)),
-                            material->Color,
+                            m_Material->Color,
                             glm::vec2(texCoordMax.x, texCoordMin.y),
                             textureIndex});
 
@@ -297,9 +183,14 @@ void Renderer2D::DrawString(const std::string& text,
         // Increment global index offset
         globalIndexOffset += 4;  // 4 vertices per character
     }
-    m_TextCache[text] = {vertices, indices};
-    // Submit the vertices and indices to the text batch
-    m_TextBatch->Submit(vertices, indices, material);
+    // NOTE: Copy to real buffers data
+    m_VerticesBytes.resize(vertices.size() * sizeof(TextVertex));
+    memcpy(m_VerticesBytes.data(), vertices.data(), m_VerticesBytes.size());
+
+
+    m_Indices.resize(indices.size() * sizeof(uint32_t));
+    memcpy(m_Indices.data(), indices.data(), m_Indices.size());
 }
+
 
 }  // namespace Forge

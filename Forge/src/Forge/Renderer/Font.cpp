@@ -5,7 +5,6 @@
 
 #include "Font.h"
 #include "Forge/Core/Log/Log.h"
-#include "Forge/Renderer/Handle.h"
 
 
 namespace Forge {

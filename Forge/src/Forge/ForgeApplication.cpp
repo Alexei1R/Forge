@@ -11,6 +11,7 @@
 
 #include "Forge/Renderer/ShaderManager.h"
 #include "Forge/Renderer/TextureManager.h"
+#include "Forge/Renderer/Renderer.h"
 
 namespace Forge {
 
@@ -52,6 +53,7 @@ void Forge::Run()
 
     ShaderManager::GetInstance().Shutdown();
     TextureManager::GetInstance().Shutdown();
+    Renderer::Shutdown();
 }
 
 

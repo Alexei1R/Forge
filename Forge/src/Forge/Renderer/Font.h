@@ -10,7 +10,7 @@
 #include <unordered_map>
 #include <memory>
 #include <filesystem>
-#include "Forge/Renderer/Handle.h"
+#include "Forge/Core/Handle.h"
 #include "Forge/Renderer/TextureManager.h"
 #include <glm/glm.hpp>
 #include "msdfgen.h"

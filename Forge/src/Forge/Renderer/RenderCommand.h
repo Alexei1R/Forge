@@ -7,34 +7,13 @@
 
 
 #include "Forge/Renderer/Buffer/BufferImpl.h"
+#include "Forge/Renderer/Material.h"
 #include "glad/glad.h"
+#include "glm/glm.hpp"
 #include <cstdint>
 #include <memory>
 
 namespace Forge {
-
-enum class DrawPrimitives : uint32_t
-{
-    POINTS,
-    LINES,
-    TRIANGLES,
-};
-
-enum class CullFace : uint32_t
-{
-    NONE = 0,
-    FRONT,
-    BACK,
-    FRONT_AND_BACK
-};
-
-enum class BlendingMode : uint32_t
-{
-    NONE = 0,
-    ADD,
-    SUBTRACT,
-    REVERSE_SUBTRACT
-};
 
 class RenderCommand
 {
@@ -47,6 +26,7 @@ public:
 
     static void Draw(const std::shared_ptr<VertexArrayBuffer>& buffer,
                      DrawPrimitives primitives = DrawPrimitives::TRIANGLES);
+
 
     static void DrawIndexed(const std::shared_ptr<VertexArrayBuffer>& buffer,
                             uint32_t indexCount,

@@ -95,7 +95,6 @@ public:
         if (!file.is_open())  // Verificăm dacă fișierul s-a deschis cu succes
             return false;
 
-        LOG_INFO("Saved material with path {}", filename.string())
         for (const auto& [name, entry] : m_Entries)
         {
             file << entry->Serialize() << '\n';
@@ -158,7 +157,6 @@ private:
 
         auto type = line.substr(typeStart, typeEnd - typeStart);
         auto name = line.substr(nameStart, nameEnd - nameStart);
-        LOG_ERROR("INFO TYPE {} NAME {}", type, name);
 
         // Create appropriate entry based on type
         EntryPtr entry;

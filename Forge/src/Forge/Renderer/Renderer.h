@@ -5,6 +5,16 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
+
+#include <memory>
+#include <unordered_map>
+
+#include "Forge/Renderer/Camera/Camera.h"
+#include "Forge/Renderer/Material.h"
+#include "Forge/Renderer/RendererBatch.h"
+#include "Forge/Renderer/UniformBuffer.h"
+#include "Forge/Renderer/RenderableTarget.h"
+
 namespace Forge {
 
 
@@ -18,20 +28,25 @@ public:
     Renderer& operator=(Renderer&&) = delete;
     ~Renderer() = delete;
 
-    bool Initialize();
-    bool Shutdown();
+    static bool Initialize();
+    static bool Shutdown();
+    static void Begin(const std::shared_ptr<Camera>& camera);
+    static void End();
+    static void SubmitMesh(const RenderableTarget& target,
+                           const std::shared_ptr<Material>& material);
 
 
-    void Begin();
-    void End();
-    void Submit();
+    static void SubmitText(const RenderableTarget& target,
+                           const std::shared_ptr<Material>& material);
 
 private:
-    void CheckScope();
+    static void CheckScope();
 
 private:
     static bool m_IsInScope;
     static bool m_IsInitialized;
+    static std::unique_ptr<UniformBuffer> m_UniformBuffer;
+    static std::unordered_map<uint32_t, RendererBatch> m_RenderBatches;
 };
 
 

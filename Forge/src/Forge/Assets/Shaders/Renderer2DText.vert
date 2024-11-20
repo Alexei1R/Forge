@@ -5,16 +5,14 @@ layout(location = 1) in vec4 a_Color;
 layout(location = 2) in vec2 a_TexCoord;
 layout(location = 3) in float a_TexIndex;
 
-layout(std140, binding = 0) uniform CombinedData {
+layout(std140, binding = 0) uniform ViewProjection {
     mat4 u_ViewProjection;
-    mat4 u_OrthoProjection;
 };
 
 out vec4 v_Color;
 out vec2 v_TexCoord;
 flat out float v_TexIndex;
 
-uniform bool u_UseScreenSpace;
 
 void main()
 {
@@ -22,6 +20,5 @@ void main()
     v_TexCoord = a_TexCoord;
     v_TexIndex = a_TexIndex;
 
-    mat4 projection = u_UseScreenSpace ? u_OrthoProjection : u_ViewProjection;
-    gl_Position = projection * vec4(a_Position, 1.0);
+    gl_Position =  u_ViewProjection*  vec4(a_Position, 1.0);
 }

@@ -12,6 +12,8 @@
 #include "Forge/Core/Utils.h"
 #include "Forge/Core/Module/Module.h"
 #include "Forge/Core/Module/ModuleStack.h"
+#include "Forge/Core/Handle.h"
+#include "Forge/Core/Hash.h"
 
 // Event System
 #include "Forge/Events/Event.h"
@@ -27,10 +29,10 @@
 #include "Forge/Renderer/Shader.h"
 #include "Forge/Renderer/Window.h"
 #include "Forge/Renderer/Framebuffer.h"
-#include "Forge/Renderer/Renderer2D.h"
+#include "Forge/Renderer/Renderer.h"
 #include "Forge/Renderer/RenderCommand.h"
-#include "Forge/Renderer/Model/Mesh.h"
-
+#include "Forge/Renderer/Font.h"
+#include "Forge/Renderer/ShaderManager.h"
 // Application
 #include "Forge/ForgeApplication.h"
 
@@ -43,7 +45,7 @@
 
 // Camera
 #include "Forge/Renderer/Camera/Camera.h"
-#include "Forge/Renderer/Camera/EditorCamera.h"
+#include "Forge/Renderer/Camera/CameraController.h"
 
 
 #endif  // FORGE_H

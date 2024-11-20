@@ -6,7 +6,7 @@
 #define TEXTUREMANAGER_H
 
 
-#include "Forge/Renderer/Handle.h"
+#include "Forge/Core/Handle.h"
 #include "Forge/Renderer/Texture.h"
 #include <filesystem>
 #include <mutex>
