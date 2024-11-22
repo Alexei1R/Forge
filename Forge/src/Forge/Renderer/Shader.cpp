@@ -219,11 +219,11 @@ int Shader::GetUniformLocation(const std::string& name)
     }
 
     int location = glGetUniformLocation(m_ProgramID, name.c_str());
-    if (location == -1)
-    {
-        LOG_WARN("Uniform '" + name + "' doesn't exist or is not used.");
-    }
-
+    /*if (location == -1)*/
+    /*{*/
+    /*    LOG_WARN("Uniform '" + name + "' doesn't exist or is not used.");*/
+    /*}*/
+    /**/
     m_UniformLocationCache[name] = location;
     return location;
 }

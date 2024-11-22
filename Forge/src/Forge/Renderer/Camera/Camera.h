@@ -17,7 +17,8 @@ namespace Forge {
 enum class CameraProjection
 {
     PerspectiveCamera,
-    OrthographicCamera
+    OrthographicCamera,
+    ScreenSpaceCamera,
 };
 
 // NOTE: Forward Declaration

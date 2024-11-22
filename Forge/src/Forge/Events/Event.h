@@ -5,11 +5,12 @@
 #ifndef EVENT_H
 #define EVENT_H
 
+#include <cstdint>
 #include <string>
 #include <vector>
 namespace Forge {
 
-enum class EventType
+enum class EventType : uint32_t
 {
     None = 0,
     Window,
@@ -17,7 +18,7 @@ enum class EventType
     Mouse,
     Drop
 };
-enum class Action
+enum class Action : uint32_t
 {
     // KeyBoard And Mouse
     None = 0,
@@ -28,6 +29,9 @@ enum class Action
     // Mouse
     MouseScroll,
     MouseMove,
+    MousePress,
+    MouseRelease,
+    MouseRepeat,
     // Window
     Resize,
     Move,

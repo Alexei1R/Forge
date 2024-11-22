@@ -7,7 +7,10 @@
 #include <string>
 
 #include "Editor.h"
+#include "Forge/BFUI/Button.h"
 #include "Forge/Core/Log/Log.h"
+#include "Forge/Events/Event.h"
+#include "Forge/Events/ImplEvent.h"
 #include "Forge/Renderer/Camera/Camera.h"
 #include "Forge/Renderer/Camera/CameraController.h"
 
@@ -29,7 +32,7 @@ void Editor::OnAttach()
 
 
     m_CameraScreenSpace =
-        std::make_shared<Camera>(CameraProjection::OrthographicCamera, glm::vec3(0.0, 0.0, 1.0));
+        std::make_shared<Camera>(CameraProjection::ScreenSpaceCamera, glm::vec3(0.0, 0.0, 1.0));
 
     CameraController::Update(m_CameraScreenSpace);
     Renderer::Initialize();
@@ -68,6 +71,25 @@ void Editor::OnAttach()
     auto quadMaterial = materialManager->CreateMaterial("QuadMaterial", quadShader);
     quadMaterial->Color = glm::vec4(1.0f);
 
+
+    // NOTE: TEST the widgets
+    // Button
+
+    button =
+        std::make_shared<BfUI::Button>(glm::vec2(50.0f, 50.0f), glm::vec2(100.0f, 50.0f), "Test");
+
+    /*button.SetText("text")*/
+    /*    .SetTextColor(glm::vec4(1.0))*/
+    /*    .SetBackGroundColor(glm::vec4(1.0))*/
+    /*    .SetBorderColor(glm::vec4(1.0))*/
+    /*    .SetBackGroundColorHover(glm::vec4(1.0))*/
+    /*    .SetBorderSize(32);*/
+    /**/
+    /*button.SubscribeEvents([](BfUI::BfUIEvents events, BfUI::Button& widget) {*/
+    /*    widget.SetBackGroundColorActive(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));*/
+    /*});*/
+
+
     /*materialManager->Serialize();*/
     /*materialManager->Deserialize();*/
 }
@@ -92,6 +114,7 @@ void Editor::OnUpdate(DeltaTime dt)
 
     CameraController::Update(m_Camera);
     Renderer::Begin(m_Camera);
+
     Renderer::SubmitMesh(*m_Quad, materialManager->GetMaterial("QuadMaterial"));
     Renderer::End();
 
@@ -99,21 +122,18 @@ void Editor::OnUpdate(DeltaTime dt)
     // NOTE: Screen Space Camera
     Renderer::Begin(m_CameraScreenSpace);
     std::string fps = std::format("{:.2f} ", fpsAverage);
+
     auto mousePos = Mouse::GetMousePosition();
-    m_Text->Update(fps, {-(m_Width / 2) + 20, (m_Height / 2) - 40, -0.1f}, 24);
+    m_Text->Update(fps, {200, 40, -0.1f}, 24);
+
+    Renderer::SubmitUIElement(*button);
     Renderer::SubmitText(*m_Text, materialManager->GetMaterial("DefaultText"));
     Renderer::End();
 }
 
 void Editor::OnEvent(const Event& event)
 {
-    if (event.GetType() == EventType::Key)
-    {
-        KeyEvent keyEv = static_cast<const KeyEvent&>(event);
-        if (keyEv.GetAction() == Action::KeyPress)
-        {
-        }
-    }
+    button->OnEvent(event);
 
     if (event.GetType() == EventType::Drop)
     {

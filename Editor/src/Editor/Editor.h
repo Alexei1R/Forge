@@ -6,6 +6,7 @@
 #define EDITOR_H
 
 #include "Forge.h"
+#include "Forge/BFUI/Button.h"
 #include "Forge/Renderer/Material.h"
 #include "Forge/Renderer/RenderableTargets/Quad.h"
 #include "Forge/Renderer/RenderableTargets/Text.h"
@@ -38,6 +39,7 @@ private:
     std::shared_ptr<MaterialManager> materialManager;
     std::shared_ptr<Quad> m_Quad;
 
+    std::shared_ptr<BfUI::Button> button;
 
     std::shared_ptr<Text> m_Text;
     float m_Width = 0;

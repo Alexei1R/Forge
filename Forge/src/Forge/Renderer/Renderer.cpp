@@ -115,12 +115,12 @@ void Renderer::SubmitMesh(const RenderableTarget& target, const std::shared_ptr<
     {
         auto& batch = m_RenderBatches[materialHash];
         batch.Init(1000, 1000, target.GetLayout());
-        batch.Submit(target, material);
+        batch.Submit(target.GetVertices(), target.GetIndices(), material);
     }
     else
     {
         auto& batch = m_RenderBatches[materialHash];
-        batch.Submit(target, material);
+        batch.Submit(target.GetVertices(), target.GetIndices(), material);
     }
 }
 
@@ -135,12 +135,35 @@ void Renderer::SubmitText(const RenderableTarget& target, const std::shared_ptr<
     {
         auto& batch = m_RenderBatches[materialHash];
         batch.Init(1000, 1000, target.GetLayout());
-        batch.Submit(target, material);
+        batch.Submit(target.GetVertices(), target.GetIndices(), material);
     }
     else
     {
         auto& batch = m_RenderBatches[materialHash];
-        batch.Submit(target, material);
+        batch.Submit(target.GetVertices(), target.GetIndices(), material);
+    }
+}
+
+
+void Renderer::SubmitUIElement(const BfUI::Widget& widget)
+{
+    const auto& material = widget.GetMaterial();
+
+    uint8_t materialData[sizeof(material)];
+    std::memcpy(materialData, &material, sizeof(material));
+    uint32_t materialHash = HashFast::GenerateU32BaseHash(materialData, sizeof(materialData));
+
+    // Check if batch exists, if not create it
+    if (m_RenderBatches.find(materialHash) == m_RenderBatches.end())
+    {
+        auto& batch = m_RenderBatches[materialHash];
+        batch.Init(1000, 1000, widget.GetLayout());
+        batch.Submit(widget.GetVertices(), widget.GetIndices(), material);
+    }
+    else
+    {
+        auto& batch = m_RenderBatches[materialHash];
+        batch.Submit(widget.GetVertices(), widget.GetIndices(), material);
     }
 }
 }  // namespace Forge

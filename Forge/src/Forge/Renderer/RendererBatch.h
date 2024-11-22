@@ -28,7 +28,9 @@ public:
     RendererBatch& operator=(RendererBatch&&) noexcept = delete;
 
     void Init(const uint32_t vertexSize, const uint32_t indexSize, const BufferLayout& layout);
-    void Submit(const RenderableTarget& target, const std::shared_ptr<Material>& material);
+    void Submit(const std::vector<uint8_t>& vertices,
+                const std::vector<uint32_t>& indices,
+                const std::shared_ptr<Material>& material);
     void Flush();
 
 private:

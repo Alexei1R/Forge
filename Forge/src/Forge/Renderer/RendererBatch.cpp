@@ -42,7 +42,8 @@ void RendererBatch::Init(const uint32_t vertexSize,
 }
 
 
-void RendererBatch::Submit(const RenderableTarget& target,
+void RendererBatch::Submit(const std::vector<uint8_t>& vertices,
+                           const std::vector<uint32_t>& indices,
                            const std::shared_ptr<Material>& material)
 {
     if (m_CurrentMaterial != material)
@@ -60,13 +61,11 @@ void RendererBatch::Submit(const RenderableTarget& target,
 
 
     // NOTE: Copy vertex data
-    const auto& vertices = target.GetVertices();
     m_VerticesBytes.insert(m_VerticesBytes.end(),
                            reinterpret_cast<const uint8_t*>(vertices.data()),
                            reinterpret_cast<const uint8_t*>(vertices.data() + vertices.size()));
 
     // NOTE: Copy index data
-    const auto& indices = target.GetIndices();
     for (auto& index : indices)
     {
         m_Indices.push_back(index + m_CurrentSubmitCount);
@@ -85,6 +84,16 @@ void RendererBatch::Flush()
     auto shader = shaderManager.GetShader(m_CurrentMaterial->ShaderHandle);
     shader->Bind();
 
+    // Set Default Parameters
+    shader->SetUniform("Color", m_CurrentMaterial->Color);
+    shader->SetUniform("EmissiveColor", m_CurrentMaterial->EmissiveColor);
+    shader->SetUniform("Metallic", m_CurrentMaterial->Metallic);
+    shader->SetUniform("Roughness", m_CurrentMaterial->Roughness);
+    shader->SetUniform("Specular", m_CurrentMaterial->Specular);
+    shader->SetUniform("Opacity", m_CurrentMaterial->Opacity);
+    shader->SetUniform("RefractionIndex", m_CurrentMaterial->RefractionIndex);
+    shader->SetUniform("Anisotropy", m_CurrentMaterial->Anisotropy);
+    shader->SetUniform("SubsurfaceScattering", m_CurrentMaterial->SubsurfaceScattering);
 
     for (const auto& [name, value] : m_CurrentMaterial->aditionlParameters)
     {

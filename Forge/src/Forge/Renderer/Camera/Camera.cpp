@@ -46,6 +46,15 @@ void Camera::RecalculateProjection(uint32_t width, uint32_t height)
             m_NearClip,
             m_FarClip);
     }
+    else if (m_CameraProjection == CameraProjection::ScreenSpaceCamera)
+    {
+        float left = 0.0f;
+        float right = static_cast<float>(width);
+        float bottom = static_cast<float>(height);
+        float top = 0.0f;
+
+        m_ProjMatrix = glm::ortho(left, right, top, bottom, m_NearClip, m_FarClip);
+    }
     else
     {
         float aspectRatio = static_cast<float>(width) / static_cast<float>(height);

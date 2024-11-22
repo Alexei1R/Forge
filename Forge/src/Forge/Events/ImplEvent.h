@@ -6,6 +6,7 @@
 #define IMPLEVENT_H
 
 #include "Event.h"
+#include "Forge/Events/KeyCodes.h"
 #include <sstream>
 #include <string>
 #include <vector>
@@ -15,15 +16,32 @@ namespace Forge {
 class KeyEvent : public Event
 {
 public:
-    KeyEvent(int key, Action action) : key_(key), action_(action)
+    KeyEvent(int key, Action action) : key_(key)
     {
-        if (action == Action::KeyPress)
+        if (key == Key::LeftMouse || key == Key::MiddleMouse || key == Key::RightMouse)
         {
-            Keyboard::SetKey(key, true);
+            if (action == Action::KeyPress)
+            {
+                action_ = Action::MousePress;
+                Keyboard::SetKey(key, true);
+            }
+            if (action == Action::KeyRelease)
+            {
+                action_ = Action::MouseRelease;
+                Keyboard::SetKey(key, false);
+            }
         }
-        if (action == Action::KeyRelease)
+        else
         {
-            Keyboard::SetKey(key, false);
+            action_ = action;
+            if (action == Action::KeyPress)
+            {
+                Keyboard::SetKey(key, true);
+            }
+            if (action == Action::KeyRelease)
+            {
+                Keyboard::SetKey(key, false);
+            }
         }
     };
 

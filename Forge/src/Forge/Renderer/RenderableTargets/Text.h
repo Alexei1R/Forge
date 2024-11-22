@@ -53,15 +53,6 @@ public:
         return m_Layout;
     }
 
-    uint32_t GetVerticesSize() const override
-    {
-        return 4;
-    }
-    const uint32_t GetIndicesSize() const override
-    {
-        return 6;
-    }
-
 
     void Update(const std::string& text, const glm::vec3& position, const float scale);
 

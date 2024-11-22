@@ -9,6 +9,7 @@
 #include <memory>
 #include <unordered_map>
 
+#include "Forge/BFUI/Widget.h"
 #include "Forge/Renderer/Camera/Camera.h"
 #include "Forge/Renderer/Material.h"
 #include "Forge/Renderer/RendererBatch.h"
@@ -38,6 +39,8 @@ public:
 
     static void SubmitText(const RenderableTarget& target,
                            const std::shared_ptr<Material>& material);
+
+    static void SubmitUIElement(const BfUI::Widget& widget);
 
 private:
     static void CheckScope();
