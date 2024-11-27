@@ -21,6 +21,7 @@ std::shared_ptr<Button>
 Button::Button(const glm::vec2& position, const glm::vec2& size, const std::string& label) :
     m_Position(position), m_Size(size)
 {
+    Theme::SetDarkTheme();
     m_BottomLeft = m_Position;
     m_TopRight = m_Position + m_Size;
     m_TopLeft = {m_BottomLeft.x, m_TopRight.y};

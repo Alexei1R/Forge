@@ -18,4 +18,14 @@ const std::vector<std::shared_ptr<Widget>>& WidgetStack::GetAllWidgets()
     return m_Widgets;
 }
 
+
+auto WidgetStack::begin()
+{
+    return m_Widgets.begin();
+}
+auto WidgetStack::end()
+{
+    return m_Widgets.end();
+}
+
 }  // namespace BfUI

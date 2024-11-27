@@ -18,14 +18,8 @@ public:
 
     static const std::vector<std::shared_ptr<Widget>>& GetAllWidgets();
 
-    static auto begin()
-    {
-        return m_Widgets.begin();
-    }
-    static auto end()
-    {
-        return m_Widgets.end();
-    }
+    static auto begin();
+    static auto end();
 
 private:
     static std::vector<std::shared_ptr<Widget>> m_Widgets;

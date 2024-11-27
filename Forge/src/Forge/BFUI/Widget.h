@@ -43,21 +43,19 @@ class Widget : public Forge::Event
 {
 public:
 public:
-    Widget();
-    virtual ~Widget();
+    Widget() = default;
+    virtual ~Widget() = default;
 
 
     virtual void OnEvent(const Event& event) = 0;
     virtual const std::vector<uint8_t>& GetVertices() const = 0;
     virtual const std::vector<uint32_t>& GetIndices() const = 0;
-
-
-    const std::shared_ptr<Forge::Material>& GetMaterial();
-    const Forge::BufferLayout& GetLayout();
+    virtual const std::shared_ptr<Forge::Material>& GetMaterial() const = 0;
+    virtual const Forge::BufferLayout& GetLayout() const = 0;
 
 
 private:
-    std::shared_ptr<Forge::Material> m_WidgetMaterial;
+    std::shared_ptr<Forge::Material> m_ButtonMaterial;
     Forge::BufferLayout m_WidgetBufferLayout;
 };
 

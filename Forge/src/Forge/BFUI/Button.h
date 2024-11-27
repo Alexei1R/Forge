@@ -82,6 +82,9 @@ private:
     glm::vec4 m_DefaultColor;
     glm::vec4 m_HoverColor;
 
+    std::shared_ptr<Forge::Material> m_ButtonMaterial;
+
+    Forge::BufferLayout m_ButtonBufferLayout;
 
     std::vector<uint32_t> m_Indices;
     std::vector<uint8_t> m_VerticesBytes;
