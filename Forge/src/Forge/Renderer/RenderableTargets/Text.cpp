@@ -4,6 +4,7 @@
 
 
 #include "Text.h"
+#include "Forge/Core/Log/Log.h"
 #include <cstdint>
 
 
@@ -25,6 +26,12 @@ Text::Text(const std::string& text,
 
 void Text::Update(const std::string& text, const glm::vec3& position, const float scale)
 {
+    const float epsilon = 0.001f;  // Example epsilon value
+
+    if (m_Text == text && m_Position == position && m_Scale == scale)
+    {
+        return;
+    }
     const MSDFData* msdfData = m_Font->GetMSDFData();
     const auto& fontGeometry = msdfData->FontGeometry;
     const auto& metrics = fontGeometry.getMetrics();

@@ -16,7 +16,8 @@ enum class EventType : uint32_t
     Window,
     Key,
     Mouse,
-    Drop
+    Drop,
+    Button
 };
 enum class Action : uint32_t
 {
@@ -43,7 +44,10 @@ enum class Action : uint32_t
     Maximize,
     FramebufferResize,
     // Drop a file
-    Drop
+    Drop,
+
+    // UIActions
+    UIEvent
 };
 
 class Event

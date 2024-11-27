@@ -1,4 +1,3 @@
-
 #version 450 core
 
 layout(location = 0) in vec3 a_Position;
@@ -9,10 +8,11 @@ layout(std140, binding = 0) uniform ViewProjection {
 };
 
 out vec4 v_Color;
+out vec3 v_Position;
 
 void main()
 {
     v_Color = a_Color;
-
-    gl_Position =  u_ViewProjection*  vec4(a_Position, 1.0);
+    v_Position = a_Position;
+    gl_Position = u_ViewProjection * vec4(a_Position, 1.0);
 }

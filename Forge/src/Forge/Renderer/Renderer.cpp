@@ -16,6 +16,10 @@ bool Renderer::m_IsInitialized = false;
 std::unique_ptr<UniformBuffer> Renderer::m_UniformBuffer = nullptr;
 std::unordered_map<uint32_t, RendererBatch> Forge::Renderer::m_RenderBatches;
 
+// UI Precalculated Size
+uint32_t Renderer::m_PrecalculatedVerticesSize = 1000;
+uint32_t Renderer::m_PrecalculatedIndicesSize = m_PrecalculatedVerticesSize * 4;
+
 bool Renderer::Initialize()
 {
     if (m_IsInitialized)
@@ -157,7 +161,7 @@ void Renderer::SubmitUIElement(const BfUI::Widget& widget)
     if (m_RenderBatches.find(materialHash) == m_RenderBatches.end())
     {
         auto& batch = m_RenderBatches[materialHash];
-        batch.Init(1000, 1000, widget.GetLayout());
+        batch.Init(m_PrecalculatedVerticesSize, m_PrecalculatedIndicesSize, widget.GetLayout());
         batch.Submit(widget.GetVertices(), widget.GetIndices(), material);
     }
     else
@@ -166,4 +170,12 @@ void Renderer::SubmitUIElement(const BfUI::Widget& widget)
         batch.Submit(widget.GetVertices(), widget.GetIndices(), material);
     }
 }
+
+
+void Renderer::SetPrecalculatedUIElementSize(uint32_t vertices, uint32_t indices)
+{
+    m_PrecalculatedVerticesSize = vertices;
+    m_PrecalculatedVerticesSize = indices;
+}
+
 }  // namespace Forge

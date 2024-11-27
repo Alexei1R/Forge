@@ -5,88 +5,88 @@
 #ifndef BUTTON_H
 #define BUTTON_H
 
-#include "Forge/BFUI/UIPrimitives/Panel.h"
 #include "Forge/BFUI/Widget.h"
+#include "Forge/BFUI/WidgetStack.h"
+#include "Forge/Core/Log/Log.h"
 #include "Forge/Events/Event.h"
-#include "Forge/Events/ImplEvent.h"
-#include "Forge/Events/KeyCodes.h"
-#include "glm/fwd.hpp"
+#include "Forge/Renderer/Material.h"
+#include "Forge/Renderer/ShaderManager.h"
+
+#include "Forge/BFUI/Theme.h"
+
+#include <glm/glm.hpp>
 #include <cstdint>
+#include <functional>
+#include <memory>
 #include <string>
+#include <vector>
+
 namespace BfUI {
 
-class Button : public Widget
+struct ButtonVertex
+{
+    glm::vec2 Position;
+    glm::vec2 TexCoord;
+};
+
+class Button : public Widget, public std::enable_shared_from_this<Button>
 {
 public:
-    Button(glm::vec2 position, glm::vec2 size, const char* label);
+    using EventCallback = std::function<void(WidgetEvents, Button&)>;
+
+    static std::shared_ptr<Button>
+        Create(const glm::vec2& position, const glm::vec2& size, const std::string& label);
+
     ~Button();
 
-
-    void SubscribeEvents(std::function<void(BfUI::BfUIEvents events, Button& button)> callback);
+    void SubscribeEvents(EventCallback callback);
 
     const std::vector<uint8_t>& GetVertices() const override;
     const std::vector<uint32_t>& GetIndices() const override;
-
     const std::shared_ptr<Forge::Material>& GetMaterial() const override;
     const Forge::BufferLayout& GetLayout() const override;
 
 
-    // NOTE: Using Fluent Interface Pattern  Patterrn Set UI Properties
-    /*Button& SetText(const std::string& text);*/
-    /*Button& SetTextColor(glm::vec4 color);*/
-    Button& SetBackGroundColor(glm::vec4 color);
-    /*Button& SetBackGroundColorHover(glm::vec4 color);*/
-    /*Button& SetBackGroundColorActive(glm::vec4 color);*/
-    /**/
-    /*Button& SetBorderColor(glm::vec4 color);*/
-    /*Button& SetBorderSize(uint32_t size);*/
+    void Move(const glm::vec2& position);
 
-    bool InInBounds(glm::vec2 point);
-    // Implement missing pure virtual methods from Event
-    virtual Forge::EventType GetType() const override {}
+    Button& SetBackgroundColor(const glm::vec4& color);
 
-    virtual Forge::Action GetAction() const override {}
+    bool IsInBounds(const glm::vec2& point) const;
 
-    virtual std::string ToString() const override
-    {
-        return "Button Event";
-    }
-    void OnEvent(const Event& event) override
-    {
-        if (event.GetType() == Forge::EventType::Key)
-        {
-            Forge::KeyEvent keyEv = static_cast<const Forge::KeyEvent&>(event);
-            if (keyEv.GetAction() == Forge::Action::MousePress)
-            {
-                auto [x, y] = Forge::Mouse::GetMousePosition();
-                auto [width, height] = Forge::ApplicationStats::GetApplicationSize();
-                if (InInBounds(glm::vec2(x, height - y)))
-                {
-                    SetBackGroundColor(glm::vec4(1.0, 0.0, 1.0, 1.0));
-                }
-                else
-                {
-                    SetBackGroundColor(glm::vec4(0.0, 1.0, 0.0, 1.0));
-                }
-            }
-        }
-    }
+    Forge::EventType GetType() const override;
+    Forge::Action GetAction() const override;
+    std::string ToString() const override;
+
+    void OnEvent(const Event& event) override;
+
+protected:
+    Button(const glm::vec2& position, const glm::vec2& size, const std::string& label);
 
 private:
     void UpdateDrawData();
 
 private:
-    Panel m_ButtonBody;
-    std::shared_ptr<Forge::Material> m_ButtonMaterial;
+    EventCallback m_EventCallback;
 
-    Forge::BufferLayout m_ButtonBufferLayout;
+    glm::vec2 m_Position;
+    glm::vec2 m_Size;
+
+    glm::vec2 m_BottomLeft;
+    glm::vec2 m_TopRight;
+    glm::vec2 m_TopLeft;
+    glm::vec2 m_BottomRight;
+
+    bool m_IsPressed = false;
+    bool m_IsHovered = false;
+
+    glm::vec4 m_DefaultColor;
+    glm::vec4 m_HoverColor;
+
 
     std::vector<uint32_t> m_Indices;
     std::vector<uint8_t> m_VerticesBytes;
 };
 
-
 }  // namespace BfUI
 
-
-#endif
+#endif  // BUTTON_H

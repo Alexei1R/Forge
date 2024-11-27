@@ -6,6 +6,7 @@
 #define RENDERER_H
 
 
+#include <cstdint>
 #include <memory>
 #include <unordered_map>
 
@@ -41,6 +42,7 @@ public:
                            const std::shared_ptr<Material>& material);
 
     static void SubmitUIElement(const BfUI::Widget& widget);
+    static void SetPrecalculatedUIElementSize(uint32_t vertices, uint32_t indices);
 
 private:
     static void CheckScope();
@@ -50,6 +52,8 @@ private:
     static bool m_IsInitialized;
     static std::unique_ptr<UniformBuffer> m_UniformBuffer;
     static std::unordered_map<uint32_t, RendererBatch> m_RenderBatches;
+    static uint32_t m_PrecalculatedVerticesSize;
+    static uint32_t m_PrecalculatedIndicesSize;
 };
 
 

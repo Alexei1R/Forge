@@ -16,38 +16,49 @@
 
 namespace BfUI {
 
-enum class BfUIEvents : uint32_t
+enum class WidgetEvents : uint32_t
 {
     None = 0,
 
     /* Button Events */
     ButtonPress = 1 << 0,
     ButtonRelease = 1 << 1,
-    ButtonHold = 1 << 2,
-    ButtonHover = 1 << 3,
+    ButtonHover = 1 << 2,
 
     /* WindowPanel Events */
     /*.......*/
     /* Other Events */
 };
 
-// NOTE: Pure abstract class , that will reprezent a GUI elemrnt
+struct WidgetVertex
+{
+    glm::vec3 Position;
+    glm::vec4 Color;
+    glm::vec2 TexCoord;
+    float TexIndex;
+    float ElementType;
+};
+
 class Widget : public Forge::Event
 {
 public:
 public:
-    Widget() = default;
-    virtual ~Widget() = default;
+    Widget();
+    virtual ~Widget();
 
 
     virtual void OnEvent(const Event& event) = 0;
     virtual const std::vector<uint8_t>& GetVertices() const = 0;
     virtual const std::vector<uint32_t>& GetIndices() const = 0;
-    virtual const std::shared_ptr<Forge::Material>& GetMaterial() const = 0;
-    virtual const Forge::BufferLayout& GetLayout() const = 0;
+
+
+    const std::shared_ptr<Forge::Material>& GetMaterial();
+    const Forge::BufferLayout& GetLayout();
 
 
 private:
+    std::shared_ptr<Forge::Material> m_WidgetMaterial;
+    Forge::BufferLayout m_WidgetBufferLayout;
 };
 
 }  // namespace BfUI

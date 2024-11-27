@@ -8,6 +8,7 @@
 
 #include "Editor.h"
 #include "Forge/BFUI/Button.h"
+#include "Forge/BFUI/WidgetStack.h"
 #include "Forge/Core/Log/Log.h"
 #include "Forge/Events/Event.h"
 #include "Forge/Events/ImplEvent.h"
@@ -23,6 +24,7 @@ Editor::~Editor() {}
 
 void Editor::OnAttach()
 {
+    BfUI::Theme::SetDarkTheme();
     RenderCommand::SetClearColor(glm::vec3(0.1));
 
     m_Camera =
@@ -75,19 +77,13 @@ void Editor::OnAttach()
     // NOTE: TEST the widgets
     // Button
 
-    button =
-        std::make_shared<BfUI::Button>(glm::vec2(50.0f, 50.0f), glm::vec2(100.0f, 50.0f), "Test");
-
-    /*button.SetText("text")*/
-    /*    .SetTextColor(glm::vec4(1.0))*/
-    /*    .SetBackGroundColor(glm::vec4(1.0))*/
-    /*    .SetBorderColor(glm::vec4(1.0))*/
-    /*    .SetBackGroundColorHover(glm::vec4(1.0))*/
-    /*    .SetBorderSize(32);*/
-    /**/
-    /*button.SubscribeEvents([](BfUI::BfUIEvents events, BfUI::Button& widget) {*/
-    /*    widget.SetBackGroundColorActive(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));*/
-    /*});*/
+    button = BfUI::Button::Create(glm::vec2(50.0f, 50.0f), glm::vec2(100.0f, 50.0f), "Test");
+    button->SubscribeEvents([](BfUI::WidgetEvents event, BfUI::Button& button) {
+        if (event == BfUI::WidgetEvents::ButtonPress)
+        {
+            LOG_INFO("Button Pressed");
+        }
+    });
 
 
     /*materialManager->Serialize();*/
@@ -121,19 +117,24 @@ void Editor::OnUpdate(DeltaTime dt)
 
     // NOTE: Screen Space Camera
     Renderer::Begin(m_CameraScreenSpace);
-    std::string fps = std::format("{:.2f} ", fpsAverage);
 
-    auto mousePos = Mouse::GetMousePosition();
-    m_Text->Update(fps, {200, 40, -0.1f}, 24);
 
+    button->Move(glm::vec2(50.0, m_Height - 100.0f));
     Renderer::SubmitUIElement(*button);
+
+    std::string fps = std::format("{:.2f} ", fpsAverage);
+    m_Text->Update(fps, {m_Width - 100.0f, m_Height - 80.0f, -0.1f}, 24);
     Renderer::SubmitText(*m_Text, materialManager->GetMaterial("DefaultText"));
+
     Renderer::End();
 }
 
 void Editor::OnEvent(const Event& event)
 {
-    button->OnEvent(event);
+    for (auto& widget : BfUI::WidgetStack::GetAllWidgets())
+    {
+        widget->OnEvent(event);
+    }
 
     if (event.GetType() == EventType::Drop)
     {
