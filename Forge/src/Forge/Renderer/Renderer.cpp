@@ -7,6 +7,7 @@
 #include "Forge/Core/Log/Log.h"
 #include "Forge/Core/Utils.h"
 #include "Forge/Core/Hash.h"
+#include "Forge/Renderer/RenderableTarget.h"
 #include "glm/fwd.hpp"
 
 namespace Forge {
@@ -17,7 +18,7 @@ std::unique_ptr<UniformBuffer> Renderer::m_UniformBuffer = nullptr;
 std::unordered_map<uint32_t, RendererBatch> Forge::Renderer::m_RenderBatches;
 
 // UI Precalculated Size
-uint32_t Renderer::m_PrecalculatedVerticesSize = 1000;
+uint32_t Renderer::m_PrecalculatedVerticesSize = 100;
 uint32_t Renderer::m_PrecalculatedIndicesSize = m_PrecalculatedVerticesSize * 4;
 
 bool Renderer::Initialize()
@@ -78,7 +79,7 @@ void Renderer::Begin(const std::shared_ptr<Camera>& camera)
         return;
     }
     m_IsInScope = true;
-    // NOTE: Here Begin Shutdown
+    // NOTE: Here Begin
     m_UniformBuffer->Submit(&camera->GetViewProjectionMatrix(), sizeof(glm::mat4));
 
     // NOTE: End
@@ -108,6 +109,54 @@ void Renderer::End()
 }
 
 
+void Renderer::SubmitMesh(const MeshTarget& target)
+{
+    // Get materials and meshes from the target
+    const auto& materials = target.GetMaterials();
+    const auto& meshes = target.GetMeshes();
+
+    // Iterate over each mesh
+    for (const auto& mesh : meshes)
+    {
+        // Get the material for the current mesh
+        uint32_t materialIndex = mesh.MaterialIndex;
+        if (materialIndex >= materials.size())
+        {
+            LOG_WARN("Invalid material index for mesh.");
+            return;
+        }
+
+        const auto& material = materials[materialIndex];
+
+        // Generate a hash for the material to group meshes that share the same material
+        uint8_t materialData[sizeof(material)];
+        std::memcpy(materialData, &material, sizeof(material));
+        uint32_t materialHash = HashFast::GenerateU32BaseHash(materialData, sizeof(materialData));
+
+        // Check if a batch for this material hash exists, if not create a new batch
+        if (m_RenderBatches.find(materialHash) == m_RenderBatches.end())
+        {
+            auto& batch = m_RenderBatches[materialHash];
+            batch.Init(10000, 10000, target.GetLayout());
+
+            std::vector<uint8_t> m_VerticesBytes;
+            auto& vertices = mesh.Vertices;
+            m_VerticesBytes.resize(vertices.size() * sizeof(MeshVertex));
+            memcpy(m_VerticesBytes.data(), vertices.data(), m_VerticesBytes.size());
+            batch.Submit(m_VerticesBytes, mesh.Indices, std::make_shared<Material>(material));
+        }
+        else
+        {
+            auto& batch = m_RenderBatches[materialHash];
+            std::vector<uint8_t> m_VerticesBytes;
+            auto& vertices = mesh.Vertices;
+            m_VerticesBytes.resize(vertices.size() * sizeof(MeshVertex));
+            memcpy(m_VerticesBytes.data(), vertices.data(), m_VerticesBytes.size());
+            batch.Submit(m_VerticesBytes, mesh.Indices, std::make_shared<Material>(material));
+        }
+    }
+}
+
 void Renderer::SubmitMesh(const RenderableTarget& target, const std::shared_ptr<Material>& material)
 {
     uint8_t materialData[sizeof(material)];
@@ -127,6 +176,7 @@ void Renderer::SubmitMesh(const RenderableTarget& target, const std::shared_ptr<
         batch.Submit(target.GetVertices(), target.GetIndices(), material);
     }
 }
+
 
 void Renderer::SubmitText(const RenderableTarget& target, const std::shared_ptr<Material>& material)
 {
@@ -161,13 +211,16 @@ void Renderer::SubmitUIElement(const BfUI::Widget& widget)
     if (m_RenderBatches.find(materialHash) == m_RenderBatches.end())
     {
         auto& batch = m_RenderBatches[materialHash];
+
         batch.Init(m_PrecalculatedVerticesSize, m_PrecalculatedIndicesSize, widget.GetLayout());
-        batch.Submit(widget.GetVertices(), widget.GetIndices(), material);
+        auto& [vertices, indices] = widget.GetDrawList();
+        batch.Submit(vertices, indices, material);
     }
     else
     {
         auto& batch = m_RenderBatches[materialHash];
-        batch.Submit(widget.GetVertices(), widget.GetIndices(), material);
+        auto& [vertices, indices] = widget.GetDrawList();
+        batch.Submit(vertices, indices, material);
     }
 }
 

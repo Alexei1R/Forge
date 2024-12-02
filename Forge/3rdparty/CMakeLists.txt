@@ -3,6 +3,7 @@ add_subdirectory(glad)
 add_subdirectory(glm)
 add_subdirectory(spdlog)
 add_subdirectory(stb)
+add_subdirectory(tinyobjloader)
 
 
 set(MSDF_ATLAS_BUILD_STANDALONE OFF CACHE BOOL "Do not build standalone executable" FORCE)

@@ -7,16 +7,18 @@
 
 
 #include <cstdint>
-#include <functional>
+#include <vector>
 
+
+#include "Forge/BFUI/DrawList.h"
 #include "Forge/Events/Event.h"
-#include "Forge/Renderer/Material.h"
 #include "Forge/Renderer/Buffer/Buffer.h"
-
+#include "Forge/Renderer/Material.h"
+#include "Forge/Renderer/RenderCommand.h"
 
 namespace BfUI {
 
-enum class WidgetEvents : uint32_t
+enum class WidgetEvent : uint32_t
 {
     None = 0,
 
@@ -25,37 +27,47 @@ enum class WidgetEvents : uint32_t
     ButtonRelease = 1 << 1,
     ButtonHover = 1 << 2,
 
-    /* WindowPanel Events */
-    /*.......*/
-    /* Other Events */
+
+    WindowHover = 1 << 2,
+    WindowPress = 1 << 2,
+    WindowRelease = 1 << 2,
 };
 
-struct WidgetVertex
+enum class Edge
 {
-    glm::vec3 Position;
-    glm::vec4 Color;
-    glm::vec2 TexCoord;
-    float TexIndex;
-    float ElementType;
+    None,
+    Left,
+    Right,
+    Bottom,
+    Top,
+    CornerTopLeft,
+    CornerTopRight,
+    CornerBottomLeft,
+    CornerBottomRight
 };
 
-class Widget : public Forge::Event
+class Widget
+
 {
 public:
 public:
-    Widget() = default;
+    Widget();
     virtual ~Widget() = default;
 
 
-    virtual void OnEvent(const Event& event) = 0;
-    virtual const std::vector<uint8_t>& GetVertices() const = 0;
-    virtual const std::vector<uint32_t>& GetIndices() const = 0;
-    virtual const std::shared_ptr<Forge::Material>& GetMaterial() const = 0;
-    virtual const Forge::BufferLayout& GetLayout() const = 0;
-
+    virtual const DrawListData GetDrawList() const = 0;
+    virtual void OnEvent(const Forge::Event& event) = 0;
+    virtual const std::shared_ptr<Forge::Material>& GetMaterial() const
+    {
+        return m_DefaultMaterial;
+    };
+    virtual const Forge::BufferLayout& GetLayout() const
+    {
+        return m_WidgetBufferLayout;
+    };
 
 private:
-    std::shared_ptr<Forge::Material> m_ButtonMaterial;
+    std::shared_ptr<Forge::Material> m_DefaultMaterial;
     Forge::BufferLayout m_WidgetBufferLayout;
 };
 

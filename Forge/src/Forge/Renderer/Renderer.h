@@ -34,9 +34,10 @@ public:
     static bool Shutdown();
     static void Begin(const std::shared_ptr<Camera>& camera);
     static void End();
+    static void SubmitMesh(const MeshTarget& target);
+
     static void SubmitMesh(const RenderableTarget& target,
                            const std::shared_ptr<Material>& material);
-
 
     static void SubmitText(const RenderableTarget& target,
                            const std::shared_ptr<Material>& material);

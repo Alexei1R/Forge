@@ -59,12 +59,10 @@ void RendererBatch::Submit(const std::vector<uint8_t>& vertices,
         return;
     }
 
-
     // NOTE: Copy vertex data
     m_VerticesBytes.insert(m_VerticesBytes.end(),
                            reinterpret_cast<const uint8_t*>(vertices.data()),
                            reinterpret_cast<const uint8_t*>(vertices.data() + vertices.size()));
-
     // NOTE: Copy index data
     for (auto& index : indices)
     {
@@ -90,10 +88,6 @@ void RendererBatch::Flush()
     shader->SetUniform("Metallic", m_CurrentMaterial->Metallic);
     shader->SetUniform("Roughness", m_CurrentMaterial->Roughness);
     shader->SetUniform("Specular", m_CurrentMaterial->Specular);
-    shader->SetUniform("Opacity", m_CurrentMaterial->Opacity);
-    shader->SetUniform("RefractionIndex", m_CurrentMaterial->RefractionIndex);
-    shader->SetUniform("Anisotropy", m_CurrentMaterial->Anisotropy);
-    shader->SetUniform("SubsurfaceScattering", m_CurrentMaterial->SubsurfaceScattering);
 
     for (const auto& [name, value] : m_CurrentMaterial->aditionlParameters)
     {

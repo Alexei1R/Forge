@@ -7,7 +7,9 @@
 
 #include "Forge.h"
 #include "Forge/BFUI/Button.h"
+#include "Forge/BFUI/Window.h"
 #include "Forge/Renderer/Material.h"
+#include "Forge/Renderer/RenderableTargets/Model.h"
 #include "Forge/Renderer/RenderableTargets/Quad.h"
 #include "Forge/Renderer/RenderableTargets/Text.h"
 #include <memory>
@@ -39,7 +41,10 @@ private:
     std::shared_ptr<MaterialManager> materialManager;
     std::shared_ptr<Quad> m_Quad;
 
-    std::shared_ptr<BfUI::Button> button;
+    std::shared_ptr<BfUI::Button> m_Button;
+    std::shared_ptr<BfUI::Window> m_Window;
+
+    std::shared_ptr<Model> m_Mesh;
 
     std::shared_ptr<Text> m_Text;
     float m_Width = 0;

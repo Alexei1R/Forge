@@ -4,14 +4,33 @@
 
 
 #include "RenderCommand.h"
+#include "Forge/Core/Log/Log.h"
+#include "Forge/Renderer/RendererBatch.h"
+#include "Forge/Renderer/Window.h"
 #include <cstdint>
 
 namespace Forge {
 
 glm::vec3 RenderCommand::m_ClearColor = glm::vec3(0.3, 0.3, 0.3);
+std::unordered_map<CursorType, GLFWcursor*> RenderCommand::m_Cursors;
+std::shared_ptr<Window> RenderCommand::m_Window = nullptr;
+void RenderCommand::Init(std::shared_ptr<Window>& window)
+{
+    m_Window = window;
+    m_Cursors[CursorType::Arrow] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+    m_Cursors[CursorType::IBeam] = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
+    m_Cursors[CursorType::Crosshair] = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
+    m_Cursors[CursorType::Hand] = glfwCreateStandardCursor(GLFW_HAND_CURSOR);
+    m_Cursors[CursorType::HResize] = glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
+    m_Cursors[CursorType::VResize] = glfwCreateStandardCursor(GLFW_VRESIZE_CURSOR);
+    m_Cursors[CursorType::ResizeAll] = glfwCreateStandardCursor(GLFW_RESIZE_ALL_CURSOR);
+}
 
 
-RenderCommand::RenderCommand() {}
+void RenderCommand::SetCursorType(CursorType type)
+{
+    glfwSetCursor(static_cast<GLFWwindow*>(m_Window->GetNativeWindow()), m_Cursors[type]);
+}
 
 void RenderCommand::SetClearColor(glm::vec3 clearColor)
 {

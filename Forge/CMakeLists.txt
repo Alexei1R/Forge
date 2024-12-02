@@ -23,6 +23,7 @@ target_link_libraries(ForgeLIB
         glad
         stb
         msdf-atlas-gen
+        tinyobjloader
 )
 
 

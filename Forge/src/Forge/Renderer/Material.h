@@ -58,13 +58,9 @@ struct Material
     glm::vec4 Color = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
     glm::vec3 EmissiveColor = glm::vec3(0.0f);
 
+    float Specular = 0.5f;
     float Metallic = 0.0f;
     float Roughness = 0.5f;
-    float Specular = 0.5f;
-    float Opacity = 1.0f;
-    float RefractionIndex = 1.0f;
-    float Anisotropy = 0.0f;
-    float SubsurfaceScattering = 0.0f;
 
 
     bool IsTransparent = false;

@@ -66,7 +66,13 @@ std::pair<double, double> const Mouse::GetMouseDeltaMovement()
 
 std::pair<double, double> const Mouse::GetMouseDeltaScroll()
 {
-    return {scrollDx, scrollDy};
+    double tempScrollDx = scrollDx;
+    double tempScrollDy = scrollDy;
+
+    scrollDx = 0.0;
+    scrollDy = 0.0;
+
+    return {tempScrollDx, tempScrollDy};
 }
 
 // Initialize static member variables

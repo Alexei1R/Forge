@@ -8,12 +8,15 @@
 
 #include "Editor.h"
 #include "Forge/BFUI/Button.h"
+#include "Forge/BFUI/DrawList.h"
+#include "Forge/BFUI/Theme.h"
 #include "Forge/BFUI/WidgetStack.h"
 #include "Forge/Core/Log/Log.h"
 #include "Forge/Events/Event.h"
 #include "Forge/Events/ImplEvent.h"
 #include "Forge/Renderer/Camera/Camera.h"
 #include "Forge/Renderer/Camera/CameraController.h"
+#include "Forge/Renderer/RenderableTargets/Model.h"
 
 namespace Forge {
 
@@ -24,7 +27,6 @@ Editor::~Editor() {}
 
 void Editor::OnAttach()
 {
-    BfUI::Theme::SetDarkTheme();
     RenderCommand::SetClearColor(glm::vec3(0.1));
 
     m_Camera =
@@ -77,13 +79,17 @@ void Editor::OnAttach()
     // NOTE: TEST the widgets
     // Button
 
-    button = BfUI::Button::Create(glm::vec2(50.0f, 50.0f), glm::vec2(100.0f, 50.0f), "Test");
-    button->SubscribeEvents([](BfUI::WidgetEvents event, BfUI::Button& button) {
-        if (event == BfUI::WidgetEvents::ButtonPress)
+    m_Button = BfUI::Button::Create(glm::vec2(50.0f, 50.0f), glm::vec2(100.0f, 50.0f), "Test 1");
+    m_Button->SubscribeEvents([](BfUI::WidgetEvent event, BfUI::Widget& button) {
+        if (event == BfUI::WidgetEvent::ButtonPress)
         {
             LOG_INFO("Button Pressed");
         }
     });
+    m_Mesh = std::make_shared<Model>("/home/toor/Downloads/cube.obj");
+
+
+    m_Window = BfUI::Window::Create("First Window");
 
 
     /*materialManager->Serialize();*/
@@ -111,7 +117,8 @@ void Editor::OnUpdate(DeltaTime dt)
     CameraController::Update(m_Camera);
     Renderer::Begin(m_Camera);
 
-    Renderer::SubmitMesh(*m_Quad, materialManager->GetMaterial("QuadMaterial"));
+
+    Renderer::SubmitMesh(*m_Mesh);
     Renderer::End();
 
 
@@ -119,8 +126,11 @@ void Editor::OnUpdate(DeltaTime dt)
     Renderer::Begin(m_CameraScreenSpace);
 
 
-    button->Move(glm::vec2(50.0, m_Height - 100.0f));
-    Renderer::SubmitUIElement(*button);
+    m_Button->Move(glm::vec2(50.0, m_Height - 100.0f));
+    Renderer::SubmitUIElement(*m_Window);
+    Renderer::SubmitUIElement(*m_Button);
+    /*Renderer::SubmitUIElement(*m_Canvas);*/
+
 
     std::string fps = std::format("{:.2f} ", fpsAverage);
     m_Text->Update(fps, {m_Width - 100.0f, m_Height - 80.0f, -0.1f}, 24);

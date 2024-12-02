@@ -7,6 +7,7 @@
 #include "Forge/Events/Event.h"
 #include "Forge/Events/KeyCodes.h"
 
+#include "Forge/Renderer/Camera/Camera.h"
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/fwd.hpp"
 
@@ -104,6 +105,26 @@ void CameraController::Update(std::shared_ptr<Camera>& camera)
             m_FirstMouseTouch = true;
         }
     }
+
+    auto [scrollX, scrollY] = Mouse::GetMouseDeltaScroll();
+
+
+    if (camera->m_CameraProjection != CameraProjection::ScreenSpaceCamera)
+    {
+        camera->m_Radius += scrollY * -camera->m_ScrollSens;
+        if (camera->m_Radius <= 0.01f)
+        {
+            camera->m_Radius = 0.01f;
+        }
+        camera->m_Position =
+            camera->m_Target +
+            glm::vec3(camera->m_Radius * cos(glm::radians(camera->m_RotationYaw)) *
+                          cos(glm::radians(camera->m_RotationPitch)),
+                      camera->m_Radius * sin(glm::radians(camera->m_RotationPitch)),
+                      camera->m_Radius * sin(glm::radians(camera->m_RotationYaw)) *
+                          cos(glm::radians(camera->m_RotationPitch)));
+    }
+
 
     camera->m_ViewMatrix = glm::lookAt(camera->m_Position, camera->m_Target, m_Up);
 }

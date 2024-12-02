@@ -1,4 +1,3 @@
-# clang-format version 12
 # https://releases.llvm.org/12.0.0/tools/clang/docs/ClangFormatStyleOptions.html
 BasedOnStyle: LLVM
 AccessModifierOffset: -4
@@ -101,4 +100,3 @@ SpacesInSquareBrackets: false
 Standard: c++17
 TabWidth: 8
 UseTab: Never
-#WhitespaceSensitiveMacros: ["CV_Check"]

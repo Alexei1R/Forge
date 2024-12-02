@@ -9,6 +9,7 @@
 #include "Forge/Core/Log/Log.h"
 #include "Forge/Events/ImplEvent.h"
 
+#include "Forge/Renderer/RenderCommand.h"
 #include "Forge/Renderer/ShaderManager.h"
 #include "Forge/Renderer/TextureManager.h"
 #include "Forge/Renderer/Renderer.h"
@@ -30,6 +31,7 @@ Forge::Forge()
     m_Window->EnableVSynk(false);
 
     m_GraphicsContext = std::make_unique<Context>(m_Window);
+    RenderCommand::Init(m_Window);
 }
 
 Forge::~Forge() {}

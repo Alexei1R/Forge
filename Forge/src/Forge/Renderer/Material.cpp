@@ -57,10 +57,6 @@ void Material::Serialize()
     config.AddEntry("Metallic", Metallic);
     config.AddEntry("Roughness", Roughness);
     config.AddEntry("Specular", Specular);
-    config.AddEntry("Opacity", Opacity);
-    config.AddEntry("RefractionIndex", RefractionIndex);
-    config.AddEntry("Anisotropy", Anisotropy);
-    config.AddEntry("SubsurfaceScattering", SubsurfaceScattering);
     config.AddEntry("ShaderHandle", (int)ShaderHandle.GetValue());
 
     // Salvăm identificatorii texturilor
@@ -196,11 +192,8 @@ void MaterialManager::Deserialize()
                 material->Metallic = config.GetEntry<float>("Metallic")->GetData();
                 material->Roughness = config.GetEntry<float>("Roughness")->GetData();
                 material->Specular = config.GetEntry<float>("Specular")->GetData();
-                material->Opacity = config.GetEntry<float>("Opacity")->GetData();
-                material->RefractionIndex = config.GetEntry<float>("RefractionIndex")->GetData();
-                material->Anisotropy = config.GetEntry<float>("Anisotropy")->GetData();
-                material->SubsurfaceScattering =
-                    config.GetEntry<float>("SubsurfaceScattering")->GetData();
+
+
                 material->ShaderHandle = Handle(config.GetEntry<int>("ShaderHandle")->GetData());
 
                 // Reconstruim identificatorii texturilor

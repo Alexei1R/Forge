@@ -43,4 +43,5 @@ void Context::SwapBuffers()
     glfwSwapBuffers(m_GLFWWindowPtr);
 }
 
+
 }  // namespace Forge
