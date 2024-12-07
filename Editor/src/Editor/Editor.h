@@ -41,8 +41,8 @@ private:
     std::shared_ptr<MaterialManager> materialManager;
     std::shared_ptr<Quad> m_Quad;
 
-    std::shared_ptr<BfUI::Button> m_Button;
     std::shared_ptr<BfUI::Window> m_Window;
+    std::shared_ptr<BfUI::Button> m_Button;
 
     std::shared_ptr<Model> m_Mesh;
 

@@ -19,17 +19,25 @@ protected:
 protected:
     const bool IsInBounds(const glm::vec2& point) const;
     const Edge IsNearEdge(const vec2i& position, const vec2i& size, const int threshold = 10) const;
-    const DrawListData GetDrawList() const override;
-    void OnEvent(const Forge::Event& event) override;
+    const DrawListData GetDrawList() override;
 
     void HandleResize(const vec2i& delta, Edge selectedEdge);
 
 
-    void Update();
-
 public:
     static std::shared_ptr<Window> Create(const std::string& label);
 
+    void AddChild(std::shared_ptr<Widget> child) override;
+
+    void OnEvent(const Forge::Event& event) override;
+    void Update();
+
+    vec2i GetPosition() const override;
+    vec2i GetSize() const override;
+    void SetPosition(const vec2i& position) override;
+    void SetSize(const vec2i& size) override;
+
+    void SetParent(std::shared_ptr<Widget> parentWidget) override;
 
 private:
     std::string m_WindowName;
@@ -47,6 +55,10 @@ private:
     vec2i m_InitialWindowPosition;
     vec2i m_InitialWindowSize;
     Edge selectedEdge = Edge::None;
+
+    std::shared_ptr<Widget> m_ParentWidget;
+    // NOTE: Layout Usage Code
+    std::vector<std::shared_ptr<Widget>> m_Children;
 };
 
 

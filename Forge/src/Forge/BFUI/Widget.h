@@ -50,22 +50,37 @@ class Widget
 
 {
 public:
-public:
     Widget();
     virtual ~Widget() = default;
 
 
-    virtual const DrawListData GetDrawList() const = 0;
+    virtual const DrawListData GetDrawList() = 0;
     virtual void OnEvent(const Forge::Event& event) = 0;
-    virtual const std::shared_ptr<Forge::Material>& GetMaterial() const
+
+
+    virtual const std::shared_ptr<Forge::Material>& GetMaterial() const;
+    virtual const Forge::BufferLayout& GetLayout() const;
+
+    virtual void AddChild(std::shared_ptr<Widget> child) = 0;
+
+
+    virtual void SetParent(std::shared_ptr<Widget> parentWidget) = 0;
+
+
+    // Layout properties
+    virtual void SetPosition(const vec2i& position) {};
+    virtual void SetSize(const vec2i& size) {};
+    virtual vec2i GetPosition() const
     {
-        return m_DefaultMaterial;
+        return vec2i(0);
     };
-    virtual const Forge::BufferLayout& GetLayout() const
+    virtual vec2i GetSize() const
     {
-        return m_WidgetBufferLayout;
+        return vec2i(0);
     };
 
+
+protected:
 private:
     std::shared_ptr<Forge::Material> m_DefaultMaterial;
     Forge::BufferLayout m_WidgetBufferLayout;

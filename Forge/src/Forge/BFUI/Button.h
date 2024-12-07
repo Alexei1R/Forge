@@ -16,22 +16,33 @@ class Button : public Widget, public std::enable_shared_from_this<Button>
 {
 protected:
     using EventCallback = std::function<void(WidgetEvent, Widget&)>;
-    Button(const vec2i& position, const vec2i& size, const std::string& label);
+    Button(const vec2i& size, const std::string& label);
+
+    const DrawListData GetDrawList() override;
 
     void OnEvent(const Forge::Event& event) override;
-    const DrawListData GetDrawList() const override;
 
 public:
-    static std::shared_ptr<Button>
-        Create(const vec2i& position, const vec2i& size, const std::string& label);
-    ~Button() = default;
+    static std::shared_ptr<Button> Create(const vec2i& size, const std::string& label);
+    virtual ~Button();
 
     void SubscribeEvents(EventCallback callback);
 
     void Move(vec2i position);
 
 
+    vec2i GetPosition() const override;
+    vec2i GetSize() const override;
+    void SetPosition(const vec2i& position) override;
+    void SetSize(const vec2i& size) override;
+
     void Update();
+
+    void SetParent(std::shared_ptr<Widget> parentWidget) override;
+
+
+    void AddChild(std::shared_ptr<Widget> child) override {}
+
 
 private:
     const bool IsInBounds(const glm::vec2& point) const;
@@ -51,6 +62,9 @@ private:
     vec4f m_ColorBackgroundDefault;
     vec4f m_ColorBackgroundHover;
     vec4f m_ColorBackgroundPressed;
+
+
+    std::shared_ptr<Widget> m_ParentWidget;
 };
 
 }  // namespace BfUI

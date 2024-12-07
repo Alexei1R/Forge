@@ -18,7 +18,7 @@ std::unique_ptr<UniformBuffer> Renderer::m_UniformBuffer = nullptr;
 std::unordered_map<uint32_t, RendererBatch> Forge::Renderer::m_RenderBatches;
 
 // UI Precalculated Size
-uint32_t Renderer::m_PrecalculatedVerticesSize = 100;
+uint32_t Renderer::m_PrecalculatedVerticesSize = 1000;
 uint32_t Renderer::m_PrecalculatedIndicesSize = m_PrecalculatedVerticesSize * 4;
 
 bool Renderer::Initialize()
@@ -199,7 +199,7 @@ void Renderer::SubmitText(const RenderableTarget& target, const std::shared_ptr<
 }
 
 
-void Renderer::SubmitUIElement(const BfUI::Widget& widget)
+void Renderer::SubmitUIElement(BfUI::Widget& widget)
 {
     const auto& material = widget.GetMaterial();
 

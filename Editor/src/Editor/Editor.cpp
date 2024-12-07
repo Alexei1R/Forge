@@ -10,6 +10,8 @@
 #include "Forge/BFUI/Button.h"
 #include "Forge/BFUI/DrawList.h"
 #include "Forge/BFUI/Theme.h"
+#include "Forge/BFUI/Column.h"
+#include "Forge/BFUI/Row.h"
 #include "Forge/BFUI/WidgetStack.h"
 #include "Forge/Core/Log/Log.h"
 #include "Forge/Events/Event.h"
@@ -36,7 +38,7 @@ void Editor::OnAttach()
 
 
     m_CameraScreenSpace =
-        std::make_shared<Camera>(CameraProjection::ScreenSpaceCamera, glm::vec3(0.0, 0.0, 1.0));
+        std::make_shared<Camera>(CameraProjection::ScreenSpaceCamera, glm::vec3(0.0, 0.0, 0.1));
 
     CameraController::Update(m_CameraScreenSpace);
     Renderer::Initialize();
@@ -79,17 +81,37 @@ void Editor::OnAttach()
     // NOTE: TEST the widgets
     // Button
 
-    m_Button = BfUI::Button::Create(glm::vec2(50.0f, 50.0f), glm::vec2(100.0f, 50.0f), "Test 1");
-    m_Button->SubscribeEvents([](BfUI::WidgetEvent event, BfUI::Widget& button) {
-        if (event == BfUI::WidgetEvent::ButtonPress)
-        {
-            LOG_INFO("Button Pressed");
-        }
-    });
     m_Mesh = std::make_shared<Model>("/home/toor/Downloads/cube.obj");
 
 
     m_Window = BfUI::Window::Create("First Window");
+
+
+    auto btn1 = BfUI::Button::Create({100, 50}, "Test1");
+    btn1->SubscribeEvents([](BfUI::WidgetEvent event, BfUI::Widget& button) {
+        if (event == BfUI::WidgetEvent::ButtonPress)
+        {
+            LOG_INFO("Button 1 Pressed");
+        }
+    });
+
+
+    auto btn2 = BfUI::Button::Create({100, 50}, "Test2");
+    btn2->SubscribeEvents([](BfUI::WidgetEvent event, BfUI::Widget& button) {
+        if (event == BfUI::WidgetEvent::ButtonPress)
+        {
+            LOG_INFO("Button 2 Pressed");
+        }
+    });
+    auto btn3 = BfUI::Button::Create({100, 50}, "Test3");
+    auto btn4 = BfUI::Button::Create({100, 50}, "Test4");
+
+
+    m_Window->AddChild(BfUI::Column::Create({
+        BfUI::Button::Create({100, 50}, "First"),
+        BfUI::Row::Create({btn1, btn2}),
+        BfUI::Row::Create({btn3, btn4}),
+    }));
 
 
     /*materialManager->Serialize();*/
@@ -114,22 +136,20 @@ void Editor::OnUpdate(DeltaTime dt)
     RenderCommand::Clear();
 
 
-    CameraController::Update(m_Camera);
-    Renderer::Begin(m_Camera);
-
-
-    Renderer::SubmitMesh(*m_Mesh);
-    Renderer::End();
+    /*CameraController::Update(m_Camera);*/
+    /*Renderer::Begin(m_Camera);*/
+    /**/
+    /**/
+    /*Renderer::SubmitMesh(*m_Mesh);*/
+    /*Renderer::End();*/
 
 
     // NOTE: Screen Space Camera
     Renderer::Begin(m_CameraScreenSpace);
 
 
-    m_Button->Move(glm::vec2(50.0, m_Height - 100.0f));
     Renderer::SubmitUIElement(*m_Window);
-    Renderer::SubmitUIElement(*m_Button);
-    /*Renderer::SubmitUIElement(*m_Canvas);*/
+    /*Renderer::SubmitUIElement(*m_Button);*/
 
 
     std::string fps = std::format("{:.2f} ", fpsAverage);
@@ -141,10 +161,15 @@ void Editor::OnUpdate(DeltaTime dt)
 
 void Editor::OnEvent(const Event& event)
 {
-    for (auto& widget : BfUI::WidgetStack::GetAllWidgets())
-    {
-        widget->OnEvent(event);
-    }
+    /*for (auto& widget : BfUI::WidgetStack::GetAllWidgets())*/
+    /*{*/
+    /*    widget->OnEvent(event);*/
+    /*}*/
+    /**/
+
+    m_Window->OnEvent(event);
+    m_Window->Update();
+
 
     if (event.GetType() == EventType::Drop)
     {

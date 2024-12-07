@@ -5,6 +5,7 @@
 #include "Button.h"
 #include "Forge/BFUI/DrawList.h"
 #include "Forge/BFUI/Theme.h"
+#include "Forge/BFUI/Types.h"
 #include "Forge/Core/Log/Log.h"
 #include "Forge/Events/ImplEvent.h"
 #include "Forge/Renderer/RenderCommand.h"
@@ -18,40 +19,69 @@
 namespace BfUI {
 
 
-std::shared_ptr<Button>
-    Button::Create(const vec2i& position, const vec2i& size, const std::string& label)
+std::shared_ptr<Button> Button::Create(const vec2i& size, const std::string& label)
 {
-    auto button = std::shared_ptr<Button>(new Button(position, size, label));
-    WidgetStack::AddWidget(button);
-    return button;
+    return std::shared_ptr<Button>(new Button(size, label));
 }
 
 
-Button::Button(const vec2i& position, const vec2i& size, const std::string& label) :
-    m_BtnPosition(position), m_BtnSize(size), m_BtnLabel(label)
+Button::Button(const vec2i& size, const std::string& label) :
+    m_BtnPosition({50, 50}), m_BtnSize(size), m_BtnLabel(label)
 
 {
-    LOG_WARN("Creating Button");
-
-
     // NOTE: Iniditialize With values from theme
     m_ColorBackground = Theme::GetColor(WidgetType::Button, WidgetState::Default);
     m_ColorBackgroundDefault = Theme::GetColor(WidgetType::Button, WidgetState::Default);
     m_ColorBackgroundHover = Theme::GetColor(WidgetType::Button, WidgetState::Hover);
     m_ColorBackgroundPressed = Theme::GetColor(WidgetType::Button, WidgetState::Pressed);
+    Update();
 }
+
+
+Button::~Button() {}
+
 
 void Button::Update()
 {
     auto& panelData = DrawList::DrawPanel(m_BtnPosition, m_BtnSize, m_ColorBackground);
     auto& textData =
         DrawList::DrawText(m_BtnLabel, m_BtnPosition + (m_BtnSize / 5), 24, m_ColorBackground, 0);
-
     m_DrawListData = textData + panelData;
 }
 
 
-const DrawListData Button::GetDrawList() const
+void Button::SetParent(std::shared_ptr<Widget> parentWidget)
+{
+    m_ParentWidget = parentWidget;
+}
+
+vec2i Button::GetPosition() const
+{
+    return m_BtnPosition;
+}
+vec2i Button::GetSize() const
+{
+    return m_BtnSize;
+}
+void Button::SetPosition(const vec2i& position)
+{
+    if (m_BtnPosition != position)
+    {
+        m_BtnPosition = position;
+        Update();
+    }
+}
+void Button::SetSize(const vec2i& size)
+{
+    if (m_BtnSize != size)
+    {
+        m_BtnSize = size;
+        Update();
+    }
+}
+
+
+const DrawListData Button::GetDrawList()
 {
     return m_DrawListData;
 };
@@ -103,8 +133,8 @@ void Button::OnEvent(const Forge::Event& event)
                 {
                     m_EventCallback(WidgetEvent::ButtonPress, *this);
                 }
-                Update();
                 m_ColorBackground = m_ColorBackgroundPressed;
+                Update();
             }
         }
         // Handle mouse release
@@ -118,8 +148,8 @@ void Button::OnEvent(const Forge::Event& event)
                     m_EventCallback(WidgetEvent::ButtonRelease, *this);
                 }
 
-                Update();
                 m_ColorBackground = m_ColorBackgroundDefault;
+                Update();
             }
         }
     }
@@ -142,16 +172,16 @@ void Button::OnEvent(const Forge::Event& event)
                 }
                 if (!m_IsPressed)
                 {
-                    Update();
                     m_ColorBackground = m_ColorBackgroundHover;
+                    Update();
                 }
             }
             else if (!m_IsHovered && wasHovered && !m_IsPressed)
             {
                 Forge::RenderCommand::SetCursorType(Forge::CursorType::Arrow);
 
-                Update();
                 m_ColorBackground = m_ColorBackgroundDefault;
+                Update();
             }
         }
     }

@@ -57,6 +57,23 @@ struct DrawListData
 
         return result;
     }
+
+    DrawListData& operator+=(const DrawListData& other)
+    {
+        // Calculate vertex offset before adding new vertices
+        uint32_t vertexOffset = Vertices.size() / sizeof(DrawListVertex);
+
+        // Append other vertices
+        Vertices.insert(Vertices.end(), other.Vertices.begin(), other.Vertices.end());
+
+        // Append other indices with offset
+        for (uint32_t index : other.Indices)
+        {
+            Indices.push_back(index + vertexOffset);
+        }
+
+        return *this;
+    }
 };
 
 class DrawList

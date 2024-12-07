@@ -5,6 +5,7 @@
 #include "Window.h"
 #include "Forge/BFUI/Theme.h"
 #include "Forge/BFUI/Types.h"
+#include "Forge/Core/Log/Log.h"
 #include "Forge/Events/ImplEvent.h"
 #include "Forge/Renderer/RenderCommand.h"
 #include "WidgetStack.h"
@@ -13,16 +14,14 @@ namespace BfUI {
 
 std::shared_ptr<Window> Window::Create(const std::string& label)
 {
-    auto window = std::shared_ptr<Window>(new Window(label));
-    WidgetStack::AddWidget(window);
-    return window;
+    return std::shared_ptr<Window>(new Window(label));
 }
 
 
 Window::Window(const std::string& label) : m_WindowName(label)
 {
-    m_WindowPosition = {50, 50};
-    m_WindowSize = {200, 250};
+    m_WindowPosition = {0, 50};
+    m_WindowSize = {400, 250};
 
     // NOTE: Set DefaultWindowColor
     m_ColorBackground = Theme::GetColor(WidgetType::Window, WidgetState::Default);
@@ -30,13 +29,58 @@ Window::Window(const std::string& label) : m_WindowName(label)
 }
 
 
-void Window::Update()
+void Window::SetParent(std::shared_ptr<Widget> parentWidget)
 {
-    auto& panelData = DrawList::DrawPanel(m_WindowPosition, m_WindowSize, m_ColorBackground);
-    m_DrawListData = panelData;
+    m_ParentWidget = parentWidget;
 }
 
-const DrawListData Window::GetDrawList() const
+
+vec2i Window::GetPosition() const
+{
+    return m_WindowPosition;
+}
+vec2i Window::GetSize() const
+{
+    return m_WindowSize;
+}
+void Window::SetPosition(const vec2i& position)
+{
+    if (m_WindowPosition != position)
+    {
+        m_WindowPosition = position;
+        Update();
+    }
+}
+void Window::SetSize(const vec2i& size)
+{
+    if (m_WindowSize != size)
+    {
+        m_WindowSize = size;
+        Update();
+    }
+}
+
+void Window::AddChild(std::shared_ptr<Widget> child)
+{
+    child->SetParent(shared_from_this());
+    m_Children.push_back(child);
+    Update();
+}
+
+void Window::Update()
+{
+    DrawListData dataStore;
+    for (auto& child : m_Children)
+    {
+        DrawListData data = child->GetDrawList();
+
+        dataStore += data;
+    }
+    m_DrawListData =
+        dataStore + DrawList::DrawPanel(m_WindowPosition, m_WindowSize, m_ColorBackground);
+}
+
+const DrawListData Window::GetDrawList()
 {
     return m_DrawListData;
 }
@@ -44,6 +88,10 @@ const DrawListData Window::GetDrawList() const
 
 void Window::OnEvent(const Forge::Event& event)
 {
+    for (auto& child : m_Children)
+    {
+        child->OnEvent(event);
+    }
     auto [x, y] = Forge::Mouse::GetMousePosition();
     auto [appX, appY] = Forge::ApplicationStats::GetApplicationSize();
 

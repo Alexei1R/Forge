@@ -19,6 +19,7 @@ enum class CameraProjection
     PerspectiveCamera,
     OrthographicCamera,
     ScreenSpaceCamera,
+    Test,
 };
 
 // NOTE: Forward Declaration

@@ -62,7 +62,7 @@ void Theme::SetDarkTheme()
     SetSize(WidgetType::Border, 2.0f);
 
     // Window Colors
-    SetColor(WidgetType::Window, WidgetState::Default, glm::vec4(0.195f, 0.195f, 0.195f, 1.000f));
+    SetColor(WidgetType::Window, WidgetState::Default, glm::vec4(0.195f, 0.195f, 0.195f, 0.5f));
     SetRounding(WidgetType::Window, 8.0f);
 
     // Button Colors
