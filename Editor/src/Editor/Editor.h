@@ -31,22 +31,16 @@ public:
 
 
 private:
-    std::shared_ptr<Camera> m_Camera;
     std::shared_ptr<Camera> m_CameraScreenSpace;
 
 
     float timeAccumulator = 0.0f;
     int frameCount = 0;
     float fpsAverage = 0.0f;
-    std::shared_ptr<MaterialManager> materialManager;
-    std::shared_ptr<Quad> m_Quad;
 
     std::shared_ptr<BfUI::Window> m_Window;
-    std::shared_ptr<BfUI::Button> m_Button;
 
-    std::shared_ptr<Model> m_Mesh;
 
-    std::shared_ptr<Text> m_Text;
     float m_Width = 0;
     float m_Height = 0;
 };

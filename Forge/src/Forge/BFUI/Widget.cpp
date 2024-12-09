@@ -52,7 +52,9 @@ const std::shared_ptr<Forge::Material>& Widget::GetMaterial() const
 
 const Forge::BufferLayout& Widget::GetLayout() const
 {
-    return m_WidgetBufferLayout;
-};
+    {
+        return m_WidgetBufferLayout;
+    };
+}
 
 }  // namespace BfUI

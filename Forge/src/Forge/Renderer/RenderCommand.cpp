@@ -65,7 +65,7 @@ void RenderCommand::Draw(const std::shared_ptr<VertexArrayBuffer>& buffer,
             break;
     }
 
-    glDrawElements(mode, buffer->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+    glDrawArrays(mode, 0, buffer->GetIndexBuffer()->GetCount());
 }
 
 void RenderCommand::DrawIndexed(const std::shared_ptr<VertexArrayBuffer>& buffer,

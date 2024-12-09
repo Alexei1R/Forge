@@ -24,28 +24,30 @@ const DrawListData DrawList::DrawPanel(const vec2i position,
                                        const vec4f color,
                                        float const textureIndex)
 {
-    vec2i m_BottomLeft = position;
-    vec2i m_TopRight = position + size;
-    vec2i m_TopLeft = vec2i(m_BottomLeft.x, m_TopRight.y);
-    vec2i m_BottomRight = vec2i(m_TopRight.x, m_BottomLeft.y);
+    // Now 'position' is the top-left corner of the panel.
+    vec2i m_TopLeft = position;
+    vec2i m_TopRight = vec2i(position.x + size.x, position.y);
+    vec2i m_BottomLeft = vec2i(position.x, position.y + size.y);
+    vec2i m_BottomRight = position + size;
 
     float type = (float)WidgetElementType::Panel;
 
+    // UV coordinates are now set with the top at v = 0.0f and bottom at v = 1.0f
     std::vector<DrawListVertex> vertices = {
-        {{m_TopLeft.x, m_TopLeft.y}, color, {0.0f, 1.0f}, textureIndex, size, type},
-        {{m_TopRight.x, m_TopRight.y}, color, {1.0f, 1.0f}, textureIndex, size, type},
-        {{m_BottomRight.x, m_BottomRight.y}, color, {1.0f, 0.0f}, textureIndex, size, type},
-        {{m_BottomLeft.x, m_BottomLeft.y}, color, {0.0f, 0.0f}, textureIndex, size, type}};
+        {{m_TopLeft.x, m_TopLeft.y}, color, {0.0f, 0.0f}, textureIndex, size, type},
+        {{m_TopRight.x, m_TopRight.y}, color, {1.0f, 0.0f}, textureIndex, size, type},
+        {{m_BottomRight.x, m_BottomRight.y}, color, {1.0f, 1.0f}, textureIndex, size, type},
+        {{m_BottomLeft.x, m_BottomLeft.y}, color, {0.0f, 1.0f}, textureIndex, size, type}};
 
     std::vector<uint32_t> indices = {0, 1, 2, 2, 3, 0};
 
     m_VerticesSize += vertices.size();
     m_IndicesSize += indices.size();
 
-
     std::vector<uint8_t> verticesBytes;
     verticesBytes.resize(vertices.size() * sizeof(DrawListVertex));
     std::memcpy(verticesBytes.data(), vertices.data(), verticesBytes.size());
+
     return {verticesBytes, indices};
 }
 

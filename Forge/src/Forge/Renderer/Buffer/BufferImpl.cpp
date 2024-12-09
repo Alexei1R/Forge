@@ -110,7 +110,7 @@ void VertexBuffer::Unbind() const
 //========================================
 
 IndexBuffer::IndexBuffer(uint32_t* data, uint32_t count, BufferDrawMode drawMode) :
-    m_Count(count / sizeof(uint32_t)), m_DrawMode(drawMode)
+    m_Count(count), m_DrawMode(drawMode)
 {
     glGenBuffers(1, &m_RendererID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID);

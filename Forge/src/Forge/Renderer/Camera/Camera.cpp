@@ -5,6 +5,7 @@
 
 #include "Camera.h"
 
+#include "Forge/Core/Log/Log.h"
 #include "glm/fwd.hpp"
 #include "glm/ext/matrix_clip_space.hpp"
 
@@ -53,19 +54,7 @@ void Camera::RecalculateProjection(uint32_t width, uint32_t height)
         float bottom = static_cast<float>(height);
         float top = 0.0f;
 
-        m_ProjMatrix = glm::ortho(left, bottom, right, top, m_NearClip, m_FarClip);
-    }
-
-    else if (m_CameraProjection == CameraProjection::Test)
-    {
-        m_ProjMatrix = glm::ortho(
-            0.0f,  // Left
-            static_cast<float>(width),  // Right
-            static_cast<float>(height),  // Bottom
-            0.0f,  // Top
-            -1.0f,  // Near
-            1.0f  // Far
-        );
+        m_ProjMatrix = glm::ortho(left, right, bottom, top, m_NearClip, m_FarClip);
     }
     else
     {
@@ -80,6 +69,7 @@ void Camera::RecalculateProjection(uint32_t width, uint32_t height)
             m_NearClip,
             m_FarClip);
     }
+    m_ViewMatrix = glm::mat4(1.0);
 }
 
 

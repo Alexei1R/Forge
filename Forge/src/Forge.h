@@ -47,5 +47,12 @@
 #include "Forge/Renderer/Camera/Camera.h"
 #include "Forge/Renderer/Camera/CameraController.h"
 
+// UI
+#include "Forge/BFUI/Button.h"
+#include "Forge/BFUI/DrawList.h"
+#include "Forge/BFUI/Theme.h"
+#include "Forge/BFUI/Column.h"
+#include "Forge/BFUI/Row.h"
+
 
 #endif  // FORGE_H
