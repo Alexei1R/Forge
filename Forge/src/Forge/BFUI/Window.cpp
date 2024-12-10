@@ -7,10 +7,10 @@
 #include "Forge/BFUI/Types.h"
 #include "Forge/Core/Log/Log.h"
 #include "Forge/Events/ImplEvent.h"
+#include "Forge/Events/KeyCodes.h"
 #include "Forge/Renderer/RenderCommand.h"
-#include "WidgetStack.h"
 
-namespace BfUI {
+namespace bf {
 
 std::shared_ptr<Window> Window::Create(const std::string& label)
 {
@@ -18,54 +18,16 @@ std::shared_ptr<Window> Window::Create(const std::string& label)
 }
 
 
-Window::Window(const std::string& label) : m_WindowName(label)
+Window::Window(const std::string& label) : m_Name(label), m_MinSize(30, 30), m_Padding(vec4i(0))
 {
-    m_WindowPosition = {250, 250};
-    m_WindowSize = {500, 500};
+    m_Position = {250, 250};
+    m_Size = {500, 500};
 
     // NOTE: Set DefaultWindowColor
     m_ColorBackground = Theme::GetColor(WidgetType::Window, WidgetState::Default);
     Update();
 }
 
-
-void Window::SetParent(std::shared_ptr<Widget> parentWidget)
-{
-    m_ParentWidget = parentWidget;
-}
-
-
-vec2i Window::GetPosition() const
-{
-    return m_WindowPosition;
-}
-vec2i Window::GetSize() const
-{
-    return m_WindowSize;
-}
-void Window::SetPosition(const vec2i& position)
-{
-    if (m_WindowPosition != position)
-    {
-        m_WindowPosition = position;
-        Update();
-    }
-}
-void Window::SetSize(const vec2i& size)
-{
-    if (m_WindowSize != size)
-    {
-        m_WindowSize = size;
-        Update();
-    }
-}
-
-void Window::AddChild(std::shared_ptr<Widget> child)
-{
-    child->SetParent(shared_from_this());
-    m_Children.push_back(child);
-    Update();
-}
 
 void Window::Update()
 {
@@ -76,9 +38,7 @@ void Window::Update()
 
         dataStore += data;
     }
-    /*LOG_WARN("Size {} {}", m_WindowSize.x, m_WindowSize.y)*/
-    m_DrawListData =
-        dataStore + DrawList::DrawPanel(m_WindowPosition, m_WindowSize, m_ColorBackground);
+    m_DrawListData = dataStore + DrawList::DrawPanel(m_Position, m_Size, m_ColorBackground);
 }
 
 const DrawListData Window::GetDrawList()
@@ -86,6 +46,61 @@ const DrawListData Window::GetDrawList()
     return m_DrawListData;
 }
 
+
+vec2i Window::GetPosition() const
+{
+    return m_Position;
+}
+vec2i Window::GetSize() const
+{
+    return m_Size;
+}
+std::shared_ptr<Widget> Window::SetPosition(const vec2i& position)
+{
+    if (m_Position != position)
+    {
+        m_Position = position;
+        Update();
+    }
+    return shared_from_this();
+}
+
+std::shared_ptr<Widget> Window::SetSize(const vec2i& size)
+{
+    if (m_Size != size)
+    {
+        m_Size = size;
+        Update();
+    }
+
+    return shared_from_this();
+}
+
+
+std::shared_ptr<Widget> Window::SetPadding(const vec4i& padding)
+{
+    m_Padding = padding;
+
+    return shared_from_this();
+};
+
+vec4i Window::GetPadding() const
+{
+    return m_Padding;
+}
+
+
+void Window::SetParent(std::shared_ptr<Widget> parentWidget)
+{
+    m_ParentWidget = parentWidget;
+}
+
+void Window::AddChild(std::shared_ptr<Widget> child)
+{
+    child->SetParent(shared_from_this());
+    m_Children.push_back(child);
+    Update();
+}
 
 void Window::OnEvent(const Forge::Event& event)
 {
@@ -97,32 +112,34 @@ void Window::OnEvent(const Forge::Event& event)
 
     glm::vec2 mousePos(x, y);
 
-    /*selectedEdge = IsNearEdge(m_WindowPosition, m_WindowSize);*/
-    /*if (selectedEdge != Edge::None)*/
-    /*{*/
-    /*    LOG_INFO("Grab edge")*/
-    /*    m_InitialWindowPosition = m_WindowPosition;*/
-    /*    m_InitialWindowSize = m_WindowSize;*/
-    /*    m_InitialMousePos = mousePos;*/
-    /*    m_IsAnyEdgeSelected = true;*/
-    /*}*/
-    /**/
     if (event.GetType() == Forge::EventType::Key)
     {
         const auto& keyEvent = static_cast<const Forge::KeyEvent&>(event);
 
 
-        if (keyEvent.GetAction() == Forge::Action::MousePress)
-
+        if (keyEvent.GetAction() == Forge::Action::MousePress &&
+            keyEvent.GetKey() == Forge::Key::LeftMouse)
         {
-            selectedEdge = IsNearEdge(m_WindowPosition, m_WindowSize);
-            if (selectedEdge != Edge::None)
+            selectedEdge = IsNearEdge(m_Position, m_Size);
+            if (selectedEdge != (Edge)0)
             {
-                LOG_INFO("Grab edge")
-                m_InitialWindowPosition = m_WindowPosition;
-                m_InitialWindowSize = m_WindowSize;
+                m_InitialPosition = m_Position;
+                m_InitialSize = m_Size;
                 m_InitialMousePos = mousePos;
                 m_IsAnyEdgeSelected = true;
+            }
+        }
+
+        else if (keyEvent.GetAction() == Forge::Action::MousePress &&
+                 keyEvent.GetKey() == Forge::Key::RightMouse)
+        {
+            selectedEdge = IsNearEdge(m_Position, m_Size, 20);
+            if (selectedEdge == Edge::CornerTopLeft)
+            {
+                m_InitialPosition = m_Position;
+                m_InitialSize = m_Size;
+                m_InitialMousePos = mousePos;
+                m_IsWindowDragged = true;
             }
         }
         else if (keyEvent.GetAction() == Forge::Action::MouseRelease)
@@ -131,6 +148,12 @@ void Window::OnEvent(const Forge::Event& event)
             {
                 Forge::RenderCommand::SetCursorType(Forge::CursorType::Arrow);
                 m_IsAnyEdgeSelected = false;
+            }
+
+            if (m_IsWindowDragged)
+            {
+                Forge::RenderCommand::SetCursorType(Forge::CursorType::Arrow);
+                m_IsWindowDragged = false;
             }
         }
     }
@@ -149,6 +172,15 @@ void Window::OnEvent(const Forge::Event& event)
                 HandleResize(delta, selectedEdge);
                 Update();
             }
+
+            if (m_IsWindowDragged)
+            {
+                glm::vec2 delta;
+                delta.x = mousePos.x - m_InitialMousePos.x;
+                delta.y = mousePos.y - m_InitialMousePos.y;
+                HandleDragg(delta);
+                Update();
+            }
         }
     }
 }
@@ -156,8 +188,8 @@ void Window::OnEvent(const Forge::Event& event)
 
 const bool Window::IsInBounds(const glm::vec2& point) const
 {
-    return point.x >= m_WindowPosition.x && point.x <= m_WindowPosition.x + m_WindowSize.x &&
-           point.y >= m_WindowPosition.y && point.y <= m_WindowPosition.y + m_WindowSize.y;
+    return point.x >= m_Position.x && point.x <= m_Position.x + m_Size.x &&
+           point.y >= m_Position.y && point.y <= m_Position.y + m_Size.y;
 }
 
 const Edge Window::IsNearEdge(const vec2i& position, const vec2i& size, const int threshold) const
@@ -173,9 +205,6 @@ const Edge Window::IsNearEdge(const vec2i& position, const vec2i& size, const in
     float right = bottomRight.x;
     float top = topLeft.y;
     float bottom = bottomRight.y;
-
-    LOG_WARN("Left: {}, Right: {}, Bottom: {}, Top: {}", left, right, bottom, top);
-    LOG_TRACE("Mouse {} ", std::abs(mousePos.x - left));
 
 
     bool nearLeft =
@@ -207,65 +236,63 @@ const Edge Window::IsNearEdge(const vec2i& position, const vec2i& size, const in
     if (nearTop)
         return Edge::Top;
 
-    return Edge::None;
+    return Edge(0);
 }
 
 
 void Window::HandleResize(const vec2i& delta, Edge selectedEdge)
 {
-    const vec2i minSize(100.0f, 100.0f);
-
     switch (selectedEdge)
     {
         case Edge::CornerTopLeft:
-            m_WindowPosition.x = m_InitialWindowPosition.x + delta.x;
-            m_WindowPosition.y = m_InitialWindowPosition.y + delta.y;
-            m_WindowSize.x = std::max(m_InitialWindowSize.x - delta.x, minSize.x);
-            m_WindowSize.y = std::max(m_InitialWindowSize.y - delta.y, minSize.y);
+            m_Position.x = m_InitialPosition.x + delta.x;
+            m_Position.y = m_InitialPosition.y + delta.y;
+            m_Size.x = std::max(m_InitialSize.x - delta.x, m_MinSize.x);
+            m_Size.y = std::max(m_InitialSize.y - delta.y, m_MinSize.y);
             Forge::RenderCommand::SetCursorType(Forge::CursorType::ResizeAll);
             break;
 
         case Edge::CornerBottomRight:
-            m_WindowSize.x = std::max(m_InitialWindowSize.x + delta.x, minSize.x);
-            m_WindowSize.y = std::max(m_InitialWindowSize.y + delta.y, minSize.y);
+            m_Size.x = std::max(m_InitialSize.x + delta.x, m_MinSize.x);
+            m_Size.y = std::max(m_InitialSize.y + delta.y, m_MinSize.y);
             Forge::RenderCommand::SetCursorType(Forge::CursorType::ResizeAll);
             break;
 
         case Edge::CornerTopRight:
-            m_WindowPosition.y = m_InitialWindowPosition.y + delta.y;
-            m_WindowSize.y = std::max(m_InitialWindowSize.y - delta.y, minSize.y);
-            m_WindowSize.x = std::max(m_InitialWindowSize.x + delta.x, minSize.x);
+            m_Position.y = m_InitialPosition.y + delta.y;
+            m_Size.y = std::max(m_InitialSize.y - delta.y, m_MinSize.y);
+            m_Size.x = std::max(m_InitialSize.x + delta.x, m_MinSize.x);
             Forge::RenderCommand::SetCursorType(Forge::CursorType::ResizeAll);
             break;
 
         case Edge::CornerBottomLeft:
-            m_WindowSize.y = std::max(m_InitialWindowSize.y + delta.y, minSize.y);
-            m_WindowPosition.x = m_InitialWindowPosition.x + delta.x;
-            m_WindowSize.x = std::max(m_InitialWindowSize.x - delta.x, minSize.x);
+            m_Size.y = std::max(m_InitialSize.y + delta.y, m_MinSize.y);
+            m_Position.x = m_InitialPosition.x + delta.x;
+            m_Size.x = std::max(m_InitialSize.x - delta.x, m_MinSize.x);
             Forge::RenderCommand::SetCursorType(Forge::CursorType::ResizeAll);
             break;
 
             // NOTE: Single side
         case Edge::Right:
-            m_WindowSize.x = std::max(m_InitialWindowSize.x + delta.x, minSize.x);
+            m_Size.x = std::max(m_InitialSize.x + delta.x, m_MinSize.x);
             Forge::RenderCommand::SetCursorType(Forge::CursorType::HResize);
             break;
 
         case Edge::Top:
-            m_WindowPosition.y = m_InitialWindowPosition.y + delta.y;
-            m_WindowSize.y = std::max(m_InitialWindowSize.y - delta.y, minSize.y);
+            m_Position.y = m_InitialPosition.y + delta.y;
+            m_Size.y = std::max(m_InitialSize.y - delta.y, m_MinSize.y);
             Forge::RenderCommand::SetCursorType(Forge::CursorType::VResize);
             break;
 
         case Edge::Left:
-            m_WindowPosition.x = m_InitialWindowPosition.x + delta.x;
-            m_WindowSize.x = std::max(m_InitialWindowSize.x - delta.x, minSize.x);
+            m_Position.x = m_InitialPosition.x + delta.x;
+            m_Size.x = std::max(m_InitialSize.x - delta.x, m_MinSize.x);
             Forge::RenderCommand::SetCursorType(Forge::CursorType::HResize);
             break;
 
         case Edge::Bottom:
 
-            m_WindowSize.y = std::max(m_InitialWindowSize.y + delta.y, minSize.y);
+            m_Size.y = std::max(m_InitialSize.y + delta.y, m_MinSize.y);
             Forge::RenderCommand::SetCursorType(Forge::CursorType::VResize);
             break;
 
@@ -274,4 +301,11 @@ void Window::HandleResize(const vec2i& delta, Edge selectedEdge)
             break;
     }
 }
-}  // namespace BfUI
+
+
+void Window::HandleDragg(const vec2i& delta)
+{
+    m_Position.x = m_InitialPosition.x + delta.x;
+    m_Position.y = m_InitialPosition.y + delta.y;
+}
+}  // namespace bf

@@ -42,7 +42,7 @@ public:
     static void SubmitText(const RenderableTarget& target,
                            const std::shared_ptr<Material>& material);
 
-    static void SubmitUIElement(BfUI::Widget& widget);
+    static void SubmitUIElement(bf::Widget& widget);
     static void SetPrecalculatedUIElementSize(uint32_t vertices, uint32_t indices);
 
 private:

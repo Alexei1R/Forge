@@ -142,7 +142,6 @@ std::shared_ptr<Font> Font::GetDefault()
     static std::shared_ptr<Font> DefaultFont;
     if (!DefaultFont)
         DefaultFont = std::make_shared<Font>("/home/toor/Books/Rostov.ttf");
-
     return DefaultFont;
 }
 

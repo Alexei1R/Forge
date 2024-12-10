@@ -7,11 +7,12 @@
 
 #include "Forge/BFUI/Theme.h"
 #include "Forge/Renderer/ShaderManager.h"
+#include "Forge/Renderer/Font.h"
 
-namespace BfUI {
+namespace bf {
 
 
-Widget::Widget()
+Widget::Widget() : m_Padding(vec4i(8))
 {
     Theme::SetDarkTheme();
     auto& shaderManager = Forge::ShaderManager::GetInstance();
@@ -41,6 +42,8 @@ Widget::Widget()
         {Forge::BufferDataType::Float, "a_TexIndex"},
         {Forge::BufferDataType::Float2, "a_QuadSize"},
         {Forge::BufferDataType::Float, "a_Type"}};
+
+    m_DefaultMaterial->SetTexture(0, Forge::Font::GetDefault()->GetAtlasTextureHandle());
 }
 
 
@@ -57,4 +60,4 @@ const Forge::BufferLayout& Widget::GetLayout() const
     };
 }
 
-}  // namespace BfUI
+}  // namespace bf

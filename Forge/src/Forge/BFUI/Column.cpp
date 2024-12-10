@@ -2,13 +2,11 @@
 // Created by toor on 2024-12-03.
 //
 
+
 #include "Column.h"
 
 
-#include "Forge/BFUI/Row.h"
-#include "Forge/Core/Log/Log.h"
-
-namespace BfUI {
+namespace bf {
 
 
 std::shared_ptr<Column> Column::Create(std::initializer_list<std::shared_ptr<Widget>> widgets)
@@ -21,10 +19,10 @@ std::shared_ptr<Column> Column::Create(std::initializer_list<std::shared_ptr<Wid
     return row;
 }
 
-Column::Column()
+Column::Column() : m_Padding(vec4i(0))
 {
-    LOG_WARN("Column Constructor");
-    m_Position = {50, 50};
+    m_Position = {300, 300};
+    m_Size = {333, 333};
 }
 
 
@@ -33,10 +31,20 @@ void Column::SetParent(std::shared_ptr<Widget> parentWidget)
     m_ParentWidget = parentWidget;
 }
 
+
 void Column::AddChild(std::shared_ptr<Widget> child)
 {
-    child->SetParent(shared_from_this());
-    m_Children.push_back(child);
+    try
+    {
+        child->SetParent(shared_from_this());
+        m_Children.push_back(child);
+    }
+    catch (const std::bad_weak_ptr&)
+    {
+        LOG_ERROR("Column::AddChild - shared_from_this() failed. Ensure Column is managed by "
+                  "shared_ptr.");
+        throw;
+    }
 }
 
 
@@ -53,27 +61,43 @@ const DrawListData Column::GetDrawList()
     vec2i parentPos = m_ParentWidget->GetPosition();
     vec2i parentSize = m_ParentWidget->GetSize();
 
-    m_Position.x = parentPos.x;
-    m_Position.y = parentPos.y + parentSize.y;
+    int advanceY = 0;  // Track vertical placement
+    m_Position = parentPos;
     m_Size = {0, 0};
-
-    uint32_t advanceY = 0;
 
     for (auto& child : m_Children)
     {
         if (!child)
             continue;  // Skip null children
 
-        vec2i childPos;
-        childPos.x = parentPos.x + 5;  // Padding from the left
-        childPos.y = parentPos.y + advanceY + 5;  // Padding from the top
+        // Retrieve padding: x (left), y (top), z (right), w (bottom)
+        glm::vec4 padding = child->GetPadding();
 
+        vec2i childPos = parentPos;
+
+        // Apply horizontal and vertical padding using glm components
+        childPos.x += static_cast<int>(padding.x);  // padding.x = left
+        childPos.y += advanceY + static_cast<int>(padding.y);  // padding.y = top
+
+        // Set the child's position
         child->SetPosition(childPos);
+
+        // Combine the child's draw list
         combinedDrawList = combinedDrawList + child->GetDrawList();
-        advanceY += child->GetSize().y + 5;  // Increment vertical offset with padding
-        m_Position.y -= advanceY;
-        m_Size.y += child->GetSize().y;
+
+        // Update advanceY with child's height and vertical padding
+        advanceY += child->GetSize().y + static_cast<int>(padding.y) +
+                    static_cast<int>(padding.w);  // padding.w = bottom
+
+        // Update m_Size.y to the total height
+        m_Size.y = advanceY;
+
+        // Update m_Size.x to the maximum width among children
+        int childTotalWidth = child->GetSize().x + static_cast<int>(padding.x) +
+                              static_cast<int>(padding.z);  // padding.x = left, padding.z = right
+        m_Size.x = std::max(m_Size.x, childTotalWidth);
     }
+
 
     return combinedDrawList;
 }
@@ -88,7 +112,9 @@ void Column::OnEvent(const Forge::Event& event)
 
 vec2i Column::GetPosition() const
 {
-    return m_Position;
+    vec2i returnPos = m_Position;
+    returnPos.y += m_Size.y;
+    return returnPos;
 }
 
 vec2i Column::GetSize() const
@@ -96,15 +122,38 @@ vec2i Column::GetSize() const
     return m_Size;
 }
 
-void Column::SetPosition(const vec2i& position)
+vec4i Column::GetPadding() const
 {
-    m_Position = position;
-}
-
-void Column::SetSize(const vec2i& size)
-{
-    m_Size = size;
+    return m_Padding;
 }
 
 
-}  // namespace BfUI
+std::shared_ptr<Widget> Column::SetPosition(const vec2i& position)
+{
+    if (m_Position != position)
+    {
+        m_Position = position;
+    }
+    return shared_from_this();
+}
+
+std::shared_ptr<Widget> Column::SetSize(const vec2i& size)
+{
+    if (m_Size != size)
+    {
+        m_Size = size;
+    }
+
+    return shared_from_this();
+}
+
+
+std::shared_ptr<Widget> Column::SetPadding(const vec4i& padding)
+{
+    m_Padding = padding;
+
+    return shared_from_this();
+};
+
+
+}  // namespace bf

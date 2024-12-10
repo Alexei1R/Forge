@@ -55,7 +55,7 @@ protected:
     float m_RotationYaw = 90.0f;
     float m_RotationPitch = 10.0f;
 
-    float m_RotationSens = 0.08f;
+    float m_RotationSens = 0.2f;
     float m_ScrollSens = 1.0f;
     float m_MovementSpeed = 0.0008;
     float m_Radius = 5.0f;

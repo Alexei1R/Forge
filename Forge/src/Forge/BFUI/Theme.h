@@ -9,7 +9,7 @@
 #include <string>
 #include <glm/vec4.hpp>
 
-namespace BfUI {
+namespace bf {
 
 enum class WidgetType
 {
@@ -52,6 +52,6 @@ private:
     static std::unordered_map<WidgetType, float> m_Size;
 };
 
-}  // namespace BfUI
+}  // namespace bf
 
 #endif

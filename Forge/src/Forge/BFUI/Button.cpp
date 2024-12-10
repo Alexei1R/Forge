@@ -3,21 +3,13 @@
 //
 
 #include "Button.h"
-#include "Forge/BFUI/DrawList.h"
 #include "Forge/BFUI/Theme.h"
 #include "Forge/BFUI/Types.h"
 #include "Forge/Core/Log/Log.h"
 #include "Forge/Events/ImplEvent.h"
 #include "Forge/Renderer/RenderCommand.h"
-#include "WidgetStack.h"
-#include <algorithm>
-#include <memory>
-#include "Forge/Renderer/Material.h"
-#include "Forge/Renderer/ShaderManager.h"
-#include "Forge/Renderer/Font.h"
 
-namespace BfUI {
-
+namespace bf {
 
 std::shared_ptr<Button> Button::Create(const vec2i& size, const std::string& label)
 {
@@ -26,9 +18,10 @@ std::shared_ptr<Button> Button::Create(const vec2i& size, const std::string& lab
 
 
 Button::Button(const vec2i& size, const std::string& label) :
-    m_BtnPosition({50, 50}), m_BtnSize(size), m_BtnLabel(label)
-
+    m_Name(label), m_MinSize(30, 30), m_Size(size), m_Padding(vec4i(8.0))
 {
+    m_Position = {50, 50};
+
     // NOTE: Iniditialize With values from theme
     m_ColorBackground = Theme::GetColor(WidgetType::Button, WidgetState::Default);
     m_ColorBackgroundDefault = Theme::GetColor(WidgetType::Button, WidgetState::Default);
@@ -38,15 +31,94 @@ Button::Button(const vec2i& size, const std::string& label) :
 }
 
 
-Button::~Button() {}
-
-
 void Button::Update()
 {
-    auto& panelData = DrawList::DrawPanel(m_BtnPosition, m_BtnSize, m_ColorBackground);
-    auto& textData =
-        DrawList::DrawText(m_BtnLabel, m_BtnPosition + (m_BtnSize / 5), 24, m_ColorBackground, 0);
-    m_DrawListData = textData + panelData;
+    DrawListData dataStore;
+    for (auto& child : m_Children)
+    {
+        DrawListData data = child->GetDrawList();
+        dataStore += data;
+    }
+
+    float textScale = 24.0f;
+    vec2f textSize = DrawList::MeasureText(m_Name, textScale);
+
+    vec2i textPosition;
+    textPosition.x = m_Position.x + (m_Size.x / 2) - static_cast<int>(textSize.x / 2);
+    textPosition.y = m_Position.y + (m_Size.y / 2) + static_cast<int>(textSize.y / 2);
+
+    DrawListData buttonDrawListData =
+        DrawList::DrawText(m_Name, textPosition, textScale, m_ColorBackground, 0);
+
+    DrawListData panelData = DrawList::DrawPanel(m_Position, m_Size, m_ColorBackground, 0);
+
+    buttonDrawListData += panelData;
+    m_DrawListData = dataStore + buttonDrawListData;
+}
+
+std::shared_ptr<Widget> Button::SubscribeEvents(EventCallback callback)
+{
+    m_EventCallback = callback;
+    return shared_from_this();
+}
+
+std::shared_ptr<Widget> Button::SetText(const std::string& label)
+{
+    if (m_Name != label)
+    {
+        m_Name = label;
+        Update();
+    }
+    return shared_from_this();
+}
+
+
+std::shared_ptr<Widget> Button::SetPosition(const vec2i& position)
+{
+    if (m_Position != position)
+    {
+        m_Position = position;
+        Update();
+    }
+    return shared_from_this();
+}
+
+std::shared_ptr<Widget> Button::SetSize(const vec2i& size)
+{
+    if (m_Size != size)
+    {
+        m_Size = size;
+        Update();
+    }
+
+    return shared_from_this();
+}
+
+
+std::shared_ptr<Widget> Button::SetPadding(const vec4i& padding)
+{
+    m_Padding = padding;
+
+    return shared_from_this();
+};
+
+const DrawListData Button::GetDrawList()
+{
+    return m_DrawListData;
+}
+
+vec2i Button::GetPosition() const
+{
+    return m_Position;
+}
+vec2i Button::GetSize() const
+{
+    return m_Size;
+}
+
+vec4i Button::GetPadding() const
+{
+    return m_Padding;
 }
 
 
@@ -55,75 +127,27 @@ void Button::SetParent(std::shared_ptr<Widget> parentWidget)
     m_ParentWidget = parentWidget;
 }
 
-vec2i Button::GetPosition() const
+void Button::AddChild(std::shared_ptr<Widget> child)
 {
-    return m_BtnPosition;
-}
-vec2i Button::GetSize() const
-{
-    return m_BtnSize;
-}
-void Button::SetPosition(const vec2i& position)
-{
-    if (m_BtnPosition != position)
-    {
-        m_BtnPosition = position;
-        Update();
-    }
-}
-void Button::SetSize(const vec2i& size)
-{
-    if (m_BtnSize != size)
-    {
-        m_BtnSize = size;
-        Update();
-    }
-}
-
-
-const DrawListData Button::GetDrawList()
-{
-    return m_DrawListData;
-};
-
-
-const bool Button::IsInBounds(const glm::vec2& point) const
-{
-    vec2i m_BottomLeft = m_BtnPosition;
-    vec2i m_TopRight = m_BtnPosition + m_BtnSize;
-    vec2i m_TopLeft = vec2i(m_BottomLeft.x, m_TopRight.y);
-    vec2i m_BottomRight = vec2i(m_TopRight.x, m_BottomLeft.y);
-
-    return (point.x >= m_BottomLeft.x && point.x <= m_TopRight.x && point.y >= m_BottomLeft.y &&
-            point.y <= m_TopRight.y);
-}
-
-
-void Button::Move(vec2i position)
-{
-    m_BtnPosition = position;
+    child->SetParent(shared_from_this());
+    m_Children.push_back(child);
     Update();
-}
-
-
-void Button::SubscribeEvents(EventCallback callback)
-{
-    m_EventCallback = callback;
 }
 
 void Button::OnEvent(const Forge::Event& event)
 {
-    auto [x, y] = Forge::Mouse::GetMousePosition();
-    auto [appX, appY] = Forge::ApplicationStats::GetApplicationSize();
+    for (auto& child : m_Children)
+    {
+        child->OnEvent(event);
+    }
 
-    // Convert mouse coordinates to match your coordinate system
-    glm::vec2 mousePos(x, appY - y);  // Flip Y coordinate if needed
+    auto [x, y] = Forge::Mouse::GetMousePosition();
+    glm::vec2 mousePos(x, y);
+
 
     if (event.GetType() == Forge::EventType::Key)
     {
         const auto& keyEvent = static_cast<const Forge::KeyEvent&>(event);
-
-        // Handle mouse press
         if (keyEvent.GetAction() == Forge::Action::MousePress)
         {
             if (IsInBounds(mousePos))
@@ -133,8 +157,8 @@ void Button::OnEvent(const Forge::Event& event)
                 {
                     m_EventCallback(WidgetEvent::ButtonPress, *this);
                 }
-                m_ColorBackground = m_ColorBackgroundPressed;
                 Update();
+                m_ColorBackground = m_ColorBackgroundPressed;
             }
         }
         // Handle mouse release
@@ -148,8 +172,8 @@ void Button::OnEvent(const Forge::Event& event)
                     m_EventCallback(WidgetEvent::ButtonRelease, *this);
                 }
 
-                m_ColorBackground = m_ColorBackgroundDefault;
                 Update();
+                m_ColorBackground = m_ColorBackgroundDefault;
             }
         }
     }
@@ -172,19 +196,27 @@ void Button::OnEvent(const Forge::Event& event)
                 }
                 if (!m_IsPressed)
                 {
-                    m_ColorBackground = m_ColorBackgroundHover;
                     Update();
+                    m_ColorBackground = m_ColorBackgroundHover;
                 }
             }
             else if (!m_IsHovered && wasHovered && !m_IsPressed)
             {
                 Forge::RenderCommand::SetCursorType(Forge::CursorType::Arrow);
 
-                m_ColorBackground = m_ColorBackgroundDefault;
                 Update();
+                m_ColorBackground = m_ColorBackgroundDefault;
             }
         }
     }
 }
 
-}  // namespace BfUI
+
+const bool Button::IsInBounds(const glm::vec2& point) const
+{
+    return point.x >= m_Position.x && point.x <= m_Position.x + m_Size.x &&
+           point.y >= m_Position.y && point.y <= m_Position.y + m_Size.y;
+}
+
+
+}  // namespace bf

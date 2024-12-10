@@ -199,7 +199,7 @@ void Renderer::SubmitText(const RenderableTarget& target, const std::shared_ptr<
 }
 
 
-void Renderer::SubmitUIElement(BfUI::Widget& widget)
+void Renderer::SubmitUIElement(bf::Widget& widget)
 {
     const auto& material = widget.GetMaterial();
 

@@ -5,7 +5,7 @@
 #include "Row.h"
 
 
-namespace BfUI {
+namespace bf {
 
 
 std::shared_ptr<Row> Row::Create(std::initializer_list<std::shared_ptr<Widget>> widgets)
@@ -18,9 +18,8 @@ std::shared_ptr<Row> Row::Create(std::initializer_list<std::shared_ptr<Widget>> 
     return row;
 }
 
-Row::Row()
+Row::Row() : m_Padding(vec4i(0))
 {
-    LOG_WARN("Row Constructor");
     m_Position = {300, 300};
 }
 
@@ -46,6 +45,7 @@ void Row::AddChild(std::shared_ptr<Widget> child)
     }
 }
 
+
 const DrawListData Row::GetDrawList()
 {
     DrawListData combinedDrawList;
@@ -63,23 +63,31 @@ const DrawListData Row::GetDrawList()
     m_Position = parentPos;
     m_Size = {0, 0};
 
+
     for (auto& child : m_Children)
     {
         if (!child)
             continue;  // Skip null children
 
+        // Retrieve padding: x (left), y (top), z (right), w (bottom)
+        glm::vec4 padding = child->GetPadding();
+
         vec2i childPos = parentPos;
-        childPos.x += advanceX;
-        childPos.y += 5;  // Padding from the top
+
+        childPos.x += advanceX + static_cast<int>(padding.x);
+        childPos.y += static_cast<int>(padding.y);
 
         child->SetPosition(childPos);
         combinedDrawList = combinedDrawList + child->GetDrawList();
-        advanceX += child->GetSize().x + 5;  // Increment horizontal offset with padding
+        advanceX += child->GetSize().x + static_cast<int>(padding.x) + static_cast<int>(padding.z);
 
+        m_Size.x = advanceX;
 
-        m_Position.x -= advanceX;
-        m_Size.x += child->GetSize().x;
+        int childTotalHeight = child->GetSize().y + static_cast<int>(padding.y) +
+                               static_cast<int>(padding.w);  // padding.w = bottom
+        m_Size.y = std::max(m_Size.y, childTotalHeight);
     }
+
 
     return combinedDrawList;
 }
@@ -94,7 +102,9 @@ void Row::OnEvent(const Forge::Event& event)
 
 vec2i Row::GetPosition() const
 {
-    return m_Position;
+    vec2i returnPos = m_Position;
+    returnPos.x += m_Size.x;
+    return returnPos;
 }
 
 vec2i Row::GetSize() const
@@ -102,15 +112,39 @@ vec2i Row::GetSize() const
     return m_Size;
 }
 
-void Row::SetPosition(const vec2i& position)
-{
-    m_Position = position;
-}
 
-void Row::SetSize(const vec2i& size)
+vec4i Row::GetPadding() const
 {
-    m_Size = size;
+    return m_Padding;
 }
 
 
-}  // namespace BfUI
+std::shared_ptr<Widget> Row::SetPosition(const vec2i& position)
+{
+    if (m_Position != position)
+    {
+        m_Position = position;
+    }
+    return shared_from_this();
+}
+
+std::shared_ptr<Widget> Row::SetSize(const vec2i& size)
+{
+    if (m_Size != size)
+    {
+        m_Size = size;
+    }
+
+    return shared_from_this();
+}
+
+
+std::shared_ptr<Widget> Row::SetPadding(const vec4i& padding)
+{
+    m_Padding = padding;
+
+    return shared_from_this();
+};
+
+
+}  // namespace bf

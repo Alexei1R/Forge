@@ -7,6 +7,7 @@
 
 #include "Forge.h"
 #include "Forge/BFUI/Button.h"
+#include "Forge/BFUI/TextView.h"
 #include "Forge/BFUI/Window.h"
 #include "Forge/Renderer/Material.h"
 #include "Forge/Renderer/RenderableTargets/Model.h"
@@ -31,6 +32,7 @@ public:
 
 
 private:
+    std::shared_ptr<Camera> m_Camera;
     std::shared_ptr<Camera> m_CameraScreenSpace;
 
 
@@ -38,7 +40,10 @@ private:
     int frameCount = 0;
     float fpsAverage = 0.0f;
 
-    std::shared_ptr<BfUI::Window> m_Window;
+    std::shared_ptr<bf::Window> m_Window;
+    std::shared_ptr<bf::Button> m_Button;
+    std::shared_ptr<bf::TextView> m_TextView;
+    std::shared_ptr<Model> m_Mesh;
 
 
     float m_Width = 0;

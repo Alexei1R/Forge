@@ -11,12 +11,13 @@
 
 
 #include "Forge/BFUI/DrawList.h"
+#include "Forge/Core/Utils.h"
 #include "Forge/Events/Event.h"
 #include "Forge/Renderer/Buffer/Buffer.h"
 #include "Forge/Renderer/Material.h"
 #include "Forge/Renderer/RenderCommand.h"
 
-namespace BfUI {
+namespace bf {
 
 enum class WidgetEvent : uint32_t
 {
@@ -35,11 +36,11 @@ enum class WidgetEvent : uint32_t
 
 enum class Edge
 {
-    None,
+    None = 0,
     Left,
     Right,
-    Bottom,
     Top,
+    Bottom,
     CornerTopLeft,
     CornerTopRight,
     CornerBottomLeft,
@@ -49,6 +50,9 @@ enum class Edge
 class Widget
 
 {
+protected:
+    using EventCallback = std::function<void(WidgetEvent, Widget&)>;
+
 public:
     Widget();
     virtual ~Widget() = default;
@@ -62,31 +66,42 @@ public:
     virtual const Forge::BufferLayout& GetLayout() const;
 
     virtual void AddChild(std::shared_ptr<Widget> child) = 0;
-
-
     virtual void SetParent(std::shared_ptr<Widget> parentWidget) = 0;
 
 
-    // Layout properties
-    virtual void SetPosition(const vec2i& position) {};
-    virtual void SetSize(const vec2i& size) {};
-    virtual vec2i GetPosition() const
-    {
-        return vec2i(0);
-    };
-    virtual vec2i GetSize() const
-    {
-        return vec2i(0);
-    };
+    // Fluent Interface Setters
+    virtual std::shared_ptr<Widget> SetPosition(const vec2i& position) = 0;
+    virtual std::shared_ptr<Widget> SetSize(const vec2i& size) = 0;
+    virtual std::shared_ptr<Widget> SetPadding(const vec4i& padding) = 0;
 
+    // Getters
+    virtual vec2i GetPosition() const = 0;
+    virtual vec2i GetSize() const = 0;
+    virtual vec4i GetPadding() const
+    {
+        return m_Padding;
+    }
+    virtual std::shared_ptr<Widget> SubscribeEvents(EventCallback callback)
+    {
+        F_ASSERT(false,
+                 "This Widget does not support Events. Make sure that the class inherits and "
+                 "overrides this function.");
+    }
 
-protected:
+    virtual std::shared_ptr<Widget> SetText(const std::string& label)
+    {
+        F_ASSERT(false,
+                 "This Widget does not support name setting. Make sure that the class inherits and "
+                 "overrides this function.");
+    }
+
 private:
+    vec4i m_Padding;
     std::shared_ptr<Forge::Material> m_DefaultMaterial;
     Forge::BufferLayout m_WidgetBufferLayout;
 };
 
-}  // namespace BfUI
+}  // namespace bf
 
 
 #endif
