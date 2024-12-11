@@ -15,6 +15,7 @@
 #include "Forge/Events/ImplEvent.h"
 #include "Forge/Renderer/Camera/Camera.h"
 #include "Forge/Renderer/Camera/CameraController.h"
+#include "Forge/Renderer/Mesh.h"
 
 namespace Forge {
 
@@ -96,7 +97,15 @@ void Editor::OnAttach()
     m_Window->SetSize({233, 220});
 
 
-    /*m_Mesh = std::make_shared<Model>("/home/toor/Downloads/cube.obj");*/
+    /*m_Mesh = std::make_shared<Model>("/home/toor/Downloads/monkey.obj");*/
+    /*m_Mesh = std::make_shared<Model>("/home/toor/Downloads/erato/erato.obj");*/
+
+    /*    uint32_t count = 0;*/
+    /*    for (auto& mesh : m_Mesh->GetMeshes())*/
+    /*    {*/
+    /*        count += mesh.Vertices.size();*/
+    /*    }*/
+    /*    LOG_ERROR("{}", count)*/
 }
 
 void Editor::OnDetach() {}

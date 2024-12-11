@@ -12,7 +12,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Set default build type if not specified
 if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Debug)  # Choose Release, Debug, etc.
+    set(CMAKE_BUILD_TYPE  Release)  # Choose Release, Debug, etc.
 endif()
 
 find_path(Forge_LIBS

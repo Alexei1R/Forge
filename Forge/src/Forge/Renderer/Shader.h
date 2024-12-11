@@ -23,12 +23,21 @@ enum class ShaderType
     COMPUTE
 };
 
+enum class ShaderSource
+{
+    FILE,
+    STRING,
+};
+
 struct ShaderElement
 {
-    std::string path;
+    std::string data;
     ShaderType type;
-
-    ShaderElement(ShaderType type, std::string path) : path(std::move(path)), type(type) {}
+    ShaderSource source;
+    ShaderElement(ShaderType type, std::string data, ShaderSource source = ShaderSource::FILE) :
+        data(std::move(data)), type(type), source(source)
+    {
+    }
 };
 
 class ShaderLayout

@@ -112,45 +112,39 @@ void Renderer::SubmitMesh(const MeshTarget& target)
     const auto& materials = target.GetMaterials();
     const auto& meshes = target.GetMeshes();
 
-    // Iterate over each mesh
     for (const auto& mesh : meshes)
     {
-        // Get the material for the current mesh
+        std::shared_ptr<Material> material;
         uint32_t materialIndex = mesh.MaterialIndex;
+
         if (materialIndex >= materials.size())
         {
-            LOG_WARN("Invalid material index for mesh.");
-            return;
-        }
-
-        const auto& material = materials[materialIndex];
-
-        // Generate a hash for the material to group meshes that share the same material
-        uint8_t materialData[sizeof(material)];
-        std::memcpy(materialData, &material, sizeof(material));
-        uint32_t materialHash = HashFast::GenerateU32BaseHash(materialData, sizeof(materialData));
-
-        // Check if a batch for this material hash exists, if not create a new batch
-        if (m_RenderBatches.find(materialHash) == m_RenderBatches.end())
-        {
-            auto& batch = m_RenderBatches[materialHash];
-            batch.Init(1000, 1000, target.GetLayout());
-
-            std::vector<uint8_t> m_VerticesBytes;
-            auto& vertices = mesh.Vertices;
-            m_VerticesBytes.resize(vertices.size() * sizeof(MeshVertex));
-            memcpy(m_VerticesBytes.data(), vertices.data(), m_VerticesBytes.size());
-            batch.Submit(m_VerticesBytes, mesh.Indices, std::make_shared<Material>(material));
+            material = MeshTarget::GetDefaultMaterial();
         }
         else
         {
-            auto& batch = m_RenderBatches[materialHash];
-            std::vector<uint8_t> m_VerticesBytes;
-            auto& vertices = mesh.Vertices;
-            m_VerticesBytes.resize(vertices.size() * sizeof(MeshVertex));
-            memcpy(m_VerticesBytes.data(), vertices.data(), m_VerticesBytes.size());
-            batch.Submit(m_VerticesBytes, mesh.Indices, std::make_shared<Material>(material));
+            material = std::make_shared<Material>(materials[materialIndex]);
         }
+
+        // Generate a hash for the material to group meshes that share the same material
+        uint8_t materialData[sizeof(Material)];
+        std::memcpy(materialData, material.get(), sizeof(Material));
+        uint32_t materialHash = HashFast::GenerateU32BaseHash(materialData, sizeof(materialData));
+
+        // Check if a batch for this material hash exists; if not, create a new batch
+        if (m_RenderBatches.find(materialHash) == m_RenderBatches.end())
+        {
+            auto& batch = m_RenderBatches[materialHash];
+            batch.Init(1237494 * sizeof(MeshVertex), 1237494, target.GetLayout());
+            LOG_WARN("Creating batch")
+        }
+
+        auto& batch = m_RenderBatches[materialHash];
+        std::vector<uint8_t> m_VerticesBytes;
+        auto& vertices = mesh.Vertices;
+        m_VerticesBytes.resize(vertices.size() * sizeof(MeshVertex));
+        memcpy(m_VerticesBytes.data(), vertices.data(), m_VerticesBytes.size());
+        batch.Submit(m_VerticesBytes, mesh.Indices, material);
     }
 }
 

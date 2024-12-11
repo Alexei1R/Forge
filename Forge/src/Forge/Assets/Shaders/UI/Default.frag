@@ -18,7 +18,7 @@ uniform vec4 BorderColor ;
 
 const float u_ScreenPxRange = 4.0;
 const vec4 u_FgColor = vec4(1.0, 1.0, 1.0, 1.0);
-const vec4 u_BgColor = v_Color;
+vec4 u_BgColor = v_Color;
 
 uniform sampler2D u_Textures[MAX_TEXTURE_SLOTS];
 

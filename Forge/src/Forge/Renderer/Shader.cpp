@@ -89,10 +89,19 @@ void Shader::BuildShader()
 
     for (const auto& shader : m_ShaderLayout)
     {
-        std::string source = ReadShader(shader.path);
+        std::string source;
+        if (shader.source == ShaderSource::FILE)
+        {
+            source = ReadShader(shader.data);
+        }
+        else
+        {
+            source = shader.data;
+        }
+
         if (source.empty())
         {
-            LOG_CRITICAL("Shader source is empty: " + shader.path);
+            LOG_CRITICAL("Shader source is empty: " + shader.data);
             continue;
         }
 
@@ -117,7 +126,7 @@ void Shader::BuildShader()
         }
         else
         {
-            LOG_CRITICAL("Failed to compile shader: " + shader.path);
+            LOG_CRITICAL("Failed to compile shader: " + shader.data);
         }
     }
 

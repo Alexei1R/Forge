@@ -10,3 +10,6 @@
 [submodule "Forge/3rdparty/spdlog"]
 	path = Forge/3rdparty/spdlog
 	url = https://github.com/gabime/spdlog
+[submodule "Forge/3rdparty/assimp"]
+	path = Forge/3rdparty/assimp
+	url = https://github.com/assimp/assimp

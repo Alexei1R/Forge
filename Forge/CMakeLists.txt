@@ -23,8 +23,17 @@ target_link_libraries(ForgeLIB
         glad
         stb
         msdf-atlas-gen
+        assimp
 )
 
+# Instead of add_definitions(), use target_compile_definitions()
+if(ASSIMP_BUILD_OBJ_IMPORTER)
+    target_compile_definitions(ForgeLIB PRIVATE FORGE_IMPORT_AVAILABLE_OBJ)
+endif()
+
+if(ASSIMP_BUILD_FBX_IMPORTER)
+    target_compile_definitions(ForgeLIB PRIVATE FORGE_IMPORT_AVAILABLE_FBX)
+endif()
 
 target_include_directories(ForgeLIB PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/)
 
