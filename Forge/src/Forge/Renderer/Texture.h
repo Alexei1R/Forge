@@ -3,13 +3,13 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
-#include <string>
 #include <glad/glad.h>
+
+#include <string>
 
 namespace Forge {
 
-class Texture
-{
+class Texture {
 public:
     Texture(const std::string& filePath);
     Texture(int width, int height, GLenum format, const void* data = nullptr);
@@ -18,9 +18,7 @@ public:
     void Bind(unsigned int slot = 0) const;
     void UnBind() const;
 
-
-    unsigned int GetID() const
-    {
+    unsigned int GetID() const {
         return m_TextureID;
     }
 
@@ -38,6 +36,6 @@ private:
     GLenum m_Format;
 };
 
-}  // namespace Forge
+} // namespace Forge
 
-#endif  // TEXTURE_H
+#endif // TEXTURE_H

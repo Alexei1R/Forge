@@ -8,12 +8,12 @@ build_and_run() {
 
     if cmake ..; then
         if make -j"$(nproc)"; then
-            cd Editor || exit
-            if [ -f "./ForgeEditor" ]; then
+            cd sandbox || exit
+            if [ -f "./sandbox" ]; then
                 case "$1" in
                     -pcpu)
                         notify-send -a "Forge" "Starting CPU profiling..."
-                        perf record --call-graph dwarf ./ForgeEditor
+                        perf record --call-graph dwarf ./sandbox
                         notify-send -a "Forge" "CPU profiling completed."
                         if [ -f "perf.data" ]; then
                             notify-send -a "Forge" "Launching Hotspot with perf.data..."
@@ -27,7 +27,7 @@ build_and_run() {
                         echo "There is no gpu profiling"
                         ;;
                     *)
-                        ./ForgeEditor
+                        ./sandbox
                         ;;
                 esac
             else

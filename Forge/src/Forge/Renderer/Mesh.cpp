@@ -1,35 +1,28 @@
 
 #include "Mesh.h"
+
 #include <memory>
+
 #include "Forge/Core/Log/Log.h"
 #include "Forge/Renderer/Shader.h"
 #include "ShaderManager.h"
 
-
 namespace Forge {
 std::shared_ptr<Material> MeshTarget::m_DefaultMaterial = nullptr;
 
-MeshTarget::MeshTarget()
-{
-    m_Layout = {{BufferDataType::Float3, "a_Position"},
-                {BufferDataType::Float3, "a_Normal"},
-                {BufferDataType::Float2, "a_TexCoords"}};
+MeshTarget::MeshTarget() {
+    m_Layout = {{BufferDataType::Float3, "a_Position"}, {BufferDataType::Float3, "a_Normal"}, {BufferDataType::Float2, "a_TexCoords"}};
 }
 
-const BufferLayout& MeshTarget::GetLayout() const
-{
+const BufferLayout& MeshTarget::GetLayout() const {
     return m_Layout;
 }
 
-
-std::shared_ptr<Material> MeshTarget::GetDefaultMaterial()
-{
-    if (m_DefaultMaterial == nullptr)
-    {
+std::shared_ptr<Material> MeshTarget::GetDefaultMaterial() {
+    if (m_DefaultMaterial == nullptr) {
         auto& shaderManager = ShaderManager::GetInstance();
-        Handle shaderHandle = shaderManager.LoadShader(ShaderLayout {
-            {ShaderType::VERTEX,
-             R"(
+        Handle shaderHandle = shaderManager.LoadShader(ShaderLayout{{ShaderType::VERTEX,
+                                                                     R"(
             #version 450 core
             layout(location = 0) in vec3 a_Position;
             layout(location = 1) in vec3 a_Norm;
@@ -51,31 +44,52 @@ std::shared_ptr<Material> MeshTarget::GetDefaultMaterial()
             v_Position = a_Position;
             }
         )",
-             ShaderSource::STRING},
+                                                                     ShaderSource::STRING},
+
+                                                                    {ShaderType::FRAGMENT,
+                                                                     R"(
 
 
-            {ShaderType::FRAGMENT,
-             R"(
+                #version 450 core
+                layout(location = 0) out vec4 o_Color;
 
+                in vec2 v_TexCoord;
+                in vec3 v_Norm;
+                in vec3 v_Position;
 
-            #version 450 core
+                // Hardcoded light properties
+                const vec3 u_LightPosition = vec3(50.0, 50.0, 5.0);  // Light position in world space
+                const vec3 u_LightColor = vec3(1.0, 1.0, 1.0);     // White light
+                const float u_AmbientStrength = 0.1;                // Ambient lighting strength
+                const float u_SpecularStrength = 0.5;               // Specular lighting strength
 
-            layout(location = 0) out vec4 o_Color;
+                void main()
+                {
+                // Ambient component
+                vec3 ambient = u_AmbientStrength * u_LightColor;
 
-            in vec2 v_TexCoord;
-            in vec3 v_Norm;
-            in vec3 v_Position;
+                // Diffuse component
+                vec3 norm = normalize(v_Norm);
+                vec3 lightDir = normalize(u_LightPosition - v_Position);
+                float diff = max(dot(norm, lightDir), 0.0);
+                vec3 diffuse = diff * u_LightColor;
 
-            void main()
-            {
-            o_Color = vec4(1.0, 0.0, 1.0, 1.0);
-            }
+                // Specular component
+                vec3 viewDir = normalize(-v_Position);  // Assuming camera is at origin
+                vec3 reflectDir = reflect(-lightDir, norm);
+                float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+                vec3 specular = u_SpecularStrength * spec * u_LightColor;
 
-        )",
-             ShaderSource::STRING}});
+                // Combine lighting components
+                vec3 result = (ambient + diffuse ) * vec3(1.0, 0.0, 1.0);  // Magenta base color
 
-        if (shaderHandle.GetValue() == 0)
-        {
+                o_Color = vec4(result, 1.0);
+                }
+
+            )",
+                                                                     ShaderSource::STRING}});
+
+        if (shaderHandle.GetValue() == 0) {
             LOG_CRITICAL("Failed to load shader.");
         }
         LOG_TRACE("Compute default Shader MeshTarget")
@@ -85,4 +99,4 @@ std::shared_ptr<Material> MeshTarget::GetDefaultMaterial()
     return m_DefaultMaterial;
 }
 
-}  // namespace Forge
+} // namespace Forge

@@ -10,14 +10,12 @@
 
 namespace bf {
 
-enum class WidgetElementType : uint32_t
-{
+enum class WidgetElementType : uint32_t {
     Panel = 1,
     Text = 2,
 };
 
-struct DrawListVertex
-{
+struct DrawListVertex {
     vec2f Position;
     vec4f Color;
     vec2f TexCoord;
@@ -26,14 +24,11 @@ struct DrawListVertex
     float WidgetElementType;
 };
 
-
-struct DrawListData
-{
+struct DrawListData {
     std::vector<uint8_t> Vertices;
     std::vector<uint32_t> Indices;
 
-    DrawListData operator+(const DrawListData& other) const
-    {
+    DrawListData operator+(const DrawListData& other) const {
         DrawListData result;
 
         result.Vertices = Vertices;
@@ -42,22 +37,19 @@ struct DrawListData
         uint32_t vertexOffset = Vertices.size() / sizeof(DrawListVertex);
 
         result.Indices = Indices;
-        for (uint32_t index : other.Indices)
-        {
+        for (uint32_t index : other.Indices) {
             result.Indices.push_back(index + vertexOffset);
         }
 
         return result;
     }
 
-    DrawListData& operator+=(const DrawListData& other)
-    {
+    DrawListData& operator+=(const DrawListData& other) {
         uint32_t vertexOffset = Vertices.size() / sizeof(DrawListVertex);
 
         Vertices.insert(Vertices.end(), other.Vertices.begin(), other.Vertices.end());
 
-        for (uint32_t index : other.Indices)
-        {
+        for (uint32_t index : other.Indices) {
             Indices.push_back(index + vertexOffset);
         }
 
@@ -65,19 +57,11 @@ struct DrawListData
     }
 };
 
-class DrawList
-{
+class DrawList {
 public:
-    static const DrawListData DrawPanel(const vec2i position,
-                                        const vec2i size,
-                                        const vec4f color,
-                                        float const textureIndex = 0);
+    static const DrawListData DrawPanel(const vec2i position, const vec2i size, const vec4f color, float const textureIndex = 0);
 
-
-    static const DrawListData DrawText(const std::string& text,
-                                       const vec2i position,
-                                       const float scale,
-                                       const vec4f color,
+    static const DrawListData DrawText(const std::string& text, const vec2i position, const float scale, const vec4f color,
                                        const float textureIndex);
 
     static vec2f MeasureText(const std::string& text, float scale);
@@ -91,6 +75,6 @@ private:
     static uint32_t m_IndicesSize;
 };
 
-}  // namespace bf
+} // namespace bf
 
 #endif

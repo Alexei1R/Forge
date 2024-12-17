@@ -1,4 +1,3 @@
-
 #ifndef EVENT_H
 #define EVENT_H
 
@@ -7,17 +6,8 @@
 #include <vector>
 namespace Forge {
 
-enum class EventType : uint32_t
-{
-    None = 0,
-    Window,
-    Key,
-    Mouse,
-    Drop,
-    Button
-};
-enum class Action : uint32_t
-{
+enum class EventType : uint32_t { None = 0, Window, Key, Mouse, Drop, Button };
+enum class Action : uint32_t {
     // KeyBoard And Mouse
     None = 0,
     KeyPress,
@@ -47,8 +37,7 @@ enum class Action : uint32_t
     UIEvent
 };
 
-class Event
-{
+class Event {
 public:
     virtual ~Event() = default;
     virtual EventType GetType() const = 0;
@@ -60,8 +49,7 @@ public:
 //=== Keyboard Get Key ===================================
 //========================================================
 
-class Keyboard
-{
+class Keyboard {
 public:
     static bool const IsKeyPressed(int key);
     friend class KeyEvent;
@@ -77,8 +65,7 @@ private:
 //==== Mouse Get Values ==================================
 //========================================================
 
-class Mouse
-{
+class Mouse {
 public:
     friend class MouseEvent;
 
@@ -109,8 +96,7 @@ private:
 //====  Window Stats =====================================
 //========================================================
 
-class ApplicationStats
-{
+class ApplicationStats {
 public:
     friend class WindowEvent;
 
@@ -140,6 +126,6 @@ private:
     static bool focused;
 };
 
-}  // namespace Forge
+} // namespace Forge
 
 #endif

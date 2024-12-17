@@ -3,34 +3,30 @@
 #ifndef FONT_H
 #define FONT_H
 
+#include <filesystem>
+#include <glm/glm.hpp>
+#include <memory>
 #include <string>
 #include <unordered_map>
-#include <memory>
-#include <filesystem>
+
 #include "Forge/Core/Handle.h"
 #include "Forge/Renderer/TextureManager.h"
-#include <glm/glm.hpp>
-#include "msdfgen.h"
 #include "msdf-atlas-gen/msdf-atlas-gen.h"
+#include "msdfgen.h"
 
 namespace Forge {
 
-
-struct MSDFData
-{
+struct MSDFData {
     std::vector<msdf_atlas::GlyphGeometry> Glyphs;
     msdf_atlas::FontGeometry FontGeometry;
 };
 
-
-class Font
-{
+class Font {
 public:
     Font(const std::filesystem::path& font);
     ~Font();
 
-    const MSDFData* GetMSDFData() const
-    {
+    const MSDFData* GetMSDFData() const {
         return m_Data;
     }
     Handle GetAtlasTextureHandle() const
@@ -46,6 +42,6 @@ private:
     Handle m_AtlasTextureHandle;
 };
 
-}  // namespace Forge
+} // namespace Forge
 
-#endif  // FONT_H
+#endif // FONT_H

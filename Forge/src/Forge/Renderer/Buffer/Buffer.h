@@ -1,20 +1,16 @@
-
 #ifndef BUFFER_H
 #define BUFFER_H
 
-
 #include <glad/glad.h>
+
 #include <string>
 #include <vector>
-#include <memory>
-#include "Forge/Core/Log/Log.h"
 
+#include "Forge/Core/Log/Log.h"
 
 namespace Forge {
 
-
-enum class BufferDataType
-{
+enum class BufferDataType {
 
     None = 0,
     Float,
@@ -31,26 +27,22 @@ enum class BufferDataType
 
 };
 
-
 unsigned int GetDataTypeSize(BufferDataType type);
 
-
-struct BufferElement
-{
+struct BufferElement {
     std::string name;
     BufferDataType type;
     unsigned int size;
     unsigned int offset;
 
-    BufferElement(BufferDataType type, std::string name) :
-        name(name), type(type), size(GetDataTypeSize(type)), offset(0)
-    {
-    }
+    BufferElement(BufferDataType type, std::string name)
+        : name(name)
+        , type(type)
+        , size(GetDataTypeSize(type))
+        , offset(0) {}
 };
 
-
-class BufferLayout
-{
+class BufferLayout {
 public:
     BufferLayout();
     BufferLayout(std::initializer_list<BufferElement> elements);
@@ -71,9 +63,7 @@ private:
     uint32_t m_Stride = 0;
 };
 
-
-class Buffer
-{
+class Buffer {
 public:
     virtual ~Buffer() {}
 
@@ -83,8 +73,6 @@ public:
 private:
 };
 
-
-}  // namespace Forge
-
+} // namespace Forge
 
 #endif

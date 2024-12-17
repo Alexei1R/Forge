@@ -2,13 +2,12 @@
 #ifndef BUTTON_H
 #define BUTTON_H
 
+#include <string>
 
 #include "Forge/BFUI/Widget.h"
-#include <string>
 namespace bf {
 
-class Button : public Widget, public std::enable_shared_from_this<Button>
-{
+class Button : public Widget, public std::enable_shared_from_this<Button> {
 protected:
     Button(const vec2i& size, const std::string& label);
     const bool IsInBounds(const glm::vec2& point) const;
@@ -44,7 +43,6 @@ private:
     bool m_IsPressed = false;
     bool m_IsHovered = false;
 
-
     vec4f m_ColorBackground;
     vec4f m_ColorBackgroundDefault;
     vec4f m_ColorBackgroundHover;
@@ -56,14 +54,11 @@ private:
     vec2i m_MinSize;
     vec4i m_Padding;
 
-
     // WARN: Layout Usage Code
     std::vector<std::shared_ptr<Widget>> m_Children;
     std::shared_ptr<Widget> m_ParentWidget;
 };
 
-
-}  // namespace bf
-
+} // namespace bf
 
 #endif

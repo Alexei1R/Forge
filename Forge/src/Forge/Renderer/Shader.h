@@ -3,45 +3,36 @@
 #ifndef SHADER_H
 #define SHADER_H
 
-#include "glm/glm.hpp"
 #include <glad/glad.h>
+
 #include <initializer_list>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
-#include <unordered_map>
+
+#include "glm/glm.hpp"
 
 namespace Forge {
 
-enum class ShaderType
-{
-    VERTEX,
-    FRAGMENT,
-    GEOMETRY,
-    TESSELLATION_CONTROL,
-    TESSELLATION_EVALUATION,
-    COMPUTE
-};
+enum class ShaderType { VERTEX, FRAGMENT, GEOMETRY, TESSELLATION_CONTROL, TESSELLATION_EVALUATION, COMPUTE };
 
-enum class ShaderSource
-{
+enum class ShaderSource {
     FILE,
     STRING,
 };
 
-struct ShaderElement
-{
+struct ShaderElement {
     std::string data;
     ShaderType type;
     ShaderSource source;
-    ShaderElement(ShaderType type, std::string data, ShaderSource source = ShaderSource::FILE) :
-        data(std::move(data)), type(type), source(source)
-    {
-    }
+    ShaderElement(ShaderType type, std::string data, ShaderSource source = ShaderSource::FILE)
+        : data(std::move(data))
+        , type(type)
+        , source(source) {}
 };
 
-class ShaderLayout
-{
+class ShaderLayout {
 public:
     ShaderLayout();
     ShaderLayout(std::initializer_list<ShaderElement> elements);
@@ -57,8 +48,7 @@ private:
     std::vector<ShaderElement> m_Elements;
 };
 
-class Shader
-{
+class Shader {
 public:
     Shader();
     Shader(const ShaderLayout& layout);
@@ -94,6 +84,6 @@ private:
     std::unordered_map<std::string, int> m_UniformLocationCache;
 };
 
-}  // namespace Forge
+} // namespace Forge
 
-#endif  // SHADER_H
+#endif // SHADER_H

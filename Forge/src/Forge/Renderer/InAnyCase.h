@@ -4,57 +4,48 @@
 #include <array>
 #include <cstdint>
 #include <vector>
+
 #include "Forge/Core/Log/Log.h"
 #include "Forge/Renderer/Buffer/Buffer.h"
 #include "Forge/Renderer/Buffer/BufferImpl.h"
 #include "Forge/Renderer/RenderCommand.h"
-#include "Forge/Renderer/Texture.h"  // Include Texture header if handling textures
+#include "Forge/Renderer/Texture.h" // Include Texture header if handling textures
 
 namespace Forge {
 
-struct BatchProps
-{
+struct BatchProps {
     uint32_t Capacity;
     uint32_t IndicesCount = 32;
     const BufferLayout& bufferLayout;
     bool HasTextures = false;
 
-    BatchProps(uint32_t capacity,
-               uint32_t indicesCount,
-               const BufferLayout& bufferLayout,
-               bool hasTextures = false) :
-        Capacity(capacity), IndicesCount(indicesCount), bufferLayout(bufferLayout),
-        HasTextures(hasTextures)
-    {
-    }
+    BatchProps(uint32_t capacity, uint32_t indicesCount, const BufferLayout& bufferLayout, bool hasTextures = false)
+        : Capacity(capacity)
+        , IndicesCount(indicesCount)
+        , bufferLayout(bufferLayout)
+        , HasTextures(hasTextures) {}
 };
 
 template <typename VertexType>
-class BatchManager
-{
+class BatchManager {
 public:
-    BatchManager(const BatchProps& properties) :
-        m_BatchProperties(properties), m_TextureSlotIndex(0)
-    {
+    BatchManager(const BatchProps& properties)
+        : m_BatchProperties(properties)
+        , m_TextureSlotIndex(0) {
         m_VertexBuffer.reserve(m_BatchProperties.Capacity);
         m_IndexBufffer.reserve(m_BatchProperties.Capacity * m_BatchProperties.IndicesCount);
         m_TextureSlots = RenderCommand::GetMaxTextureSlots();
 
         // Initialize buffers
-        if (m_BatchProperties.bufferLayout.GetElements().empty())
-        {
+        if (m_BatchProperties.bufferLayout.GetElements().empty()) {
             F_ASSERT(false, "BatchManager BufferLayout is not set");
         }
 
         m_VAO = std::make_shared<VertexArrayBuffer>();
-        m_VBO = std::make_shared<VertexBuffer>(nullptr,
-                                               m_BatchProperties.Capacity * sizeof(VertexType),
-                                               BufferDrawMode::Dynamic);
+        m_VBO = std::make_shared<VertexBuffer>(nullptr, m_BatchProperties.Capacity * sizeof(VertexType), BufferDrawMode::Dynamic);
 
-        m_EBO = std::make_shared<IndexBuffer>(
-            nullptr,
-            m_BatchProperties.Capacity * m_BatchProperties.IndicesCount * sizeof(uint32_t),
-            BufferDrawMode::Dynamic);
+        m_EBO = std::make_shared<IndexBuffer>(nullptr, m_BatchProperties.Capacity * m_BatchProperties.IndicesCount * sizeof(uint32_t),
+                                              BufferDrawMode::Dynamic);
 
         m_VAO->Bind();
         m_VBO->Bind();
@@ -68,32 +59,27 @@ public:
         m_VAO->Unbind();
 
         // Initialize texture slots if using textures
-        if (m_BatchProperties.HasTextures)
-        {
+        if (m_BatchProperties.HasTextures) {
             m_TextureSlotArray.fill(nullptr);
         }
     }
 
-    void BeginBatch()
-    {
+    void BeginBatch() {
         m_VertexBuffer.clear();
         m_IndexBufffer.clear();
         m_TextureSlotIndex = 0;
-        if (m_BatchProperties.HasTextures)
-        {
+        if (m_BatchProperties.HasTextures) {
             m_TextureSlotArray.fill(nullptr);
         }
     }
 
-    void EndBatch()
-    {
+    void EndBatch() {
         Flush();
     }
 
-    void Flush()
-    {
+    void Flush() {
         if (m_IndexBufffer.empty())
-            return;  // Nothing to draw
+            return; // Nothing to draw
 
         m_VAO->Bind();
 
@@ -106,10 +92,8 @@ public:
         m_EBO->SubmitData(m_IndexBufffer.data(), m_IndexBufffer.size() * sizeof(uint32_t));
 
         // Bind textures if any
-        if (m_BatchProperties.HasTextures)
-        {
-            for (uint32_t i = 0; i < m_TextureSlotIndex; ++i)
-            {
+        if (m_BatchProperties.HasTextures) {
+            for (uint32_t i = 0; i < m_TextureSlotIndex; ++i) {
                 m_TextureSlotArray[i]->Bind(i);
             }
         }
@@ -120,36 +104,28 @@ public:
         m_VAO->Unbind();
     }
 
-    void Submit(const std::vector<VertexType>& vertices,
-                const std::vector<uint32_t>& indices,
-                const std::shared_ptr<Texture>& texture = nullptr)
-    {
+    void Submit(const std::vector<VertexType>& vertices, const std::vector<uint32_t>& indices,
+                const std::shared_ptr<Texture>& texture = nullptr) {
         // Check if we need to flush
         if (vertices.size() + m_VertexBuffer.size() > m_BatchProperties.Capacity ||
-            indices.size() + m_IndexBufffer.size() >
-                m_BatchProperties.Capacity * m_BatchProperties.IndicesCount ||
-            (texture != nullptr && m_TextureSlotIndex >= m_TextureSlots))
-        {
+            indices.size() + m_IndexBufffer.size() > m_BatchProperties.Capacity * m_BatchProperties.IndicesCount ||
+            (texture != nullptr && m_TextureSlotIndex >= m_TextureSlots)) {
             Flush();
-            BeginBatch();  // Reset batch data after flushing
+            BeginBatch(); // Reset batch data after flushing
         }
 
         uint32_t textureIndex = 0;
-        if (texture != nullptr)
-        {
+        if (texture != nullptr) {
             // Check if texture is already in slot array
             bool found = false;
-            for (uint32_t i = 0; i < m_TextureSlotIndex; ++i)
-            {
-                if (m_TextureSlotArray[i]->GetID() == texture->GetID())
-                {
+            for (uint32_t i = 0; i < m_TextureSlotIndex; ++i) {
+                if (m_TextureSlotArray[i]->GetID() == texture->GetID()) {
                     textureIndex = i;
                     found = true;
                     break;
                 }
             }
-            if (!found)
-            {
+            if (!found) {
                 // Add new texture
                 textureIndex = m_TextureSlotIndex;
                 m_TextureSlotArray[m_TextureSlotIndex] = texture;
@@ -159,24 +135,18 @@ public:
 
         // Adjust vertices to set the texture index
         std::vector<VertexType> adjustedVertices = vertices;
-        if (texture != nullptr)
-        {
-            for (auto& vertex : adjustedVertices)
-            {
+        if (texture != nullptr) {
+            for (auto& vertex : adjustedVertices) {
                 vertex.TextureIndex = static_cast<float>(textureIndex);
             }
         }
 
         // Append adjusted vertices to m_VertexBuffer
-        m_VertexBuffer.insert(m_VertexBuffer.end(),
-                              adjustedVertices.begin(),
-                              adjustedVertices.end());
+        m_VertexBuffer.insert(m_VertexBuffer.end(), adjustedVertices.begin(), adjustedVertices.end());
 
         // Adjust indices
-        uint32_t indexOffset =
-            static_cast<uint32_t>(m_VertexBuffer.size() - adjustedVertices.size());
-        for (auto index : indices)
-        {
+        uint32_t indexOffset = static_cast<uint32_t>(m_VertexBuffer.size() - adjustedVertices.size());
+        for (auto index : indices) {
             m_IndexBufffer.push_back(index + indexOffset);
         }
     }
@@ -196,6 +166,6 @@ private:
     std::shared_ptr<IndexBuffer> m_EBO;
 };
 
-}  // namespace Forge
+} // namespace Forge
 
-#endif  // BATCHMANAGER_H
+#endif // BATCHMANAGER_H

@@ -2,25 +2,22 @@
 #ifndef COLUMN_H
 #define COLUMN_H
 
+#include <memory>
+#include <vector>
 
 #include "Widget.h"
-#include <vector>
-#include <memory>
 
 namespace bf {
-class Column : public Widget, public std::enable_shared_from_this<Column>
-{
+class Column : public Widget, public std::enable_shared_from_this<Column> {
 protected:
     Column();
 
 public:
     static std::shared_ptr<Column> Create(std::initializer_list<std::shared_ptr<Widget>> widgets);
 
-
     void AddChild(std::shared_ptr<Widget> child) override;
     const DrawListData GetDrawList() override;
     void OnEvent(const Forge::Event& event) override;
-
 
     vec2i GetPosition() const override;
     vec2i GetSize() const override;
@@ -42,5 +39,5 @@ private:
     std::vector<std::shared_ptr<Widget>> m_Children;
     std::shared_ptr<Widget> m_ParentWidget;
 };
-}  // namespace bf
+} // namespace bf
 #endif
