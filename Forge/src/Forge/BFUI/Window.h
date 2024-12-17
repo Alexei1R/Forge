@@ -2,13 +2,12 @@
 #ifndef BFWINDOW_H
 #define BFWINDOW_H
 
+#include <string>
 
 #include "Forge/BFUI/Widget.h"
-#include <string>
 namespace bf {
 
-class Window : public Widget, public std::enable_shared_from_this<Window>
-{
+class Window : public Widget, public std::enable_shared_from_this<Window> {
 protected:
     Window(const std::string& label);
     const bool IsInBounds(const glm::vec2& point) const;
@@ -49,14 +48,11 @@ private:
     bool m_IsAnyEdgeSelected = false;
     bool m_IsWindowDragged = false;
 
-
     // WARN: Layout Usage Code
     std::vector<std::shared_ptr<Widget>> m_Children;
     std::shared_ptr<Widget> m_ParentWidget;
 };
 
-
-}  // namespace bf
-
+} // namespace bf
 
 #endif

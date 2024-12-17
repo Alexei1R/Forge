@@ -1,24 +1,21 @@
-
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include <string>
+#include <unordered_map>
 
 #include "Forge/Config/Entry.h"
 #include "Forge/Core/Log/Log.h"
 #include "glm/fwd.hpp"
-#include <string>
-#include <unordered_map>
 
-
-namespace Forge { namespace Config {
+namespace Forge {
+namespace Config {
 
 using EntryPtr = std::shared_ptr<Entry>;
 
-class Config
-{
+class Config {
 public:
-    class Iterator
-    {
+    class Iterator {
     public:
         using iterator_category = std::forward_iterator_tag;
         using value_type = EntryPtr;
@@ -26,29 +23,25 @@ public:
         using pointer = EntryPtr*;
         using reference = EntryPtr&;
 
-        Iterator(typename std::unordered_map<std::string, EntryPtr>::iterator it) : m_It(it) {}
+        Iterator(typename std::unordered_map<std::string, EntryPtr>::iterator it)
+            : m_It(it) {}
 
-        Iterator& operator++()
-        {
+        Iterator& operator++() {
             ++m_It;
             return *this;
         }
-        Iterator operator++(int)
-        {
+        Iterator operator++(int) {
             Iterator tmp = *this;
             ++(*this);
             return tmp;
         }
-        bool operator==(const Iterator& other) const
-        {
+        bool operator==(const Iterator& other) const {
             return m_It == other.m_It;
         }
-        bool operator!=(const Iterator& other) const
-        {
+        bool operator!=(const Iterator& other) const {
             return !(*this == other);
         }
-        reference operator*()
-        {
+        reference operator*() {
             return m_It->second;
         }
 
@@ -60,96 +53,82 @@ public:
     ~Config() = default;
 
     template <typename T>
-    void AddEntry(std::string_view name, const T& value)
-    {
+    void AddEntry(std::string_view name, const T& value) {
         auto entry = std::make_shared<TypedEntry<T>>(value);
         entry->SetEntryName(std::string(name));
         m_Entries[std::string(name)] = entry;
     }
 
     template <typename T>
-    [[nodiscard]] TypedEntry<T>* GetEntry(std::string_view name) const
-    {
+    [[nodiscard]] TypedEntry<T>* GetEntry(std::string_view name) const {
         auto it = m_Entries.find(std::string(name));
-        if (it != m_Entries.end())
-        {
+        if (it != m_Entries.end()) {
             return dynamic_cast<TypedEntry<T>*>(it->second.get());
         }
         return nullptr;
     }
 
-    [[nodiscard]] bool SaveToFile(const fs::path& filename) const
-    {
+    [[nodiscard]] bool SaveToFile(const fs::path& filename) const {
         std::error_code ec;
-        if (!fs::exists(filename.parent_path()))
-        {
+        if (!fs::exists(filename.parent_path())) {
             fs::create_directories(filename.parent_path(), ec);
             if (ec)
                 return false;
         }
 
         std::ofstream file(filename, std::ios::binary);
-        if (!file.is_open())  // Verificăm dacă fișierul s-a deschis cu succes
+        if (!file.is_open()) // Verificăm dacă fișierul s-a deschis cu succes
             return false;
 
-        for (const auto& [name, entry] : m_Entries)
-        {
+        for (const auto& [name, entry] : m_Entries) {
             file << entry->Serialize() << '\n';
         }
         return true;
     }
 
-    bool LoadFromFile(const fs::path& filename)
-    {
+    bool LoadFromFile(const fs::path& filename) {
         if (!fs::exists(filename))
             return false;
 
         std::ifstream file(filename, std::ios::binary);
-        if (!file.is_open())  // Verificăm dacă fișierul s-a deschis cu succes
+        if (!file.is_open()) // Verificăm dacă fișierul s-a deschis cu succes
             return false;
 
         m_Entries.clear();
         std::string line;
-        while (std::getline(file, line))
-        {
+        while (std::getline(file, line)) {
             ParseEntry(line);
         }
         return true;
     }
 
     // Iterator support
-    [[nodiscard]] Iterator begin()
-    {
+    [[nodiscard]] Iterator begin() {
         return Iterator(m_Entries.begin());
     }
-    [[nodiscard]] Iterator end()
-    {
+    [[nodiscard]] Iterator end() {
         return Iterator(m_Entries.end());
     }
-    [[nodiscard]] std::size_t size() const noexcept
-    {
+    [[nodiscard]] std::size_t size() const noexcept {
         return m_Entries.size();
     }
-    [[nodiscard]] bool empty() const noexcept
-    {
+    [[nodiscard]] bool empty() const noexcept {
         return m_Entries.empty();
     }
 
     // Range-based for loop support
-    [[nodiscard]] auto entries() const
-    {
+    [[nodiscard]] auto entries() const {
         return std::ranges::subrange(m_Entries.begin(), m_Entries.end());
     }
 
 private:
-    void ParseEntry(std::string_view line)
-    {
+    void ParseEntry(std::string_view line) {
         auto typeStart = line.find('"') + 1;
         auto typeEnd = line.find('"', typeStart);
         auto nameStart = line.find('"', typeEnd + 2) + 1;
         auto nameEnd = line.find('"', nameStart);
-        if (typeStart == std::string_view::npos || typeEnd == std::string_view::npos ||
-            nameStart == std::string_view::npos || nameEnd == std::string_view::npos)
+        if (typeStart == std::string_view::npos || typeEnd == std::string_view::npos || nameStart == std::string_view::npos ||
+            nameEnd == std::string_view::npos)
             return;
 
         auto type = line.substr(typeStart, typeEnd - typeStart);
@@ -174,9 +153,9 @@ private:
         else if (type == "Vec4")
             entry = std::make_shared<TypedEntry<glm::vec4>>();
         else if (type == "Mat3")
-            entry = std::make_shared<TypedEntry<glm::mat3>>();  // Fixed: was vec3
+            entry = std::make_shared<TypedEntry<glm::mat3>>(); // Fixed: was vec3
         else if (type == "Mat4")
-            entry = std::make_shared<TypedEntry<glm::mat4>>();  // Fixed: was vec4
+            entry = std::make_shared<TypedEntry<glm::mat4>>(); // Fixed: was vec4
         else
             return;
 
@@ -206,18 +185,15 @@ private:
         else if (type == "Mat4")
             success = SetEntryName<glm::mat4>(entry, name);
 
-        if (success)
-        {
+        if (success) {
             m_Entries[std::string(name)] = entry;
         }
     }
 
     // Helper template function to handle the dynamic_cast and name setting
     template <typename T>
-    bool SetEntryName(const EntryPtr& entry, std::string_view name)
-    {
-        if (auto* typedEntry = dynamic_cast<TypedEntry<T>*>(entry.get()))
-        {
+    bool SetEntryName(const EntryPtr& entry, std::string_view name) {
+        if (auto* typedEntry = dynamic_cast<TypedEntry<T>*>(entry.get())) {
             typedEntry->SetEntryName(std::string(name));
             return true;
         }
@@ -227,6 +203,6 @@ private:
     std::unordered_map<std::string, EntryPtr> m_Entries;
 };
 
-
-}}  // namespace Forge::Config
+} // namespace Config
+} // namespace Forge
 #endif

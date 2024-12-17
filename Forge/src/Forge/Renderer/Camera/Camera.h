@@ -2,17 +2,14 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
+#include <cstdint>
 
 #include "glm/fwd.hpp"
 #include "glm/glm.hpp"
-#include <cstdint>
-
 
 namespace Forge {
 
-
-enum class CameraProjection
-{
+enum class CameraProjection {
     PerspectiveCamera,
     OrthographicCamera,
     ScreenSpaceCamera,
@@ -22,22 +19,17 @@ enum class CameraProjection
 // NOTE: Forward Declaration
 class CameraController;
 
-
-class Camera
-{
+class Camera {
 public:
     Camera(CameraProjection projection, glm::vec3 position);
     Camera(const Camera& other);
     Camera& operator=(const Camera& other);
     ~Camera();
 
-
     void RecalculateProjection(uint32_t width, uint32_t height);
-
 
     glm::vec3& GetCameraPosition();
     glm::vec3& GetCameraTarget();
-
 
     // NOTE: Camera
     glm::mat4& GetViewProjectionMatrix();
@@ -64,15 +56,12 @@ private:
     glm::mat4 m_ViewMatrix = glm::mat4(1.0f);
     glm::mat4 m_ViewProjectionMatrix = glm::mat4(1.0f);
 
-
     CameraProjection m_CameraProjection;
     float m_NearClip = 0.001f;
-    float m_FarClip = 1000.0f;
+    float m_FarClip = 10000.0f;
     float m_Fov = 45.0f;
 };
 
-
-}  // namespace Forge
-
+} // namespace Forge
 
 #endif

@@ -9,13 +9,13 @@ file(GLOB_RECURSE EXECUTABLE_SRC
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
 )
 
-add_executable(ForgeEditor ${EXECUTABLE_SRC} ${EXECUTABLE_HEADERS})
+add_executable(sandbox ${EXECUTABLE_SRC} ${EXECUTABLE_HEADERS})
 
-target_link_libraries(ForgeEditor
+target_link_libraries(sandbox
     ForgeLIB
 )
 
-target_include_directories(ForgeEditor PUBLIC 
+target_include_directories(sandbox PUBLIC 
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${Forge_LIBS}
 )

@@ -1,10 +1,10 @@
 
 #include "DrawList.h"
 
-#include "Forge/BFUI/Types.h"
 #include <cstdint>
 #include <cstring>
 
+#include "Forge/BFUI/Types.h"
 #include "Forge/Core/Log/Log.h"
 #include "Forge/Renderer/Font.h"
 #include "glm/ext/matrix_transform.hpp"
@@ -15,12 +15,7 @@ namespace bf {
 uint32_t DrawList::m_VerticesSize = 1000;
 uint32_t DrawList::m_IndicesSize = 1000;
 
-
-const DrawListData DrawList::DrawPanel(const vec2i position,
-                                       const vec2i size,
-                                       const vec4f color,
-                                       float const textureIndex)
-{
+const DrawListData DrawList::DrawPanel(const vec2i position, const vec2i size, const vec4f color, float const textureIndex) {
     vec2i m_TopLeft = position;
     vec2i m_TopRight = vec2i(position.x + size.x, position.y);
     vec2i m_BottomLeft = vec2i(position.x, position.y + size.y);
@@ -28,11 +23,10 @@ const DrawListData DrawList::DrawPanel(const vec2i position,
 
     float type = (float)WidgetElementType::Panel;
 
-    std::vector<DrawListVertex> vertices = {
-        {{m_TopLeft.x, m_TopLeft.y}, color, {0.0f, 0.0f}, textureIndex, size, type},
-        {{m_TopRight.x, m_TopRight.y}, color, {1.0f, 0.0f}, textureIndex, size, type},
-        {{m_BottomRight.x, m_BottomRight.y}, color, {1.0f, 1.0f}, textureIndex, size, type},
-        {{m_BottomLeft.x, m_BottomLeft.y}, color, {0.0f, 1.0f}, textureIndex, size, type}};
+    std::vector<DrawListVertex> vertices = {{{m_TopLeft.x, m_TopLeft.y}, color, {0.0f, 0.0f}, textureIndex, size, type},
+                                            {{m_TopRight.x, m_TopRight.y}, color, {1.0f, 0.0f}, textureIndex, size, type},
+                                            {{m_BottomRight.x, m_BottomRight.y}, color, {1.0f, 1.0f}, textureIndex, size, type},
+                                            {{m_BottomLeft.x, m_BottomLeft.y}, color, {0.0f, 1.0f}, textureIndex, size, type}};
 
     std::vector<uint32_t> indices = {0, 1, 2, 2, 3, 0};
 
@@ -46,12 +40,8 @@ const DrawListData DrawList::DrawPanel(const vec2i position,
     return {verticesBytes, indices};
 }
 
-
 // NOTE: Draw Text
-const DrawListData DrawList::DrawText(const std::string& text,
-                                      const vec2i position,
-                                      const float scale,
-                                      const vec4f color,
+const DrawListData DrawList::DrawText(const std::string& text, const vec2i position, const float scale, const vec4f color,
                                       const float textureIndex)
 
 {
@@ -76,28 +66,23 @@ const DrawListData DrawList::DrawText(const std::string& text,
     double fsScale = scale / (metrics.ascenderY - metrics.descenderY);
     double lineHeight = fsScale * metrics.lineHeight;
 
-    for (size_t i = 0; i < text.size(); ++i)
-    {
+    for (size_t i = 0; i < text.size(); ++i) {
         char character = text[i];
 
         // Special cases
         if (character == '\r')
             continue;
 
-        if (character == '\n')
-        {
+        if (character == '\n') {
             x = 0;
             y -= lineHeight;
             continue;
         }
 
-        if (character == ' ' || character == '\t')
-        {
+        if (character == ' ' || character == '\t') {
             const msdf_atlas::GlyphGeometry* glyph = nullptr;
-            for (const auto& g : msdfData->Glyphs)
-            {
-                if (g.getCodepoint() == ' ')
-                {
+            for (const auto& g : msdfData->Glyphs) {
+                if (g.getCodepoint() == ' ') {
                     glyph = &g;
                     break;
                 }
@@ -106,7 +91,7 @@ const DrawListData DrawList::DrawText(const std::string& text,
                 continue;
             double advance = glyph->getAdvance();
             if (character == '\t')
-                advance *= 4;  // Handle tab as 4 spaces
+                advance *= 4; // Handle tab as 4 spaces
             x += fsScale * advance;
             continue;
         }
@@ -114,15 +99,13 @@ const DrawListData DrawList::DrawText(const std::string& text,
         // Compute the quad from glyph
         msdf_atlas::unicode_t codepoint = (unsigned char)character;
         const msdf_atlas::GlyphGeometry* glyph = fontGeometry.getGlyph(codepoint);
-        if (!glyph)
-        {
+        if (!glyph) {
             // WARN: Fallback to ? glyph
             LOG_WARN("Fallback to ? glyph")
             glyph = fontGeometry.getGlyph('?');
             if (!glyph)
                 continue;
         }
-
 
         double al, ab, ar, at;
         glyph->getQuadAtlasBounds(al, ab, ar, at);
@@ -134,13 +117,11 @@ const DrawListData DrawList::DrawText(const std::string& text,
         texCoordMin *= glm::vec2(texelWidth, texelHeight);
         texCoordMax *= glm::vec2(texelWidth, texelHeight);
 
-
         // Get glyph quad bounds in plane coordinates
         double pl, pb, pr, pt;
         glyph->getQuadPlaneBounds(pl, pb, pr, pt);
         glm::vec2 quadMin(static_cast<float>(pl), static_cast<float>(pt));
         glm::vec2 quadMax(static_cast<float>(pr), static_cast<float>(pb));
-
 
         // Scale and position the quad
         quadMin *= static_cast<float>(fsScale);
@@ -153,39 +134,22 @@ const DrawListData DrawList::DrawText(const std::string& text,
         transform = glm::scale(transform, glm::vec3(1.0f, -1.0f, 1.0f));
 
         // NOTE: BOTTOM LEFT
-        vertices.push_back({glm::vec3(transform * glm::vec4(quadMin.x, quadMax.y, 0.0f, 1.0f)),
-                            color,
-                            vec2f(texCoordMin.x, texCoordMax.y),
-                            textureIndex,
-                            quadSize,
-                            type});
+        vertices.push_back({glm::vec3(transform * glm::vec4(quadMin.x, quadMax.y, 0.0f, 1.0f)), color,
+                            vec2f(texCoordMin.x, texCoordMax.y), textureIndex, quadSize, type});
         // NOTE: BOTTOM RIGHT
-        vertices.push_back({glm::vec3(transform * glm::vec4(quadMax.x, quadMax.y, 0.0f, 1.0f)),
-                            color,
-                            texCoordMax,
-                            textureIndex,
-                            quadSize,
-                            type});
+        vertices.push_back(
+            {glm::vec3(transform * glm::vec4(quadMax.x, quadMax.y, 0.0f, 1.0f)), color, texCoordMax, textureIndex, quadSize, type});
         // NOTE: TOP RIGHT
-        vertices.push_back({glm::vec3(transform * glm::vec4(quadMax.x, quadMin.y, 0.0f, 1.0f)),
-                            color,
-                            vec2f(texCoordMax.x, texCoordMin.y),
-                            textureIndex,
-                            quadSize,
-                            type});
+        vertices.push_back({glm::vec3(transform * glm::vec4(quadMax.x, quadMin.y, 0.0f, 1.0f)), color,
+                            vec2f(texCoordMax.x, texCoordMin.y), textureIndex, quadSize, type});
         // NOTE: TOP LEFT
-        vertices.push_back({glm::vec3(transform * glm::vec4(quadMin.x, quadMin.y, 0.0f, 1.0f)),
-                            color,
-                            texCoordMin,
-                            textureIndex,
-                            quadSize,
-                            type});
+        vertices.push_back(
+            {glm::vec3(transform * glm::vec4(quadMin.x, quadMin.y, 0.0f, 1.0f)), color, texCoordMin, textureIndex, quadSize, type});
 
         // NOTE: Indices
         std::vector<uint32_t> currentIndices = {0, 1, 2, 2, 3, 0};
 
-        for (auto index : currentIndices)
-        {
+        for (auto index : currentIndices) {
             indices.push_back(index + caracterIndexOffset);
         }
 
@@ -193,13 +157,11 @@ const DrawListData DrawList::DrawText(const std::string& text,
         double advance = glyph->getAdvance();
 
         // Apply kerning adjustment if available
-        if (i + 1 < text.size())
-        {
+        if (i + 1 < text.size()) {
             char nextCharacter = text[i + 1];
             std::pair<int, int> kerningKey = {character, nextCharacter};
             auto kerningIt = kerningMap.find(kerningKey);
-            if (kerningIt != kerningMap.end())
-            {
+            if (kerningIt != kerningMap.end()) {
                 double kerning = kerningIt->second;
                 advance += kerning;
             }
@@ -207,7 +169,6 @@ const DrawListData DrawList::DrawText(const std::string& text,
         x += fsScale * advance;
         caracterIndexOffset += 4;
     }
-
 
     //+= vectices
     m_VerticesSize += vertices.size();
@@ -220,9 +181,7 @@ const DrawListData DrawList::DrawText(const std::string& text,
     return {verticesBytes, indices};
 }
 
-
-vec2f DrawList::MeasureText(const std::string& text, float scale)
-{
+vec2f DrawList::MeasureText(const std::string& text, float scale) {
     // Initialize variables to track dimensions
     double totalWidth = 0.0;
     double maxWidth = 0.0;
@@ -231,15 +190,13 @@ vec2f DrawList::MeasureText(const std::string& text, float scale)
 
     // Retrieve font data
     const auto& font = Forge::Font::GetDefault();
-    if (!font)
-    {
+    if (!font) {
         LOG_WARN("Default font not found.");
         return {0.0f, 0.0f};
     }
 
     const Forge::MSDFData* msdfData = font->GetMSDFData();
-    if (!msdfData)
-    {
+    if (!msdfData) {
         LOG_WARN("MSDF data not found in the default font.");
         return {0.0f, 0.0f};
     }
@@ -257,21 +214,17 @@ vec2f DrawList::MeasureText(const std::string& text, float scale)
     double x = 0.0;
     double y = 0.0;
 
-    for (size_t i = 0; i < text.size(); ++i)
-    {
+    for (size_t i = 0; i < text.size(); ++i) {
         char character = text[i];
 
         // Handle special characters
-        if (character == '\r')
-        {
-            continue;  // Ignore carriage returns
+        if (character == '\r') {
+            continue; // Ignore carriage returns
         }
 
-        if (character == '\n')
-        {
+        if (character == '\n') {
             // Newline: Reset x, increment y, and update height
-            if (x > maxWidth)
-            {
+            if (x > maxWidth) {
                 maxWidth = x;
             }
             x = 0.0;
@@ -281,27 +234,22 @@ vec2f DrawList::MeasureText(const std::string& text, float scale)
             continue;
         }
 
-        if (character == ' ' || character == '\t')
-        {
+        if (character == ' ' || character == '\t') {
             // Handle space and tab
             const msdf_atlas::GlyphGeometry* glyph = nullptr;
-            for (const auto& g : msdfData->Glyphs)
-            {
-                if (g.getCodepoint() == ' ')
-                {
+            for (const auto& g : msdfData->Glyphs) {
+                if (g.getCodepoint() == ' ') {
                     glyph = &g;
                     break;
                 }
             }
-            if (!glyph)
-            {
+            if (!glyph) {
                 LOG_WARN("Space glyph not found.");
                 continue;
             }
             double advance = glyph->getAdvance();
-            if (character == '\t')
-            {
-                advance *= 4;  // Treat tab as 4 spaces
+            if (character == '\t') {
+                advance *= 4; // Treat tab as 4 spaces
             }
             x += fsScale * advance;
             continue;
@@ -310,13 +258,11 @@ vec2f DrawList::MeasureText(const std::string& text, float scale)
         // Get glyph for the character
         msdf_atlas::unicode_t codepoint = static_cast<unsigned char>(character);
         const msdf_atlas::GlyphGeometry* glyph = fontGeometry.getGlyph(codepoint);
-        if (!glyph)
-        {
+        if (!glyph) {
             // Fallback to '?' glyph if character not found
             LOG_WARN("Glyph not found for character '%c'. Using fallback glyph '?'.", character);
             glyph = fontGeometry.getGlyph('?');
-            if (!glyph)
-            {
+            if (!glyph) {
                 LOG_WARN("Fallback glyph '?' not found.");
                 continue;
             }
@@ -326,13 +272,11 @@ vec2f DrawList::MeasureText(const std::string& text, float scale)
         double advance = glyph->getAdvance();
 
         // Apply kerning if available
-        if (i + 1 < text.size())
-        {
+        if (i + 1 < text.size()) {
             char nextCharacter = text[i + 1];
             std::pair<int, int> kerningKey = {character, nextCharacter};
             auto kerningIt = kerningMap.find(kerningKey);
-            if (kerningIt != kerningMap.end())
-            {
+            if (kerningIt != kerningMap.end()) {
                 double kerning = kerningIt->second;
                 advance += kerning;
             }
@@ -343,8 +287,7 @@ vec2f DrawList::MeasureText(const std::string& text, float scale)
     }
 
     // After processing all characters, check the last line's width
-    if (x > maxWidth)
-    {
+    if (x > maxWidth) {
         maxWidth = x;
     }
 
@@ -355,14 +298,11 @@ vec2f DrawList::MeasureText(const std::string& text, float scale)
     return {static_cast<float>(totalWidth), static_cast<float>(totalHeight)};
 }
 
-const uint32_t DrawList::GetVerticesSize()
-{
+const uint32_t DrawList::GetVerticesSize() {
     return m_VerticesSize;
 }
-const uint32_t DrawList::GetIndicesSize()
-{
+const uint32_t DrawList::GetIndicesSize() {
     return m_IndicesSize;
 }
 
-
-}  // namespace bf
+} // namespace bf

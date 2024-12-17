@@ -22,6 +22,6 @@ using vec4i = glm::vec<4, int32_t>;
 using vec4f = glm::vec<4, float>;
 using vec4u = glm::vec<4, uint32_t>;
 
-}  // namespace bf
+} // namespace bf
 
 #endif

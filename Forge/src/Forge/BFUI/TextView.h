@@ -2,14 +2,13 @@
 #ifndef TEXTVIEW_H
 #define TEXTVIEW_H
 
+#include <string>
 
 #include "Forge/BFUI/Widget.h"
-#include <string>
 
 namespace bf {
 
-class TextView : public Widget, public std::enable_shared_from_this<TextView>
-{
+class TextView : public Widget, public std::enable_shared_from_this<TextView> {
 protected:
     TextView(const std::string& text);
     const DrawListData GetDrawList() override;
@@ -42,14 +41,11 @@ private:
 
     vec4i m_Padding;
 
-
     // WARN: Layout Usage Code
     std::vector<std::shared_ptr<Widget>> m_Children;
     std::shared_ptr<Widget> m_ParentWidget;
 };
 
-
-}  // namespace bf
-
+} // namespace bf
 
 #endif

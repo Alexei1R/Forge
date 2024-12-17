@@ -32,6 +32,6 @@ endif()
 
 # Include subdirectories
 add_subdirectory(Forge)
-add_subdirectory(Editor)
+add_subdirectory(sandbox)
 
 

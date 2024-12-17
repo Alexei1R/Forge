@@ -2,6 +2,8 @@
 #ifndef RENDERCOMMAND_H
 #define RENDERCOMMAND_H
 
+#include <cstdint>
+#include <memory>
 
 #include "Forge/Renderer/Buffer/BufferImpl.h"
 #include "Forge/Renderer/Material.h"
@@ -9,13 +11,10 @@
 #include "GLFW/glfw3.h"
 #include "glad/glad.h"
 #include "glm/glm.hpp"
-#include <cstdint>
-#include <memory>
 
 namespace Forge {
 
-enum class CursorType
-{
+enum class CursorType {
     Arrow,
     IBeam,
     Crosshair,
@@ -26,20 +25,16 @@ enum class CursorType
 
 };
 
-class RenderCommand
-{
+class RenderCommand {
 public:
     static void Init(std::shared_ptr<Window>& window);
     static void SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
     static void SetClearColor(glm::vec3 clearColor);
     static void Clear();
 
-    static void Draw(const std::shared_ptr<VertexArrayBuffer>& buffer,
-                     DrawPrimitives primitives = DrawPrimitives::TRIANGLES);
+    static void Draw(const std::shared_ptr<VertexArrayBuffer>& buffer, DrawPrimitives primitives = DrawPrimitives::TRIANGLES);
 
-
-    static void DrawIndexed(const std::shared_ptr<VertexArrayBuffer>& buffer,
-                            uint32_t indexCount,
+    static void DrawIndexed(const std::shared_ptr<VertexArrayBuffer>& buffer, uint32_t indexCount,
                             DrawPrimitives primitives = DrawPrimitives::TRIANGLES);
 
     static void SetCursorType(CursorType type);
@@ -52,7 +47,6 @@ private:
     static std::shared_ptr<Window> m_Window;
 };
 
-}  // namespace Forge
-
+} // namespace Forge
 
 #endif

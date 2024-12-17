@@ -8,52 +8,40 @@ std::unordered_map<WidgetType, std::unordered_map<WidgetState, glm::vec4>> Theme
 std::unordered_map<WidgetType, float> Theme::m_Rounding;
 std::unordered_map<WidgetType, float> Theme::m_Size;
 
-void Theme::SetColor(WidgetType widget, WidgetState state, const glm::vec4& color)
-{
+void Theme::SetColor(WidgetType widget, WidgetState state, const glm::vec4& color) {
     m_Colors[widget][state] = color;
 }
 
-glm::vec4 Theme::GetColor(WidgetType widget, WidgetState state)
-{
-    if (m_Colors.find(widget) != m_Colors.end() &&
-        m_Colors.at(widget).find(state) != m_Colors.at(widget).end())
-    {
+glm::vec4 Theme::GetColor(WidgetType widget, WidgetState state) {
+    if (m_Colors.find(widget) != m_Colors.end() && m_Colors.at(widget).find(state) != m_Colors.at(widget).end()) {
         return m_Colors.at(widget).at(state);
     }
-    return glm::vec4(1.0f);  // White color as fallback
+    return glm::vec4(1.0f); // White color as fallback
 }
 
-void Theme::SetRounding(WidgetType widget, float rounding)
-{
+void Theme::SetRounding(WidgetType widget, float rounding) {
     m_Rounding[widget] = rounding;
 }
 
-float Theme::GetRounding(WidgetType widget)
-{
-    if (m_Rounding.find(widget) != m_Rounding.end())
-    {
+float Theme::GetRounding(WidgetType widget) {
+    if (m_Rounding.find(widget) != m_Rounding.end()) {
         return m_Rounding.at(widget);
     }
-    return 0.0f;  // No rounding as fallback
+    return 0.0f; // No rounding as fallback
 }
 
-
-void Theme::SetSize(WidgetType widget, float size)
-{
+void Theme::SetSize(WidgetType widget, float size) {
     m_Size[widget] = size;
 }
 
-float Theme::GetSize(WidgetType widget)
-{
-    if (m_Size.find(widget) != m_Size.end())
-    {
+float Theme::GetSize(WidgetType widget) {
+    if (m_Size.find(widget) != m_Size.end()) {
         return m_Size.at(widget);
     }
-    return 0.0f;  // No rounding as fallback
+    return 0.0f; // No rounding as fallback
 }
 
-void Theme::SetDarkTheme()
-{
+void Theme::SetDarkTheme() {
     // Border
     SetColor(WidgetType::Border, WidgetState::Default, glm::vec4(0.7, 0.7, 0.7, 1.0));
     SetSize(WidgetType::Border, 2.5f);
@@ -74,4 +62,4 @@ void Theme::SetDarkTheme()
     SetColor(WidgetType::Text, WidgetState::Disabled, glm::vec4(0.500f, 0.500f, 0.500f, 1.000f));
 }
 
-}  // namespace bf
+} // namespace bf

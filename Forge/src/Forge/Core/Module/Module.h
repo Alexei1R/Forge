@@ -1,14 +1,11 @@
-
 #ifndef MODULE_H
 #define MODULE_H
-
 
 #include "Forge/Core/Time.h"
 #include "Forge/Events/Event.h"
 namespace Forge {
 
-class Module
-{
+class Module {
 public:
     Module() = default;
     virtual ~Module() = default;
@@ -22,6 +19,6 @@ public:
     virtual void OnEvent(const Event& event) {}
 };
 
-}  // namespace Forge
+} // namespace Forge
 
 #endif

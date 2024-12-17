@@ -2,14 +2,11 @@
 #ifndef FRAMEBUFFER_H
 #define FRAMEBUFFER_H
 
-
 #include <vector>
 
 namespace Forge {
 
-
-enum class FrameTextureFormat
-{
+enum class FrameTextureFormat {
     None = 0,
     // Color
     RGBA8,
@@ -20,25 +17,20 @@ enum class FrameTextureFormat
     Depth = DEPTH24STENCIL8
 };
 
-
-struct FramebufferProps
-{
+struct FramebufferProps {
     int height;
     int width;
     FrameTextureFormat format;
-    FramebufferProps(int width = 1920,
-                     int height = 1080,
-                     FrameTextureFormat format = FrameTextureFormat::RGBA8) :
-        width(width), height(height), format(format) {};
+    FramebufferProps(int width = 1920, int height = 1080, FrameTextureFormat format = FrameTextureFormat::RGBA8)
+        : width(width)
+        , height(height)
+        , format(format) {};
 };
 
-
-class Framebuffer
-{
+class Framebuffer {
 public:
     Framebuffer(const FramebufferProps& spec);
     ~Framebuffer();
-
 
     void Bind();
     void UnBind();
@@ -47,8 +39,7 @@ public:
 
     unsigned int GetTextureID() const;
 
-    const FramebufferProps& GetSpecification() const
-    {
+    const FramebufferProps& GetSpecification() const {
         return m_Specification;
     }
 
@@ -60,7 +51,6 @@ private:
     FramebufferProps m_Specification;
 };
 
-}  // namespace Forge
-
+} // namespace Forge
 
 #endif

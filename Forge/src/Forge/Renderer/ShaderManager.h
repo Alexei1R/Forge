@@ -2,16 +2,16 @@
 #ifndef SHADERMANAGER_H
 #define SHADERMANAGER_H
 
-#include "Forge/Core/Handle.h"
-#include "Shader.h"
-#include <unordered_map>
 #include <memory>
 #include <mutex>
+#include <unordered_map>
+
+#include "Forge/Core/Handle.h"
+#include "Shader.h"
 
 namespace Forge {
 
-class ShaderManager
-{
+class ShaderManager {
 public:
     static ShaderManager& GetInstance();
 
@@ -36,6 +36,6 @@ private:
     uint32_t m_NextHandleValue = 1;
 };
 
-}  // namespace Forge
+} // namespace Forge
 
-#endif  // SHADERMANAGER_H
+#endif // SHADERMANAGER_H

@@ -2,14 +2,13 @@
 #ifndef THEME_H
 #define THEME_H
 
-#include <unordered_map>
-#include <string>
 #include <glm/vec4.hpp>
+#include <string>
+#include <unordered_map>
 
 namespace bf {
 
-enum class WidgetType
-{
+enum class WidgetType {
     Panel,
     Button,
     Window,
@@ -21,16 +20,14 @@ enum class WidgetType
     Border,
 };
 
-enum class WidgetState
-{
+enum class WidgetState {
     Default,
     Hover,
     Pressed,
     Disabled,
 };
 
-class Theme
-{
+class Theme {
 public:
     static void SetColor(WidgetType widget, WidgetState state, const glm::vec4& color);
     static glm::vec4 GetColor(WidgetType widget, WidgetState state);
@@ -49,6 +46,6 @@ private:
     static std::unordered_map<WidgetType, float> m_Size;
 };
 
-}  // namespace bf
+} // namespace bf
 
 #endif

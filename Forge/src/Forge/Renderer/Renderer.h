@@ -2,53 +2,47 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
-
 #include <cstdint>
 #include <memory>
 #include <unordered_map>
 
 #include "Forge/BFUI/Widget.h"
 #include "Forge/Renderer/Camera/Camera.h"
-#include "Forge/Renderer/Material.h"
+#include "Forge/Renderer/Mesh.h"
 #include "Forge/Renderer/RendererBatch.h"
 #include "Forge/Renderer/UniformBuffer.h"
-#include "Forge/Renderer/Mesh.h"
+
+#define BATCH_VERTEX_SIZE 5000000
+#define BATCH_INDEX_SIZE 800000
 
 namespace Forge {
 
-
-class Renderer
-{
+class Renderer {
 public:
-    Renderer() = delete;
+    Renderer();
+    virtual ~Renderer();
+
     Renderer(const Renderer&) = delete;
     Renderer(Renderer&&) = delete;
     Renderer& operator=(const Renderer&) = delete;
     Renderer& operator=(Renderer&&) = delete;
-    ~Renderer() = delete;
 
-    static bool Initialize();
-    static bool Shutdown();
-    static void Begin(const std::shared_ptr<Camera>& camera);
-    static void End();
-    static void SubmitMesh(const MeshTarget& target);
+    void Begin();
+    void End();
 
+    void AddMesh(const MeshTarget& target);
 
-    static void SubmitUIElement(bf::Widget& widget);
-    static void SetPrecalculatedUIElementSize(uint32_t vertices, uint32_t indices);
+    void Draw(const std::shared_ptr<Camera>& camera);
 
 private:
-    static void CheckScope();
+    void Init();
+    bool Shutdown();
 
 private:
-    static bool m_IsInScope;
-    static bool m_IsInitialized;
-    static std::unique_ptr<UniformBuffer> m_UniformBuffer;
-    static std::unordered_map<uint32_t, RendererBatch> m_RenderBatches;
-    static uint32_t m_PrecalculatedVerticesSize;
-    static uint32_t m_PrecalculatedIndicesSize;
+    bool m_IsInScope = false;
+    std::unique_ptr<UniformBuffer> m_UniformBuffer;
+    std::unordered_map<uint32_t, RendererBatch> m_RenderBatches;
 };
 
-
-}  // namespace Forge
+} // namespace Forge
 #endif

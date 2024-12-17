@@ -2,20 +2,15 @@
 #ifndef CAMERACONTROLLER_H
 #define CAMERACONTROLLER_H
 
-#include "Forge/Renderer/Camera/Camera.h"
 #include <memory>
+
+#include "Forge/Renderer/Camera/Camera.h"
 
 namespace Forge {
 
-enum class ControllerMode
-{
-    FreeCamera = 0,
-    OrbitalCamera
-};
+enum class ControllerMode { FreeCamera = 0, OrbitalCamera };
 
-
-class CameraController
-{
+class CameraController {
 public:
     CameraController() = delete;
     CameraController(const CameraController&) = delete;
@@ -23,7 +18,6 @@ public:
     CameraController& operator=(const CameraController&) = delete;
     CameraController& operator=(CameraController&&) = delete;
     ~CameraController() = delete;
-
 
     static void Update(std::shared_ptr<Camera>& camera);
 
@@ -36,8 +30,6 @@ private:
     static bool m_FirstMouseTouchMovement;
 };
 
-
-}  // namespace Forge
-
+} // namespace Forge
 
 #endif

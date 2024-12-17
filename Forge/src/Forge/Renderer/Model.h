@@ -1,22 +1,18 @@
 #ifndef MODEL_H
 #define MODEL_H
 
-
-#include <vector>
 #include <filesystem>
+#include <vector>
+
 #include "Mesh.h"
 #include "assimp/mesh.h"
 #include "assimp/scene.h"
 
-
 namespace Forge {
 
-
-class Model : public MeshTarget
-{
+class Model : public MeshTarget {
 public:
     Model(const std::filesystem::path& modelPath);
-
 
     const std::vector<Mesh>& GetMeshes() const override;
     const std::vector<Material>& GetMaterials() const override;
@@ -31,9 +27,9 @@ private:
     std::vector<Mesh> m_Meshes;
     std::vector<Material> m_Materials;
     std::filesystem::path m_BaseDir;
+    uint32_t m_MeshIndicesOffset = 0;
 };
 
-}  // namespace Forge
-
+} // namespace Forge
 
 #endif

@@ -1,49 +1,63 @@
 
 #include "BufferImpl.h"
-#include "Forge/Core/Log/Log.h"
-#include "Forge/Core/Utils.h"
-#include "Forge/Renderer/Buffer/Buffer.h"
+
 #include <cassert>
 #include <cstdint>
 
+#include "Forge/Core/Log/Log.h"
+#include "Forge/Core/Utils.h"
+#include "Forge/Renderer/Buffer/Buffer.h"
 
 namespace Forge {
 
-uint32_t GetComponentCount(BufferDataType type)
-{
-    switch (type)
-    {
-        case BufferDataType::Float: return 1;
-        case BufferDataType::Float2: return 2;
-        case BufferDataType::Float3: return 3;
-        case BufferDataType::Float4: return 4;
-        case BufferDataType::Mat3: return 3 * 3;
-        case BufferDataType::Mat4: return 4 * 4;
-        case BufferDataType::Int: return 1;
-        case BufferDataType::Int2: return 2;
-        case BufferDataType::Int3: return 3;
-        case BufferDataType::Int4: return 4;
-        case BufferDataType::Bool: return 1;
-        default: return 0;
+uint32_t GetComponentCount(BufferDataType type) {
+    switch (type) {
+    case BufferDataType::Float:
+        return 1;
+    case BufferDataType::Float2:
+        return 2;
+    case BufferDataType::Float3:
+        return 3;
+    case BufferDataType::Float4:
+        return 4;
+    case BufferDataType::Mat3:
+        return 3 * 3;
+    case BufferDataType::Mat4:
+        return 4 * 4;
+    case BufferDataType::Int:
+        return 1;
+    case BufferDataType::Int2:
+        return 2;
+    case BufferDataType::Int3:
+        return 3;
+    case BufferDataType::Int4:
+        return 4;
+    case BufferDataType::Bool:
+        return 1;
+    default:
+        return 0;
     }
 }
 
-GLenum BufferDataTypeToOpenGLBaseType(BufferDataType type)
-{
-    switch (type)
-    {
-        case BufferDataType::Float:
-        case BufferDataType::Float2:
-        case BufferDataType::Float3:
-        case BufferDataType::Float4:
-        case BufferDataType::Mat3:
-        case BufferDataType::Mat4: return GL_FLOAT;
-        case BufferDataType::Int:
-        case BufferDataType::Int2:
-        case BufferDataType::Int3:
-        case BufferDataType::Int4: return GL_INT;
-        case BufferDataType::Bool: return GL_BOOL;
-        default: LOG_ERROR("Unknown BufferDataType!"); return 0;
+GLenum BufferDataTypeToOpenGLBaseType(BufferDataType type) {
+    switch (type) {
+    case BufferDataType::Float:
+    case BufferDataType::Float2:
+    case BufferDataType::Float3:
+    case BufferDataType::Float4:
+    case BufferDataType::Mat3:
+    case BufferDataType::Mat4:
+        return GL_FLOAT;
+    case BufferDataType::Int:
+    case BufferDataType::Int2:
+    case BufferDataType::Int3:
+    case BufferDataType::Int4:
+        return GL_INT;
+    case BufferDataType::Bool:
+        return GL_BOOL;
+    default:
+        LOG_ERROR("Unknown BufferDataType!");
+        return 0;
     }
 }
 
@@ -51,52 +65,42 @@ GLenum BufferDataTypeToOpenGLBaseType(BufferDataType type)
 //  Vertex Buffer Implementation
 //========================================
 
-VertexBuffer::VertexBuffer(const void* data, uint32_t count, BufferDrawMode drawMode) :
-    m_DrawMode(drawMode)
-{
+VertexBuffer::VertexBuffer(const void* data, uint32_t count, BufferDrawMode drawMode)
+    : m_DrawMode(drawMode) {
     glGenBuffers(1, &m_RendererID);
     glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
+    LOG_INFO("========= {} =========", count)
 
-    switch (drawMode)
-    {
-        case BufferDrawMode::Static:
-            glBufferData(GL_ARRAY_BUFFER, count, data, GL_STATIC_DRAW);
-            break;
-        case BufferDrawMode::Dynamic:
-            glBufferData(GL_ARRAY_BUFFER, count, data, GL_DYNAMIC_DRAW);
-            break;
+    switch (drawMode) {
+    case BufferDrawMode::Static:
+        glBufferData(GL_ARRAY_BUFFER, count, data, GL_STATIC_DRAW);
+        break;
+    case BufferDrawMode::Dynamic:
+        glBufferData(GL_ARRAY_BUFFER, count * sizeof(float), data, GL_DYNAMIC_DRAW);
+        break;
     }
 }
 
-void VertexBuffer::SubmitData(const void* data, uint32_t count, uint32_t offset)
-{
+void VertexBuffer::SubmitData(const void* data, uint32_t count, uint32_t offset) {
     Bind();
 
-    if (m_DrawMode == BufferDrawMode::Dynamic)
-    {
+    if (m_DrawMode == BufferDrawMode::Dynamic) {
         glBufferSubData(GL_ARRAY_BUFFER, offset, count, data);
-    }
-    else
-    {
-        F_ASSERT(false,
-                 "Can't submit data to a static VertexBuffer. Set BufferDrawMode to "
-                 "Dynamic.");
+    } else {
+        F_ASSERT(false, "Can't submit data to a static VertexBuffer. Set BufferDrawMode to "
+                        "Dynamic.");
     }
 }
 
-
-VertexBuffer::~VertexBuffer()
-{
+VertexBuffer::~VertexBuffer() {
     glDeleteBuffers(1, &m_RendererID);
 }
 
-void VertexBuffer::Bind() const
-{
+void VertexBuffer::Bind() const {
     glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
 }
 
-void VertexBuffer::Unbind() const
-{
+void VertexBuffer::Unbind() const {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
@@ -106,53 +110,42 @@ void VertexBuffer::Unbind() const
 //  Index Buffer Implementation
 //========================================
 
-IndexBuffer::IndexBuffer(uint32_t* data, uint32_t count, BufferDrawMode drawMode) :
-    m_Count(count), m_DrawMode(drawMode)
-{
+IndexBuffer::IndexBuffer(uint32_t* data, uint32_t count, BufferDrawMode drawMode)
+    : m_Count(count)
+    , m_DrawMode(drawMode) {
     glGenBuffers(1, &m_RendererID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID);
 
-
-    switch (drawMode)
-    {
-        case BufferDrawMode::Static:
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, count, data, GL_STATIC_DRAW);
-            break;
-        case BufferDrawMode::Dynamic:
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, count, data, GL_STATIC_DRAW);
-            break;
+    switch (drawMode) {
+    case BufferDrawMode::Static:
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, count, data, GL_STATIC_DRAW);
+        break;
+    case BufferDrawMode::Dynamic:
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, count, data, GL_STATIC_DRAW);
+        break;
     }
 }
 
-void IndexBuffer::SubmitData(const void* data, uint32_t count, uint32_t offset)
-{
+void IndexBuffer::SubmitData(const void* data, uint32_t count, uint32_t offset) {
     Bind();
 
-    if (m_DrawMode == BufferDrawMode::Dynamic)
-    {
+    if (m_DrawMode == BufferDrawMode::Dynamic) {
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, count, data);
-    }
-    else
-    {
-        F_ASSERT(false,
-                 "Can't submit data to a static IndexBuffer. Set BufferDrawMode to "
-                 "Dynamic.");
+    } else {
+        F_ASSERT(false, "Can't submit data to a static IndexBuffer. Set BufferDrawMode to "
+                        "Dynamic.");
     }
 }
 
-
-IndexBuffer::~IndexBuffer()
-{
+IndexBuffer::~IndexBuffer() {
     glDeleteBuffers(1, &m_RendererID);
 }
 
-void IndexBuffer::Bind() const
-{
+void IndexBuffer::Bind() const {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID);
 }
 
-void IndexBuffer::Unbind() const
-{
+void IndexBuffer::Unbind() const {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
@@ -160,30 +153,24 @@ void IndexBuffer::Unbind() const
 //  Vertex Array Buffer Implementation
 //========================================
 
-VertexArrayBuffer::VertexArrayBuffer()
-{
+VertexArrayBuffer::VertexArrayBuffer() {
     glGenVertexArrays(1, &m_RendererID);
 }
 
-VertexArrayBuffer::~VertexArrayBuffer()
-{
+VertexArrayBuffer::~VertexArrayBuffer() {
     glDeleteVertexArrays(1, &m_RendererID);
 }
 
-void VertexArrayBuffer::Bind() const
-{
+void VertexArrayBuffer::Bind() const {
     glBindVertexArray(m_RendererID);
 }
 
-void VertexArrayBuffer::Unbind() const
-{
+void VertexArrayBuffer::Unbind() const {
     glBindVertexArray(0);
 }
 
-void VertexArrayBuffer::AddVertexBuffer(std::shared_ptr<VertexBuffer>& vertexBuffer)
-{
-    if (vertexBuffer->GetLayout().GetElements().empty())
-    {
+void VertexArrayBuffer::AddVertexBuffer(std::shared_ptr<VertexBuffer>& vertexBuffer) {
+    if (vertexBuffer->GetLayout().GetElements().empty()) {
         LOG_ERROR("VertexBuffer has no layout!");
         return;
     }
@@ -193,29 +180,21 @@ void VertexArrayBuffer::AddVertexBuffer(std::shared_ptr<VertexBuffer>& vertexBuf
 
     const auto& layout = vertexBuffer->GetLayout();
     uint32_t index = 0;
-    for (const auto& element : layout)
-    {
+    for (const auto& element : layout) {
         glEnableVertexAttribArray(index);
-        glVertexAttribPointer(
-            index,
-            GetComponentCount(element.type),
-            BufferDataTypeToOpenGLBaseType(element.type),
-            GL_FALSE,
-            layout.GetStride(),
-            (const void*)(intptr_t)element.offset);
+        glVertexAttribPointer(index, GetComponentCount(element.type), BufferDataTypeToOpenGLBaseType(element.type), GL_FALSE,
+                              layout.GetStride(), (const void*)(intptr_t)element.offset);
         index++;
     }
 
     m_VertexBuffers.push_back(vertexBuffer);
 }
 
-void VertexArrayBuffer::SetIndexBuffer(std::shared_ptr<IndexBuffer>& indexBuffer)
-{
+void VertexArrayBuffer::SetIndexBuffer(std::shared_ptr<IndexBuffer>& indexBuffer) {
     glBindVertexArray(m_RendererID);
     indexBuffer->Bind();
-
 
     m_IndexBuffer = indexBuffer;
 }
 
-}  // namespace Forge
+} // namespace Forge

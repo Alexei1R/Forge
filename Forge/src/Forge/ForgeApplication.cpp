@@ -1,22 +1,23 @@
 
+
+#include "ForgeApplication.h"
+
 #include <chrono>
 #include <filesystem>
 #include <memory>
-#include "ForgeApplication.h"
+
 #include "Forge/Core/Log/Log.h"
 #include "Forge/Events/ImplEvent.h"
-
 #include "Forge/Renderer/RenderCommand.h"
+#include "Forge/Renderer/Renderer.h"
 #include "Forge/Renderer/ShaderManager.h"
 #include "Forge/Renderer/TextureManager.h"
-#include "Forge/Renderer/Renderer.h"
 
 namespace Forge {
 
 Forge* Forge::s_Instance = nullptr;
 
-Forge::Forge()
-{
+Forge::Forge() {
     s_Instance = (Forge*)this;
 
     Log::Init("Forge");
@@ -33,18 +34,13 @@ Forge::Forge()
 
 Forge::~Forge() {}
 
-void Forge::Run()
-{
-    while (m_Running)
-    {
+void Forge::Run() {
+    while (m_Running) {
         float deltaTime = m_Timer.getDeltaTime();
 
-
-        for (auto component : m_ModuleStack)
-        {
+        for (auto component : m_ModuleStack) {
             component->OnUpdate(deltaTime);
         }
-
 
         m_GraphicsContext->SwapBuffers();
         m_Window->Update();
@@ -52,46 +48,33 @@ void Forge::Run()
 
     ShaderManager::GetInstance().Shutdown();
     TextureManager::GetInstance().Shutdown();
-    Renderer::Shutdown();
 }
 
-
-void Forge::HandleEvent(const Event& event)
-{
-    for (auto component : m_ModuleStack)
-    {
+void Forge::HandleEvent(const Event& event) {
+    for (auto component : m_ModuleStack) {
         component->OnEvent(event);
     }
 
-    if (event.GetType() == EventType::Window)
-    {
+    if (event.GetType() == EventType::Window) {
         WindowEvent windowEvent = static_cast<const WindowEvent&>(event);
-        if (windowEvent.GetAction() == Action::Close)
-        {
+        if (windowEvent.GetAction() == Action::Close) {
             LOG_INFO("Window Closed")
             m_Running = false;
         }
     }
 };
 
-
-void Forge::SetPath()
-{
+void Forge::SetPath() {
     std::filesystem::path forgePath = std::filesystem::path(LIBRARY_DIR);
-    try
-    {
+    try {
         std::filesystem::current_path(forgePath);
-    }
-    catch (const std::filesystem::filesystem_error& ex)
-    {
+    } catch (const std::filesystem::filesystem_error& ex) {
         LOG_ERROR("Error setting current path:  {0}", ex.what());
     }
 }
 
-
-void Forge::PushModule(std::shared_ptr<Module> module)
-{
+void Forge::PushModule(std::shared_ptr<Module> module) {
     m_ModuleStack.PushModule(module);
 }
 
-}  // namespace Forge
+} // namespace Forge

@@ -1,25 +1,23 @@
-
 #ifndef LOG_H
 #define LOG_H
 
-#include "spdlog/fmt/ostr.h"
-#include "spdlog/sinks/stdout_color_sinks.h"
-#include "spdlog/spdlog.h"
 #include <cstdlib>
 #include <iostream>
 #include <memory>
+
 #include "Forge/Core/Utils.h"
 #include "LogFormaters.h"
+#include "spdlog/fmt/ostr.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
+#include "spdlog/spdlog.h"
 
 namespace Forge {
 
-class Log
-{
+class Log {
 public:
     static void Init(std::string name);
 
-    inline static std::shared_ptr<spdlog::logger>& GetLogger()
-    {
+    inline static std::shared_ptr<spdlog::logger>& GetLogger() {
         return s_Logger;
     }
 
@@ -27,7 +25,7 @@ private:
     static std::shared_ptr<spdlog::logger> s_Logger;
 };
 
-}  // namespace Forge
+} // namespace Forge
 
 // clang-format off
 #ifndef NULL

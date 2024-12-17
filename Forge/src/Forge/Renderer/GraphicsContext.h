@@ -3,15 +3,15 @@
 #define GRAPHICSCONTEXT_H
 
 #include <glad/glad.h>
-#include "GLFW/glfw3.h"
+
 #include <memory>
 
 #include "Forge/Renderer/Window.h"
+#include "GLFW/glfw3.h"
 
 namespace Forge {
 
-class Context
-{
+class Context {
 public:
     Context(std::shared_ptr<Window>& window);
     void SwapBuffers();
@@ -21,7 +21,6 @@ private:
     std::shared_ptr<Window> m_Window;
 };
 
-}  // namespace Forge
-
+} // namespace Forge
 
 #endif

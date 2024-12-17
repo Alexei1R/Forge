@@ -1,14 +1,12 @@
-
 #ifndef MODULESTACK_H
 #define MODULESTACK_H
 
-
 #include <memory>
+
 #include "Module.h"
 namespace Forge {
 
-class ModuleStack : public Module
-{
+class ModuleStack : public Module {
 public:
     ModuleStack();
     ~ModuleStack();
@@ -18,12 +16,10 @@ public:
     void PopModule(std::shared_ptr<Module> component);
     void PopOverlay(std::shared_ptr<Module> overlay);
 
-    std::vector<std::shared_ptr<Module>>::iterator begin()
-    {
+    std::vector<std::shared_ptr<Module>>::iterator begin() {
         return m_Modules.begin();
     }
-    std::vector<std::shared_ptr<Module>>::iterator end()
-    {
+    std::vector<std::shared_ptr<Module>>::iterator end() {
         return m_Modules.end();
     }
 
@@ -32,7 +28,6 @@ private:
     unsigned int m_ModuleInsertIndex = 0;
 };
 
-}  // namespace Forge
-
+} // namespace Forge
 
 #endif

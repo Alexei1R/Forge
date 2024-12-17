@@ -2,17 +2,15 @@
 #ifndef TEXTUREMANAGER_H
 #define TEXTUREMANAGER_H
 
-
-#include "Forge/Core/Handle.h"
-#include "Forge/Renderer/Texture.h"
 #include <filesystem>
 #include <mutex>
 #include <string>
+
+#include "Forge/Core/Handle.h"
+#include "Forge/Renderer/Texture.h"
 namespace Forge {
 
-
-class TextureManager
-{
+class TextureManager {
 public:
     static TextureManager& GetInstance();
 
@@ -36,7 +34,6 @@ private:
     std::unordered_map<Handle, std::unique_ptr<Texture>> m_Textures;
     uint32_t m_NextHandleValue = 1;
 };
-}  // namespace Forge
-
+} // namespace Forge
 
 #endif
