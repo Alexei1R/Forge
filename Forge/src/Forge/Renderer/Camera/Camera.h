@@ -21,7 +21,7 @@ class CameraController;
 
 class Camera {
 public:
-    Camera(CameraProjection projection, glm::vec3 position);
+    Camera(CameraProjection projection, glm::vec3 position = glm::vec3(0.0, 0.0, 8.0));
     Camera(const Camera& other);
     Camera& operator=(const Camera& other);
     ~Camera();

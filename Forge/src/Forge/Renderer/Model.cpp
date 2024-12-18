@@ -30,6 +30,13 @@ Model::Model(const std::filesystem::path& modelPath) {
         return;
     }
 
+    auto& shaderManager = ShaderManager::GetInstance();
+    shaderDefaultHandle = shaderManager.LoadShader(ShaderLayout{{ShaderType::VERTEX, "Assets/Shaders/Mesh/Default.vert"},
+                                                                {ShaderType::FRAGMENT, "Assets/Shaders/Mesh/Default.frag"}});
+    if (shaderDefaultHandle.GetValue() == 0) {
+        LOG_CRITICAL("Failed to load shader.");
+    }
+
     LoadModel(modelPath);
 }
 
@@ -92,13 +99,51 @@ void Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
         vertices.push_back(vertex);
     }
 
-    LOG_TRACE("Processing {} faces", mesh->mNumFaces);
-
     for (uint32_t i = 0; i < mesh->mNumFaces; i++) {
         aiFace face = mesh->mFaces[i];
         for (uint32_t j = 0; j < face.mNumIndices; j++) {
             indices.push_back(face.mIndices[j]);
         }
+    }
+
+    if (scene->HasMaterials() && mesh->mMaterialIndex >= 0) {
+        aiMaterial* aiMaterial = scene->mMaterials[mesh->mMaterialIndex];
+
+        Material material(shaderDefaultHandle);
+
+        aiString materialName;
+        aiMaterial->Get(AI_MATKEY_NAME, materialName);
+        material.Name = materialName.C_Str();
+
+        aiColor4D color;
+        if (AI_SUCCESS == aiMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, color)) {
+            material.Color = glm::vec4(color.r, color.g, color.b, color.a);
+        }
+
+        aiColor4D specColor;
+        if (AI_SUCCESS == aiMaterial->Get(AI_MATKEY_COLOR_SPECULAR, specColor)) {
+            material.Specular = (specColor.r + specColor.g + specColor.b) / 3.0f;
+        }
+
+        // Extract emissive color
+        aiColor4D emissiveColor;
+        if (AI_SUCCESS == aiMaterial->Get(AI_MATKEY_COLOR_EMISSIVE, emissiveColor)) {
+            material.EmissiveColor = glm::vec3(emissiveColor.r, emissiveColor.g, emissiveColor.b);
+        }
+
+        float shininess;
+        if (AI_SUCCESS == aiMaterial->Get(AI_MATKEY_SHININESS, shininess)) {
+            material.Roughness = 1.0f - (shininess / 100.0f);
+        }
+
+        /*// Process textures*/
+        /*ProcessMaterialTextures(aiMaterial, material);*/
+
+        localMesh.MaterialIndex = m_Materials.size();
+
+        m_Materials.push_back(std::move(material));
+    } else {
+        localMesh.MaterialIndex = -1;
     }
 
     localMesh.Vertices = std::move(vertices);

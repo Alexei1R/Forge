@@ -25,7 +25,7 @@ struct DrawListVertex {
 };
 
 struct DrawListData {
-    std::vector<uint8_t> Vertices;
+    std::vector<DrawListVertex> Vertices;
     std::vector<uint32_t> Indices;
 
     DrawListData operator+(const DrawListData& other) const {
@@ -34,7 +34,7 @@ struct DrawListData {
         result.Vertices = Vertices;
         result.Vertices.insert(result.Vertices.end(), other.Vertices.begin(), other.Vertices.end());
 
-        uint32_t vertexOffset = Vertices.size() / sizeof(DrawListVertex);
+        uint32_t vertexOffset = Vertices.size();
 
         result.Indices = Indices;
         for (uint32_t index : other.Indices) {
@@ -45,7 +45,7 @@ struct DrawListData {
     }
 
     DrawListData& operator+=(const DrawListData& other) {
-        uint32_t vertexOffset = Vertices.size() / sizeof(DrawListVertex);
+        uint32_t vertexOffset = Vertices.size();
 
         Vertices.insert(Vertices.end(), other.Vertices.begin(), other.Vertices.end());
 

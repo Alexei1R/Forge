@@ -22,7 +22,8 @@ void Renderer::Init() {
 }
 bool Renderer::Shutdown() {
 
-    m_RenderBatches.clear();
+    m_MeshBatch.clear();
+    m_UIBatch.clear();
     m_UniformBuffer.reset();
     return true;
 }
@@ -33,9 +34,6 @@ void Renderer::Begin() {
         return;
     }
     m_IsInScope = true;
-    for (auto& [_, batch] : m_RenderBatches) {
-        batch.Begin();
-    }
 }
 
 void Renderer::End() {
@@ -47,25 +45,50 @@ void Renderer::End() {
     m_IsInScope = false;
 }
 
-void Renderer::Draw(const std::shared_ptr<Camera>& camera) {
+void Renderer::Submit() {
+
+    if (m_NeedSubmit) {
+
+        for (auto& [_, batch] : m_MeshBatch) {
+            batch.Begin();
+        }
+
+        for (auto& [_, batch] : m_UIBatch) {
+            batch.Begin();
+        }
+        m_NeedSubmit = false;
+    }
+}
+void Renderer::DrawUI(const std::shared_ptr<Camera>& camera) {
 
     if (!m_IsInScope) {
         F_ASSERT(false, "The Submit function is not in scope of Begin/End")
     }
-    m_IsInScope = true;
     m_UniformBuffer->Submit(&camera->GetViewProjectionMatrix(), sizeof(glm::mat4));
 
-    for (auto& [materialHash, batch] : m_RenderBatches) {
+    // Draw UI
+    for (auto& [materialHash, batch] : m_UIBatch) {
         batch.Flush();
     }
 }
 
+void Renderer::DrawMesh(const std::shared_ptr<Camera>& camera) {
+
+    if (!m_IsInScope) {
+        F_ASSERT(false, "The Submit function is not in scope of Begin/End")
+    }
+
+    m_UniformBuffer->Submit(&camera->GetViewProjectionMatrix(), sizeof(glm::mat4));
+
+    // Draw Mesh
+    for (auto& [materialHash, batch] : m_MeshBatch) {
+        batch.Flush();
+    }
+}
 void Renderer::AddMesh(const MeshTarget& target) {
 
     const auto& materials = target.GetMaterials();
     const auto& meshes = target.GetMeshes();
-
-    uint32_t indicesOffset;
 
     for (const auto& mesh : meshes) {
         std::shared_ptr<Material> material;
@@ -84,15 +107,44 @@ void Renderer::AddMesh(const MeshTarget& target) {
         uint32_t materialHash = HashFast::GenerateU32BaseHash(materialData, sizeof(materialData));
 
         // NOTE:Check if a batch for this material hash exists; if not, create a new batch
-        if (m_RenderBatches.find(materialHash) == m_RenderBatches.end()) {
+        if (m_MeshBatch.find(materialHash) == m_MeshBatch.end()) {
 
-            auto& batch = m_RenderBatches[materialHash];
+            auto& batch = m_MeshBatch[materialHash];
             batch.Init(BATCH_VERTEX_SIZE, BATCH_INDEX_SIZE, target.GetLayout());
-            LOG_WARN("Creating batch")
         }
 
-        auto& batch = m_RenderBatches[materialHash];
+        auto& batch = m_MeshBatch[materialHash];
         batch.Submit(mesh.Vertices, mesh.Indices, material);
+    }
+}
+
+void Renderer::AddUI(bf::Widget& widget) {
+
+    const auto& material = widget.GetMaterial();
+
+    uint8_t materialData[sizeof(material)];
+    std::memcpy(materialData, &material, sizeof(material));
+    uint32_t materialHash = HashFast::GenerateU32BaseHash(materialData, sizeof(materialData));
+
+    // Check if batch exists, if not create it
+    if (m_UIBatch.find(materialHash) == m_UIBatch.end()) {
+        auto& batch = m_UIBatch[materialHash];
+
+        batch.Init(BATCH_VERTEX_SIZE, BATCH_INDEX_SIZE, widget.GetLayout());
+        auto& [vertices, indices] = widget.GetDrawList();
+
+        for (auto singleVertex : vertices) {
+            LOG_ERROR("{} {}", singleVertex.Position.x, singleVertex.Position.y)
+        }
+
+        for (auto index : indices) {
+            LOG_ERROR("{}", index)
+        }
+        batch.Submit(vertices, indices, material);
+    } else {
+        auto& batch = m_UIBatch[materialHash];
+        auto& [vertices, indices] = widget.GetDrawList();
+        batch.Submit(vertices, indices, material);
     }
 }
 

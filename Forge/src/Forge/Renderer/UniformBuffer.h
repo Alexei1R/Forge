@@ -10,6 +10,8 @@ public:
     UniformBuffer(uint32_t size, uint32_t bindingPoint);
 
     void Submit(const void* data, uint32_t size, uint32_t offset = 0) const;
+    void Bind() const;
+    void Unbind() const;
 
 private:
     uint32_t m_RendererID;

@@ -69,7 +69,6 @@ VertexBuffer::VertexBuffer(const void* data, uint32_t count, BufferDrawMode draw
     : m_DrawMode(drawMode) {
     glGenBuffers(1, &m_RendererID);
     glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
-    LOG_INFO("========= {} =========", count)
 
     switch (drawMode) {
     case BufferDrawMode::Static:

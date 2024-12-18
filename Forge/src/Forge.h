@@ -56,4 +56,6 @@
 #include "Forge/Renderer/Material.h"
 #include "Forge/Renderer/Model.h"
 
+// UTILS
+#include "Forge/Core/Log/LogFormaters.h"
 #endif // FORGE_H

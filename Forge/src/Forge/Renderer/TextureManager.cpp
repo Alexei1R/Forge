@@ -21,12 +21,12 @@ Handle TextureManager::LoadTexture(const std::filesystem::path path) {
     Handle newHandle = GenerateHandle();
 
     try {
-        auto texture = std::make_unique<Texture>(path); // Now inside the try block
+        auto texture = std::make_unique<Texture>(path);
         m_Textures.emplace(newHandle, std::move(texture));
         return newHandle;
     } catch (const std::runtime_error& e) {
         LOG_CRITICAL("Failed to load with handle {}: {}", newHandle.GetValue(), e.what());
-        return Handle(0); // Returning a null/invalid handle on failure
+        return Handle(0);
     }
 }
 
@@ -40,7 +40,7 @@ Handle TextureManager::DataTexture(int width, int height, GLenum format, const v
         return newHandle;
     } catch (const std::runtime_error& e) {
         LOG_CRITICAL("Failed to load with handle {}: {}", newHandle.GetValue(), e.what());
-        return Handle(0); // Returning a null/invalid handle on failure
+        return Handle(0);
     }
 }
 

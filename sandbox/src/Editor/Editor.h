@@ -22,6 +22,9 @@ public:
 
 private:
     std::shared_ptr<Camera> m_Camera;
+    std::shared_ptr<Camera> m_CameraScreenSpace;
+
+    std::shared_ptr<bf::Window> m_Window;
 
     float timeAccumulator = 0.0f;
     int frameCount = 0;

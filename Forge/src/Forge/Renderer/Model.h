@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <vector>
 
+#include "Forge/Core/Handle.h"
 #include "Mesh.h"
 #include "assimp/mesh.h"
 #include "assimp/scene.h"
@@ -28,6 +29,7 @@ private:
     std::vector<Material> m_Materials;
     std::filesystem::path m_BaseDir;
     uint32_t m_MeshIndicesOffset = 0;
+    Handle shaderDefaultHandle;
 };
 
 } // namespace Forge

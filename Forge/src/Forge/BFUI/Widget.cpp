@@ -21,6 +21,8 @@ Widget::Widget()
     }
     m_DefaultMaterial = std::make_shared<Forge::Material>(shaderHandle);
 
+    m_DefaultMaterial->Name = "Widget";
+
     m_DefaultMaterial->SetParameter("BorderSize", (int)Theme::GetSize(WidgetType::Border));
     m_DefaultMaterial->SetParameter("BorderColor", Theme::GetColor(WidgetType::Border, WidgetState::Default));
 

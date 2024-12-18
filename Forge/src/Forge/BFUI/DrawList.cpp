@@ -33,11 +33,7 @@ const DrawListData DrawList::DrawPanel(const vec2i position, const vec2i size, c
     m_VerticesSize += vertices.size();
     m_IndicesSize += indices.size();
 
-    std::vector<uint8_t> verticesBytes;
-    verticesBytes.resize(vertices.size() * sizeof(DrawListVertex));
-    std::memcpy(verticesBytes.data(), vertices.data(), verticesBytes.size());
-
-    return {verticesBytes, indices};
+    return {vertices, indices};
 }
 
 // NOTE: Draw Text
@@ -174,11 +170,7 @@ const DrawListData DrawList::DrawText(const std::string& text, const vec2i posit
     m_VerticesSize += vertices.size();
     m_IndicesSize += indices.size();
 
-    // Convert to bytes
-    std::vector<uint8_t> verticesBytes;
-    verticesBytes.resize(vertices.size() * sizeof(DrawListVertex));
-    std::memcpy(verticesBytes.data(), vertices.data(), verticesBytes.size());
-    return {verticesBytes, indices};
+    return {vertices, indices};
 }
 
 vec2f DrawList::MeasureText(const std::string& text, float scale) {

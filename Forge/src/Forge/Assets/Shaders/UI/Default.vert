@@ -20,7 +20,7 @@ flat out float v_Type;
 
 void main()
 {
-    gl_Position = u_ViewProjection * vec4(a_Position, -0.5, 1.0);
+    gl_Position = u_ViewProjection * vec4(a_Position.xy, 0.0, 1.0);
     v_TexCoord = a_TexCoord;
     v_Color = a_Color;
     v_TexIndex = a_TexIndex;

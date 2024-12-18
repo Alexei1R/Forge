@@ -92,7 +92,6 @@ std::shared_ptr<Material> MeshTarget::GetDefaultMaterial() {
         if (shaderHandle.GetValue() == 0) {
             LOG_CRITICAL("Failed to load shader.");
         }
-        LOG_TRACE("Compute default Shader MeshTarget")
         m_DefaultMaterial = std::make_shared<Material>(shaderHandle);
     }
 

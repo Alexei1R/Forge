@@ -38,7 +38,11 @@ void Camera::RecalculateProjection(uint32_t width, uint32_t height) {
         float bottom = static_cast<float>(height);
         float top = 0.0f;
 
-        m_ProjMatrix = glm::ortho(left, right, bottom, top, m_NearClip, m_FarClip);
+        float nearClip = -1.0f; // Adjust near and far planes to cover the depth range
+        float farClip = 1.0f;
+
+        m_ProjMatrix = glm::ortho(left, right, bottom, top, nearClip, farClip);
+        /*m_ProjMatrix = glm::ortho(left, right, bottom, top, -1.0,1.0);*/
     } else {
         float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
         float orthoHeight = static_cast<float>(height);

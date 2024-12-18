@@ -1,7 +1,7 @@
 #ifndef LOGFORMATERS_H
 #define LOGFORMATERS_H
 
-#include <fmt/format.h> // Ensure this is included
+#include <fmt/format.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_access.hpp>
@@ -14,7 +14,7 @@ struct fmt::formatter<glm::vec2> {
     }
 
     template <typename FormatContext>
-    auto format(const glm::vec2& vec, FormatContext& ctx) {
+    auto format(const glm::vec2& vec, FormatContext& ctx) const { // Make format const
         return fmt::format_to(ctx.out(), "({}, {})", vec.x, vec.y);
     }
 };
@@ -27,7 +27,7 @@ struct fmt::formatter<glm::vec3> {
     }
 
     template <typename FormatContext>
-    auto format(const glm::vec3& vec, FormatContext& ctx) {
+    auto format(const glm::vec3& vec, FormatContext& ctx) const { // Make format const
         return fmt::format_to(ctx.out(), "({}, {}, {})", vec.x, vec.y, vec.z);
     }
 };
@@ -40,7 +40,7 @@ struct fmt::formatter<glm::vec4> {
     }
 
     template <typename FormatContext>
-    auto format(const glm::vec4& vec, FormatContext& ctx) {
+    auto format(const glm::vec4& vec, FormatContext& ctx) const { // Make format const
         return fmt::format_to(ctx.out(), "({}, {}, {}, {})", vec.x, vec.y, vec.z, vec.w);
     }
 };
@@ -53,7 +53,7 @@ struct fmt::formatter<glm::mat3> {
     }
 
     template <typename FormatContext>
-    auto format(const glm::mat3& mat, FormatContext& ctx) {
+    auto format(const glm::mat3& mat, FormatContext& ctx) const { // Make format const
         return fmt::format_to(ctx.out(), "\n[{}, {}, {}]\n[{}, {}, {}]\n[{}, {}, {}]", mat[0][0], mat[0][1], mat[0][2], mat[1][0],
                               mat[1][1], mat[1][2], mat[2][0], mat[2][1], mat[2][2]);
     }
@@ -67,7 +67,7 @@ struct fmt::formatter<glm::mat4> {
     }
 
     template <typename FormatContext>
-    auto format(const glm::mat4& mat, FormatContext& ctx) {
+    auto format(const glm::mat4& mat, FormatContext& ctx) const { // Make format const
         return fmt::format_to(ctx.out(),
                               "\n[{}, {}, {}, {}]\n[{}, {}, {}, {}]\n[{}, {}, {}, "
                               "{}]\n[{}, {}, {}, {}]",

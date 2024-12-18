@@ -59,7 +59,6 @@ struct Material {
     void SetTexture(uint32_t slot, const Handle& textureHandle);
     uint32_t GetTexureSlot(Handle handle);
     void ApplyRenderState() const;
-    void Serialize();
 
     template <typename T>
     void SetParameter(const std::string& name, T value) {
@@ -91,12 +90,8 @@ public:
     void RemoveMaterial(const std::string& name);
     void ClearAll();
 
-    void Serialize();
-
-    void Deserialize();
-
 private:
-    mutable std::mutex mutex_; // Mutex for thread safety
+    mutable std::mutex mutex_; // Mutex for thread safet
     std::unordered_map<std::string, std::shared_ptr<Material>> materialComponents;
 };
 

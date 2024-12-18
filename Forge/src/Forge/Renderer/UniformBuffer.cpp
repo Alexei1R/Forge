@@ -20,4 +20,12 @@ void UniformBuffer::Submit(const void* data, uint32_t size, uint32_t offset) con
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
+void UniformBuffer::Bind() const {
+    glBindBuffer(GL_UNIFORM_BUFFER, m_RendererID);
+}
+
+void UniformBuffer::Unbind() const {
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
 } // namespace Forge
