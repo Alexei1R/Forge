@@ -9,7 +9,7 @@ uniform float Roughness;
 uniform float Specular;
 
 // Hardcoded light properties
-const vec3 u_LightPosition = vec3(50.0, 50.0, 5.0); 
+const vec3 u_LightPosition = vec3(-50.0, -50.0, 50.0); 
 const vec3 u_LightColor = vec3(1.0, 1.0, 1.0);     
 const float u_AmbientStrength = 0.2;              
 const float u_SpecularStrength = 0.7;              
@@ -36,7 +36,7 @@ void main()
     vec3 specular = u_SpecularStrength * spec * u_LightColor;
 
     // Combine lighting components
-    vec3 result = (ambient + diffuse + specular) * Color.xyz;
+    vec3 result = (ambient + diffuse)* Color.xyz;
 
     o_Color = vec4(result, 1.0);
 }

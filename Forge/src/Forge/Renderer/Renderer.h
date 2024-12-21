@@ -13,8 +13,8 @@
 #include "Forge/Renderer/RendererBatch.h"
 #include "Forge/Renderer/UniformBuffer.h"
 
-#define BATCH_VERTEX_SIZE 5000000
-#define BATCH_INDEX_SIZE 800000
+#define BATCH_VERTEX_SIZE 9000000
+#define BATCH_INDEX_SIZE 10000000
 
 namespace Forge {
 

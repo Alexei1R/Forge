@@ -71,6 +71,12 @@ void Editor::OnAttach() {
             })
         })
         ->SetPadding({10, 10, 10, 0}),
+        bf::Button::Create({100, 60 },"kasud")
+        ->SubscribeEvents([](bf::WidgetEvent event, bf::Widget& btn) {
+                if (event == bf::WidgetEvent::ButtonRelease) {
+                    LOG_CRITICAL("Quit button clicked");
+                }
+            })
 
     });
     // clang-format on
@@ -78,7 +84,7 @@ void Editor::OnAttach() {
     m_Window->SetSize({233, 220});
     m_Renderer.AddUI(*m_Window);
 
-    auto cube = Model("/home/toor/Downloads/scene.obj");
+    auto cube = Model("/home/toor/Downloads/untitled.fbx");
     m_Renderer.AddMesh(std::move(cube));
 
     m_Renderer.Begin();

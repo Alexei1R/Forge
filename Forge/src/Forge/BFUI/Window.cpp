@@ -34,12 +34,9 @@ void Window::Update() {
         dataStore += data;
     }
     m_DrawListData = dataStore + DrawList::DrawPanel(m_Position, m_Size, m_ColorBackground);
-
-    LOG_ERROR("compute drawlist")
 }
 
 const DrawListData Window::GetDrawList() {
-    LOG_ERROR("return DrawList")
     return m_DrawListData;
 }
 

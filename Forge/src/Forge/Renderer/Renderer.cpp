@@ -62,7 +62,7 @@ void Renderer::Submit() {
 void Renderer::DrawUI(const std::shared_ptr<Camera>& camera) {
 
     if (!m_IsInScope) {
-        F_ASSERT(false, "The Submit function is not in scope of Begin/End")
+        F_ASSERT(false, "The Draw function is not in scope of Begin/End")
     }
     m_UniformBuffer->Submit(&camera->GetViewProjectionMatrix(), sizeof(glm::mat4));
 
@@ -75,7 +75,7 @@ void Renderer::DrawUI(const std::shared_ptr<Camera>& camera) {
 void Renderer::DrawMesh(const std::shared_ptr<Camera>& camera) {
 
     if (!m_IsInScope) {
-        F_ASSERT(false, "The Submit function is not in scope of Begin/End")
+        F_ASSERT(false, "The Draw function is not in scope of Begin/End")
     }
 
     m_UniformBuffer->Submit(&camera->GetViewProjectionMatrix(), sizeof(glm::mat4));
@@ -132,14 +132,6 @@ void Renderer::AddUI(bf::Widget& widget) {
 
         batch.Init(BATCH_VERTEX_SIZE, BATCH_INDEX_SIZE, widget.GetLayout());
         auto& [vertices, indices] = widget.GetDrawList();
-
-        for (auto singleVertex : vertices) {
-            LOG_ERROR("{} {}", singleVertex.Position.x, singleVertex.Position.y)
-        }
-
-        for (auto index : indices) {
-            LOG_ERROR("{}", index)
-        }
         batch.Submit(vertices, indices, material);
     } else {
         auto& batch = m_UIBatch[materialHash];
